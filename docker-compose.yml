@@ -17,7 +17,7 @@ services:
     volumes:
       - sonar_db:/var/lib/postgresql/data
 
-  sonarqube:
+  SonarQube:
     image: sonarqube:lts-community
     depends_on:
       - sonar-db

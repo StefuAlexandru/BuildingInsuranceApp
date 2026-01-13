@@ -10,12 +10,13 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @Table(
+        name="cities",
         uniqueConstraints = @UniqueConstraint(
-                name="uq_county_country_name",
-                columnNames = {"country_id","name"}
+                name="uq_city_county_name",
+                columnNames = {"county_id","name"}
         )
 )
-public class County {
+public class City {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -25,5 +26,5 @@ public class County {
 
     @JoinColumn(nullable = false)
     @ManyToOne(optional = false,fetch = FetchType.LAZY)
-    private Country country;
+    private County county;
 }

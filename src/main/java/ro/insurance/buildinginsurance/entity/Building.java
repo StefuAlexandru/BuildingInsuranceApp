@@ -4,26 +4,49 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import ro.insurance.buildinginsurance.enums.BuildingType;
+
+import java.math.BigDecimal;
 
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
-@Table(
-        uniqueConstraints = @UniqueConstraint(
-                name="uq_county_country_name",
-                columnNames = {"country_id","name"}
-        )
-)
-public class County {
+@Table(name="buildings")
+public class Building {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false,length = 120)
-    private String name;
-
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(nullable = false)
-    @ManyToOne(optional = false,fetch = FetchType.LAZY)
-    private Country country;
+    private Client client;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(nullable = false)
+    private City city;
+
+    @Column(nullable = false)
+    private String street;
+
+    @Column(nullable = false, length = 50)
+    private String number;
+
+    @Column(nullable = false)
+    private Integer constructionYear;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
+    private BuildingType buildingType;
+
+    private Integer floors;
+
+    @Column(nullable = false, precision = 12, scale = 2)
+    private BigDecimal surfaceArea;
+
+    @Column(nullable = false, precision = 14, scale = 2)
+    private BigDecimal insuredValue;
+
+    private Boolean floodZone;
+    private Boolean earthquakeZone;
 }

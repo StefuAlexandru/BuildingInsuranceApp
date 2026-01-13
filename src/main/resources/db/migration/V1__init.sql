@@ -47,17 +47,17 @@ CREATE TABLE buildings (
                            construction_year INT NOT NULL
                                CHECK (construction_year BETWEEN 1800 AND EXTRACT(YEAR FROM now())::INT),
 
-  building_type VARCHAR(30) NOT NULL,
-  floors INT CHECK (floors IS NULL OR floors >= 0),
+                          building_type VARCHAR(30) NOT NULL,
+                          floors INT CHECK (floors IS NULL OR floors >= 0),
 
-  surface_area NUMERIC(12,2) NOT NULL CHECK (surface_area > 0),
-  insured_value NUMERIC(14,2) NOT NULL CHECK (insured_value > 0),
+                          surface_area NUMERIC(12,2) NOT NULL CHECK (surface_area > 0),
+                          insured_value NUMERIC(14,2) NOT NULL CHECK (insured_value > 0),
 
-  flood_zone BOOLEAN,
-  earthquake_zone BOOLEAN,
+                          flood_zone BOOLEAN,
+                          earthquake_zone BOOLEAN,
 
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+                          created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+                          updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE INDEX idx_buildings_client_id ON buildings (client_id);
