@@ -1,6 +1,6 @@
 stages:
   - test
-  - sonarqube-check
+  - sonar
 
 variables:
   GIT_DEPTH: "0"
