@@ -43,22 +43,12 @@ test:
       - target/site/jacoco/
       - target/surefire-reports/
 
-sonarqube-check:
-  stage: sonar
+sonar:
+  stage: test
   variables:
     GIT_DEPTH: "0"
   script:
-    - |
-        $ErrorActionPreference="Stop"
-        if ([string]::IsNullOrWhiteSpace($env:SONAR_HOST_URL)) { throw "SONAR_HOST_URL missing" }
-        if ([string]::IsNullOrWhiteSpace($env:SONAR_TOKEN)) { throw "SONAR_TOKEN missing" }
-
-        & .\mvnw.cmd -B -ntp -DskipTests verify sonar:sonar `
-          -Dsonar.projectKey=building-insurance `
-          -Dsonar.host.url=$env:SONAR_HOST_URL `
-          -Dsonar.login=$env:SONAR_TOKEN `
-          -Dsonar.qualitygate.wait=true
-
-        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-
+    - mvn -B clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+        -Dsonar.host.url="$SONAR_HOST_URL" \
+        -Dsonar.token="$SONAR_TOKEN"
 
