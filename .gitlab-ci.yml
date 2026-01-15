@@ -4,11 +4,20 @@ stages:
 
 variables:
   GIT_DEPTH: "0"
+  SONAR_PROJECT_KEY: "building-insurance"
+  MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
+
+cache:
+  key: maven
+  paths:
+    - .m2/repository/
 
 test:
   stage: test
   script:
-    - .\mvnw.cmd -B -ntp clean verify jacoco:report
+    - $ErrorActionPreference = "Stop"
+    - $args = @("-B","-ntp","clean","verify","jacoco:report")
+    - & .\mvnw.cmd @args
     - |
         $xml = "target/site/jacoco/jacoco.xml"
         if (!(Test-Path $xml)) { throw "Missing $xml (JaCoCo n-a generat raportul)" }
@@ -17,10 +26,10 @@ test:
         $c = $j.report.counter | Where-Object { $_.type -eq "LINE" } | Select-Object -First 1
         if (-not $c) { $c = $j.report.counter | Where-Object { $_.type -eq "INSTRUCTION" } | Select-Object -First 1 }
 
-        $miss = [int]$c.missed
-        $cov  = [int]$c.covered
-        $total = $miss + $cov
-        $pct = if ($total -eq 0) { 0 } else { [int]([math]::Round(100 * $cov / $total)) }
+        $miss  = [int]$c.missed
+        $cover = [int]$c.covered
+        $total = $miss + $cover
+        $pct   = if ($total -eq 0) { 0 } else { [int]([math]::Round(100 * $cover / $total)) }
 
         Write-Output "Coverage: $pct%"
   coverage: '/Coverage:\s+(\d+)%/'
@@ -34,7 +43,20 @@ test:
 
 sonar:
   stage: sonar
-  needs: ["test"]
-  dependencies: ["test"]
+  needs:
+    - job: test
+      artifacts: true
   script:
-    - .\mvnw.cmd -B -ntp -DskipTests sonar:sonar -Dsonar.host.url=$env:SONAR_HOST_URL -Dsonar.token=$env:SONAR_TOKEN -Dsonar.projectKey=building-insurance -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml -Dsonar.qualitygate.wait=true
+    - $ErrorActionPreference = "Stop"
+    - if (!(Test-Path "target/site/jacoco/jacoco.xml")) { throw "Missing target/site/jacoco/jacoco.xml (n-a venit din artifacts)" }
+    - $args = @(
+        "-B","-ntp","-DskipTests",
+        "sonar:sonar",
+        "-Dsonar.host.url=$env:SONAR_HOST_URL",
+        "-Dsonar.token=$env:SONAR_TOKEN",
+        "-Dsonar.projectKey=$env:SONAR_PROJECT_KEY",
+        "-Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml",
+        "-Dsonar.qualitygate.wait=true"
+      )
+    - & .\mvnw.cmd @args
+    - Write-Output "Sonar dashboard: $env:SONAR_HOST_URL/dashboard?id=$env:SONAR_PROJECT_KEY"
