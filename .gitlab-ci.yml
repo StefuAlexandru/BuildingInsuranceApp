@@ -15,10 +15,12 @@ cache:
 test:
   stage: test
   script:
-    - $ErrorActionPreference = "Stop"
-    - $args = @("-B","-ntp","clean","verify","jacoco:report")
-    - & .\mvnw.cmd @args
     - |
+        $ErrorActionPreference = "Stop"
+
+        $args = @("-B","-ntp","clean","verify","jacoco:report")
+        & .\mvnw.cmd @args
+
         $xml = "target/site/jacoco/jacoco.xml"
         if (!(Test-Path $xml)) { throw "Missing $xml (JaCoCo n-a generat raportul)" }
 
@@ -47,16 +49,22 @@ sonar:
     - job: test
       artifacts: true
   script:
-    - $ErrorActionPreference = "Stop"
-    - if (!(Test-Path "target/site/jacoco/jacoco.xml")) { throw "Missing target/site/jacoco/jacoco.xml (n-a venit din artifacts)" }
-    - $args = @(
-        "-B","-ntp","-DskipTests",
-        "sonar:sonar",
-        "-Dsonar.host.url=$env:SONAR_HOST_URL",
-        "-Dsonar.token=$env:SONAR_TOKEN",
-        "-Dsonar.projectKey=$env:SONAR_PROJECT_KEY",
-        "-Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml",
-        "-Dsonar.qualitygate.wait=true"
-      )
-    - & .\mvnw.cmd @args
-    - Write-Output "Sonar dashboard: $env:SONAR_HOST_URL/dashboard?id=$env:SONAR_PROJECT_KEY"
+    - |
+        $ErrorActionPreference = "Stop"
+
+        if (!(Test-Path "target/site/jacoco/jacoco.xml")) {
+          throw "Missing target/site/jacoco/jacoco.xml (n-a venit din artifacts)"
+        }
+
+        $args = @(
+          "-B","-ntp","-DskipTests",
+          "sonar:sonar",
+          "-Dsonar.host.url=$env:SONAR_HOST_URL",
+          "-Dsonar.token=$env:SONAR_TOKEN",
+          "-Dsonar.projectKey=$env:SONAR_PROJECT_KEY",
+          "-Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml",
+          "-Dsonar.qualitygate.wait=true"
+        )
+        & .\mvnw.cmd @args
+
+        Write-Output "Sonar dashboard: $env:SONAR_HOST_URL/dashboard?id=$env:SONAR_PROJECT_KEY"
