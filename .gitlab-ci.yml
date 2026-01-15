@@ -44,17 +44,21 @@ test:
       - target/surefire-reports/
 
 sonarqube-check:
-  image: maven:3.6.3-jdk-11
+  stage: sonar
   variables:
-    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar" 
-    GIT_DEPTH: "0" 
-  cache:
-    key: "${CI_JOB_NAME}"
-    paths:
-      - .sonar/cache
-  script: 
-    - mvn verify sonar:sonar -Dsonar.projectKey=building-insurance
-  allow_failure: true
-  only:
-    - main
+    GIT_DEPTH: "0"
+  script:
+    - |
+        $ErrorActionPreference="Stop"
+        if ([string]::IsNullOrWhiteSpace($env:SONAR_HOST_URL)) { throw "SONAR_HOST_URL missing" }
+        if ([string]::IsNullOrWhiteSpace($env:SONAR_TOKEN)) { throw "SONAR_TOKEN missing" }
+
+        & .\mvnw.cmd -B -ntp -DskipTests verify sonar:sonar `
+          -Dsonar.projectKey=building-insurance `
+          -Dsonar.host.url=$env:SONAR_HOST_URL `
+          -Dsonar.login=$env:SONAR_TOKEN `
+          -Dsonar.qualitygate.wait=true
+
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
 
