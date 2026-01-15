@@ -28,6 +28,7 @@
     </scm>
     <properties>
         <java.version>21</java.version>
+        <mapstruct.version>1.5.5.Final</mapstruct.version>
 
         <sonar.host.url>http://localhost:9000</sonar.host.url>
         <sonar.projectKey>building-insurance</sonar.projectKey>
@@ -139,7 +140,7 @@
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-            <version>2.6.0</version>
+            <version>3.0.1</version>
         </dependency>
     </dependencies>
 
@@ -153,6 +154,16 @@
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
+                        </path>
+                        <path>
+                            <groupId>org.mapstruct</groupId>
+                            <artifactId>mapstruct-processor</artifactId>
+                            <version>${mapstruct.version}</version>
+                        </path>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok-mapstruct-binding</artifactId>
+                            <version>0.2.0</version>
                         </path>
                     </annotationProcessorPaths>
                 </configuration>

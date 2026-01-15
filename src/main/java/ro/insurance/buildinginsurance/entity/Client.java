@@ -4,8 +4,10 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.web.service.registry.HttpServiceGroup;
 import ro.insurance.buildinginsurance.enums.ClientType;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -23,20 +25,16 @@ public class Client {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false,length = 20)
-    private ClientType ClientType;
-
     @Column(nullable = false)
     private String name;
 
     @Column(nullable = false,length = 32)
     private String identificationNumber;
 
-    @Column(length = 255)
+    @Column(nullable = false)
     private String email;
 
-    @Column(length = 50)
+    @Column(nullable = false, length = 50)
     private String phone;
 
     private String addressStreet;
@@ -44,4 +42,12 @@ public class Client {
 
     @ManyToOne(fetch = FetchType.LAZY)
     private City addressCity;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false,length = 20)
+    private ClientType clientType;
+
+    @OneToMany(mappedBy = "client",fetch = FetchType.LAZY)
+    private List<Building> buildings =  new ArrayList<>();
+
 }

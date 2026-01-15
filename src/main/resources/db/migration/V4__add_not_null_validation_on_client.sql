@@ -1,0 +1,3 @@
+ALTER TABLE clients
+    ALTER COLUMN email SET NOT NULL,
+    ALTER COLUMN phone SET NOT NULL;
