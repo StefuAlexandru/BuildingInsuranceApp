@@ -30,3 +30,11 @@ test:
     paths:
       - target/site/jacoco/
       - target/surefire-reports/
+      
+sonar:
+  stage: sonar
+  needs: ["test"]
+  dependencies: ["test"]
+  script:
+    - mvn -B -ntp -DskipTests sonar:sonar -Dsonar.host.url=$env:SONAR_HOST_URL -Dsonar.token=$env:SONAR_TOKEN -Dsonar.projectKey=building-insurance -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml -Dsonar.qualitygate.wait=true
+
