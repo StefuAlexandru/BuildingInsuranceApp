@@ -1,21 +1,25 @@
-stages: [test]
+stages:
+  - test
+
+variables:
+  GIT_DEPTH: "0"
 
 test:
   stage: test
-  variables:
-    SPRING_PROFILES_ACTIVE: "ci"
-    SPRING_DATASOURCE_URL: "jdbc:postgresql://localhost:54321/building_insurance_ci"
-    SPRING_DATASOURCE_USERNAME: "ci_user"
-    SPRING_DATASOURCE_PASSWORD: "ci_pass"
   script:
-    - docker rm -f pg-ci 2>$null | Out-Null; $global:LASTEXITCODE = 0
-    - docker run -d --name pg-ci -e POSTGRES_DB=building_insurance_ci -e POSTGRES_USER=ci_user -e POSTGRES_PASSWORD=ci_pass -p 54321:5432 postgres:16-alpine
-    - mvn test jacoco:report
-  after_script:
-    - docker rm -f pg-ci 2>$null | Out-Null; $global:LASTEXITCODE = 0
+    - mvn -B -ntp clean verify jacoco:report
+    - |
+      [xml]$x = Get-Content "target/site/jacoco/jacoco.xml"
+      $c = $x.report.counter | Where-Object { $_.type -eq "LINE" } | Select-Object -First 1
+      $missed = [int]$c.missed
+      $covered = [int]$c.covered
+      $pct = [math]::Round(100 * $covered / ($covered + $missed), 2)
+      Write-Host "Coverage: $pct%"
+  coverage: '/Coverage:\s+(\d+(\.\d+)?)%/'
   artifacts:
     when: always
-    expire_in: 7 days
+    reports:
+      junit: target/surefire-reports/TEST-*.xml
     paths:
       - target/site/jacoco/
       - target/surefire-reports/
