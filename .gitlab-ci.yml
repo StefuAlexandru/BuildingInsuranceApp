@@ -1,7 +1,7 @@
 stages:
   - test
   - sonar
-  
+
 variables:
   GIT_DEPTH: "0"
 
@@ -38,4 +38,3 @@ sonar:
   dependencies: ["test"]
   script:
     - mvn -B -ntp -DskipTests sonar:sonar -Dsonar.host.url=$env:SONAR_HOST_URL -Dsonar.token=$env:SONAR_TOKEN -Dsonar.projectKey=building-insurance -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml -Dsonar.qualitygate.wait=true
-    - Write-Output "Sonar dashboard: $env:SONAR_HOST_URL/dashboard?id=building-insurance"
