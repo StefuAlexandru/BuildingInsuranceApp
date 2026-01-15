@@ -7,7 +7,7 @@ variables:
 test:
   stage: test
   script:
-    - mvn -B -ntp clean verify jacoco:report
+    - .\mvnw.cmd -B -ntp clean verify jacoco:report
     - |
       [xml]$x = Get-Content "target/site/jacoco/jacoco.xml"
       $c = $x.report.counter | Where-Object { $_.type -eq "LINE" } | Select-Object -First 1
