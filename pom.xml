@@ -34,6 +34,9 @@
         <sonar.projectKey>building-insurance</sonar.projectKey>
         <!--suppress UnresolvedMavenProperty -->
         <sonar.login>${env.SONAR_TOKEN}</sonar.login>
+
+        <sonar.qualitygate.wait>true</sonar.qualitygate.wait>
+        
     </properties>
     <dependencies>
         <dependency>
