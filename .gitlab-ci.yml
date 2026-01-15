@@ -8,11 +8,11 @@ test:
     SPRING_DATASOURCE_USERNAME: "ci_user"
     SPRING_DATASOURCE_PASSWORD: "ci_pass"
   script:
-    - docker rm -f pg-ci 2>$null
+    - docker rm -f pg-ci 2>$null | Out-Null; $global:LASTEXITCODE = 0
     - docker run -d --name pg-ci -e POSTGRES_DB=building_insurance_ci -e POSTGRES_USER=ci_user -e POSTGRES_PASSWORD=ci_pass -p 54321:5432 postgres:16-alpine
     - mvn test jacoco:report
   after_script:
-    - docker rm -f pg-ci 2>$null
+    - docker rm -f pg-ci 2>$null | Out-Null; $global:LASTEXITCODE = 0
   artifacts:
     when: always
     expire_in: 7 days
