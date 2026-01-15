@@ -9,8 +9,8 @@ test:
   script:
     - .\mvnw.cmd -B -ntp clean verify jacoco:report
     - |
-      $xml = "target/site/jacoco/jacoco.xml"
-        if (!(Test-Path $xml)) { throw "Missing $xml (JaCoCo report n-a fost generat)" }
+        $xml = "target/site/jacoco/jacoco.xml"
+        if (!(Test-Path $xml)) { throw "Missing $xml (JaCoCo n-a generat raportul)" }
 
         [xml]$j = Get-Content $xml
         $c = $j.report.counter | Where-Object { $_.type -eq "LINE" } | Select-Object -First 1
@@ -19,10 +19,10 @@ test:
         $miss = [int]$c.missed
         $cov  = [int]$c.covered
         $total = $miss + $cov
-        $pct = if ($total -eq 0) { 0 } else { [math]::Round(100 * $cov / $total, 2) }
+        $pct = if ($total -eq 0) { 0 } else { [int]([math]::Round(100 * $cov / $total)) }
 
-        Write-Host "Coverage: $pct%"
-  coverage: '/Coverage:\s+(\d+(\.\d+)?)%/'
+        Write-Output "Coverage: $pct%"
+  coverage: '/Coverage:\s+(\d+)%/'
   artifacts:
     when: always
     reports:
