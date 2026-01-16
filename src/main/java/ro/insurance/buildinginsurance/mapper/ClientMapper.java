@@ -45,9 +45,11 @@ public interface ClientMapper {
         client.setAddressStreet(trimToNull(client.getAddressStreet()));
         client.setAddressNumber(trimToNull(client.getAddressNumber()));
     }
+
     private static String trim(String s) {
         return s == null ? null : s.trim();
     }
+
     private static String trimToNull(String s) {
         if (s == null) return null;
         String t = s.trim();
