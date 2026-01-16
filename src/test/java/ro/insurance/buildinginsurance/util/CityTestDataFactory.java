@@ -1,6 +1,8 @@
 package ro.insurance.buildinginsurance.util;
 
+import ro.insurance.buildinginsurance.dto.cityDto.CityDTO;
 import ro.insurance.buildinginsurance.dto.cityDto.CityRequestDTO;
+import ro.insurance.buildinginsurance.dto.clientDto.ClientDTO;
 import ro.insurance.buildinginsurance.entity.City;
 import ro.insurance.buildinginsurance.entity.County;
 
@@ -13,10 +15,11 @@ public class CityTestDataFactory {
     // -------------------  DTOS  -------------------
 
     public static CityRequestDTO aCityRequestDTO() {
-        return new CityRequestDTO(
-                "Adjud",
-                1L
-        );
+        return new CityRequestDTO("Adjud", 1L);
+    }
+
+    public static CityDTO aCityDTO(){
+        return new CityDTO(1L, "Adjud", "Vrancea", "Romania");
     }
 
     // -------------------  ENTITY  -------------------
