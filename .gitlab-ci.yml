@@ -44,11 +44,14 @@ test:
       - target/surefire-reports/
 
 sonar:
-  stage: test
+  stage: sonar
   variables:
     GIT_DEPTH: "0"
   script:
-    - mvn -B clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-        -Dsonar.host.url="$SONAR_HOST_URL" \
-        -Dsonar.token="$SONAR_TOKEN"
+   - |
+        $ErrorActionPreference="Stop"
+        .\mvnw.cmd -B -ntp sonar:sonar `
+          "-Dsonar.projectKey=$env:SONAR_PROJECT_KEY" `
+          "-Dsonar.host.url=$env:SONAR_HOST_URL" `
+          "-Dsonar.login=$env:SONAR_TOKEN" `
 
