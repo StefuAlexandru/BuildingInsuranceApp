@@ -6,11 +6,13 @@ variables:
   GIT_DEPTH: "0"
   SONAR_PROJECT_KEY: "building-insurance"
   MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
+  SONAR_USER_HOME: "$CI_PROJECT_DIR/.sonar"
 
 cache:
   key: maven
   paths:
     - .m2/repository/
+    - .sonar/cache/
 
 test:
   stage: test
@@ -55,10 +57,17 @@ sonar:
         $ErrorActionPreference = "Stop"
 
         if (-not $env:SONAR_HOST_URL) { throw "Missing SONAR_HOST_URL" }
-        if (-not $env:SONAR_TOKEN) { throw "Missing SONAR_TOKEN" }
+        if (-not $env:SONAR_TOKEN) { throw "Missing SONAR_TOKEN (check CI/CD variable scope/protection)" }
 
-        # sanity check: SonarQube reachable
-        iwr "$env:SONAR_HOST_URL/api/system/health" -UseBasicParsing | Out-String | Write-Host
+        # Optional check (non-fatal), with auth to avoid 403
+        try {
+          $basic = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("$($env:SONAR_TOKEN):"))
+          $headers = @{ Authorization = "Basic $basic" }
+          $ver = (iwr "$env:SONAR_HOST_URL/api/server/version" -Headers $headers -UseBasicParsing).Content
+          Write-Host "SonarQube reachable, version: $ver"
+        } catch {
+          Write-Host "SonarQube check skipped: $($_.Exception.Message)"
+        }
 
         & .\mvnw.cmd -B -ntp sonar:sonar `
           "-Dsonar.projectKey=$env:SONAR_PROJECT_KEY" `
