@@ -18,8 +18,8 @@ test:
     - |
         $ErrorActionPreference = "Stop"
 
-        $args = @("-B","-ntp","clean","verify","jacoco:report")
-        & .\mvnw.cmd @args
+        & .\mvnw.cmd -B -ntp clean verify jacoco:report
+        if ($LASTEXITCODE -ne 0) { throw "Maven failed with exit code $LASTEXITCODE" }
 
         $xml = "target/site/jacoco/jacoco.xml"
         if (!(Test-Path $xml)) { throw "Missing $xml (JaCoCo n-a generat raportul)" }
@@ -42,16 +42,27 @@ test:
     paths:
       - target/site/jacoco/
       - target/surefire-reports/
+      - target/classes/
+      - target/test-classes/
 
 sonar:
   stage: sonar
-  variables:
-    GIT_DEPTH: "0"
+  needs:
+    - job: test
+      artifacts: true
   script:
-   - |
-        $ErrorActionPreference="Stop"
-        .\mvnw.cmd -B -ntp sonar:sonar `
+    - |
+        $ErrorActionPreference = "Stop"
+
+        if (-not $env:SONAR_HOST_URL) { throw "Missing SONAR_HOST_URL" }
+        if (-not $env:SONAR_TOKEN) { throw "Missing SONAR_TOKEN" }
+
+        # sanity check: SonarQube reachable
+        iwr "$env:SONAR_HOST_URL/api/system/health" -UseBasicParsing | Out-String | Write-Host
+
+        & .\mvnw.cmd -B -ntp sonar:sonar `
           "-Dsonar.projectKey=$env:SONAR_PROJECT_KEY" `
           "-Dsonar.host.url=$env:SONAR_HOST_URL" `
-          "-Dsonar.login=$env:SONAR_TOKEN" `
-
+          "-Dsonar.token=$env:SONAR_TOKEN" `
+          "-Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml"
+        if ($LASTEXITCODE -ne 0) { throw "Sonar failed with exit code $LASTEXITCODE" }
