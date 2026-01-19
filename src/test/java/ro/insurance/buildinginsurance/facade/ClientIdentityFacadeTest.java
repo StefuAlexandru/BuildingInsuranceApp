@@ -163,6 +163,95 @@ class ClientIdentityFacadeTest {
         verify(clientRepository).save(client);
     }
 
+    @Test
+    void patchIdentity_shouldThrowWhenChangedByNull() {
+        // Arrange
+        ClientIdentityPatchDTO dto = aClientIdentityPatchDTOCustom(ClientType.COMPANY, "ID2", "reason");
+
+        // Act + Assert
+        BusinessException ex = assertThrows(BusinessException.class, () -> facade.patchIdentity(1L, dto, null));
+
+        assertAll(
+                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.CHANGED_BY_REQUIRED.name().equals(e.getCode()))),
+                () -> assertEquals(1, ex.getErrors().size())
+        );
+
+        verifyNoInteractions(clientRepository, historyService);
+    }
+
+    @Test
+    void patchIdentity_shouldTreatBlankNewIdentificationNumberAsNoChange() {
+        // Arrange
+        Client client = aClientIndividual();
+        when(clientRepository.findById(1L)).thenReturn(Optional.of(client));
+
+        ClientIdentityPatchDTO dto = aClientIdentityPatchDTOCustom(null, "   ", "reason");
+
+        // Act + Assert
+        BusinessException ex = assertThrows(BusinessException.class, () -> facade.patchIdentity(1L, dto, "alex"));
+
+        assertAll(
+                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.NO_CHANGES.name().equals(e.getCode()))),
+                () -> assertEquals(1, ex.getErrors().size())
+        );
+
+        verify(clientRepository).findById(1L);
+        verify(clientRepository, never()).save(any());
+        verifyNoInteractions(historyService);
+    }
+
+    @Test
+    void patchIdentity_shouldLogOnlyIdentificationChange_whenOnlyIdChanges() {
+        // Arrange
+        Client client = aClientIndividual();
+        when(clientRepository.findById(1L)).thenReturn(Optional.of(client));
+        when(clientRepository.existsByIdentificationNumberAndIdNot("ID2", 1L)).thenReturn(false);
+
+        Client saved = new Client();
+        when(clientRepository.save(any(Client.class))).thenReturn(saved);
+
+        ClientIdentityPatchDTO dto = aClientIdentityPatchDTOCustom(null, "ID2", "reason");
+
+        // Act
+        Client result = facade.patchIdentity(1L, dto, "alex");
+
+        // Assert
+        assertAll(
+                () -> assertSame(saved, result),
+                () -> assertEquals(ClientType.INDIVIDUAL, client.getClientType()),
+                () -> assertEquals("ID2", client.getIdentificationNumber())
+        );
+
+        verify(historyService, never()).logClientTypeChange(anyLong(), any(), any(), any(), any());
+        verify(historyService).logIdentificationNumberChange(1L, "ID1", "ID2", "reason", "alex");
+        verify(clientRepository).existsByIdentificationNumberAndIdNot("ID2", 1L);
+        verify(clientRepository).save(client);
+    }
+
+    @Test
+    void patchIdentity_shouldThrowWhenTypeChangesButIdStaysSame_afterTrim() {
+        // Arrange
+        Client client = aClientIndividual();
+        when(clientRepository.findById(1L)).thenReturn(Optional.of(client));
+
+        ClientIdentityPatchDTO dto = aClientIdentityPatchDTOCustom(ClientType.COMPANY, "  ID1  ", "reason");
+
+        // Act + Assert
+        BusinessException ex = assertThrows(BusinessException.class, () -> facade.patchIdentity(1L, dto, "alex"));
+
+        assertAll(
+                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.ID_NUMBER_REQUIRED_WHEN_TYPE_CHANGES.name().equals(e.getCode()))),
+                () -> assertEquals(1, ex.getErrors().size())
+        );
+
+        verify(clientRepository).findById(1L);
+        verify(clientRepository, never()).save(any());
+        verifyNoInteractions(historyService);
+    }
+
+
+
+
 
 
 
