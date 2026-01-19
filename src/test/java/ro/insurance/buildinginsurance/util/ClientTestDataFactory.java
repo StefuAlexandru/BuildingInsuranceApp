@@ -1,15 +1,16 @@
 package ro.insurance.buildinginsurance.util;
 
-import ro.insurance.buildinginsurance.dto.clientDto.ClientIdentityPatchDTO;
-import ro.insurance.buildinginsurance.dto.clientDto.ClientRequestDTO;
-import ro.insurance.buildinginsurance.dto.clientDto.ClientResponseDTO;
-import ro.insurance.buildinginsurance.dto.clientDto.ClientUpdateRequestDTO;
+import ro.insurance.buildinginsurance.dto.buildingDto.BuildingDTO;
+import ro.insurance.buildinginsurance.dto.cityDto.CityDTO;
+import ro.insurance.buildinginsurance.dto.clientDto.*;
 import ro.insurance.buildinginsurance.entity.Client;
 import ro.insurance.buildinginsurance.enums.ClientType;
 import ro.insurance.buildinginsurance.facade.ClientIdentityFacade;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import static ro.insurance.buildinginsurance.util.BuildingTestDataFactory.aBuildingDTO;
 import static ro.insurance.buildinginsurance.util.CityTestDataFactory.aCity;
 import static ro.insurance.buildinginsurance.util.CityTestDataFactory.aCityDTO;
 
@@ -88,6 +89,23 @@ public class ClientTestDataFactory {
 
     public static ClientIdentityPatchDTO aClientIdentityPatchDTOCustom(ClientType clientType,String identificationNumber,String reason){
          return new ClientIdentityPatchDTO(clientType,identificationNumber,reason);
+    }
+
+    public static ClientDetailsResponseDTO aClientDetailsResponse() {
+        BuildingDTO b = aBuildingDTO();
+
+        return new ClientDetailsResponseDTO(
+                1L,
+                ClientType.INDIVIDUAL,
+                "Gheo",
+                "1960101123456",
+                "gheo@test.com",
+                "0712345678",
+                aCityDTO(),
+                "Street",
+                "10A",
+                List.of(b)
+        );
     }
 
 

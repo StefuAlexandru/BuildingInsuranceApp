@@ -3,6 +3,7 @@ package ro.insurance.buildinginsurance.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import ro.insurance.buildinginsurance.dto.buildingDto.BuildingDTO;
 import ro.insurance.buildinginsurance.dto.buildingDto.BuildingRequestDTO;
 import ro.insurance.buildinginsurance.dto.buildingDto.BuildingResponseDTO;
 import ro.insurance.buildinginsurance.entity.Building;
@@ -20,4 +21,6 @@ public interface BuildingMapper {
     Building toEntity(BuildingRequestDTO buildingRequestDTO, Client client, City city);
 
     BuildingResponseDTO toResponse(Building building);
+
+    BuildingDTO toDTO(Building building);
 }

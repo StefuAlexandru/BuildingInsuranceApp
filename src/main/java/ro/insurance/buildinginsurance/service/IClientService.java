@@ -10,8 +10,11 @@ public interface IClientService {
     ClientResponseDTO createClient(ClientRequestDTO clientRequestDTO);
 
     ClientResponseDTO getClientById(Long clientId);
+    ClientDetailsResponseDTO getClientDetailsById(Long clientId);
     ClientResponseDTO getClientByNameAndIdentificationNumber(String name,String identificationNumber);
     Page<ClientResponseDTO> getAllClients(Pageable pageable);
+
+    Page<ClientResponseDTO> searchClients(String name, String identificationNumber, Pageable pageable);
 
     ClientResponseDTO updateClient(Long clientId, ClientUpdateRequestDTO clientUpdateRequestDTO);
 

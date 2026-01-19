@@ -7,13 +7,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import ro.insurance.buildinginsurance.dto.clientDto.ClientIdentityPatchDTO;
-import ro.insurance.buildinginsurance.dto.clientDto.ClientRequestDTO;
-import ro.insurance.buildinginsurance.dto.clientDto.ClientResponseDTO;
-import ro.insurance.buildinginsurance.dto.clientDto.ClientUpdateRequestDTO;
+import org.springframework.data.domain.*;
+import ro.insurance.buildinginsurance.dto.clientDto.*;
 import ro.insurance.buildinginsurance.entity.City;
 import ro.insurance.buildinginsurance.entity.Client;
 import ro.insurance.buildinginsurance.enums.ErrorCode;
@@ -430,6 +425,32 @@ class ClientServiceTest {
     }
 
     @Test
+    void searchClients_shouldTrimAndMap() {
+        // Arrange
+        Pageable pageable = PageRequest.of(0, 5, Sort.by("name"));
+        Client client = aClient();
+        ClientResponseDTO dto = aClientResponse();
+
+        Page<Client> repoPage = new PageImpl<>(List.of(client), pageable, 1);
+
+        when(clientRepository.search("Gheo", "1960101123456", pageable)).thenReturn(repoPage);
+        when(clientMapper.toResponse(client)).thenReturn(dto);
+
+        // Act
+        Page<ClientResponseDTO> result = clientService.searchClients("  Gheo  ", "  1960101123456  ", pageable);
+
+        assertAll(
+                () -> assertEquals(1, result.getTotalElements()),
+                () -> assertEquals(1, result.getContent().size()),
+                () -> assertSame(dto, result.getContent().getFirst())
+        );
+
+        verify(clientRepository).search("Gheo", "1960101123456", pageable);
+        verify(clientMapper).toResponse(client);
+        verifyNoInteractions(cityRepository, clientIdentityFacade);
+    }
+
+    @Test
     void getAllClients_shouldMapToResponsePage() {
         // Arrange
         PageRequest pageable = PageRequest.of(0, 2);
@@ -459,6 +480,45 @@ class ClientServiceTest {
         verify(clientMapper).toResponse(client1);
         verify(clientMapper).toResponse(client2);
         verifyNoInteractions(cityRepository, clientIdentityFacade);
+    }
+
+    @Test
+    void getClientDetailsById_shouldReturnDetails() {
+        // Arrange
+        Long clientId = 1L;
+        Client client = new Client();
+        ClientDetailsResponseDTO dto = aClientDetailsResponse();
+
+        when(clientRepository.findWithBuildingsById(clientId)).thenReturn(Optional.of(client));
+        when(clientMapper.toDetailsResponse(client)).thenReturn(dto);
+
+        // Act
+        ClientDetailsResponseDTO result = clientService.getClientDetailsById(clientId);
+
+        // Assert
+        assertSame(dto, result);
+
+        verify(clientRepository).findWithBuildingsById(clientId);
+        verify(clientMapper).toDetailsResponse(client);
+        verifyNoInteractions(cityRepository, clientIdentityFacade);
+    }
+
+    @Test
+    void getClientDetailsById_whenNotFound_shouldThrowBusinessException() {
+        // Arrange
+        Long clientId = 99L;
+        when(clientRepository.findWithBuildingsById(clientId)).thenReturn(Optional.empty());
+
+        // Act + Assert
+        BusinessException ex = assertThrows(BusinessException.class, () -> clientService.getClientDetailsById(clientId));
+
+        assertAll(
+                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.CLIENT_NOT_FOUND.name().equals(e.getCode()))),
+                () -> assertEquals(1, ex.getErrors().size())
+        );
+
+        verify(clientRepository).findWithBuildingsById(clientId);
+        verifyNoInteractions(clientMapper, cityRepository, clientIdentityFacade);
     }
 
 

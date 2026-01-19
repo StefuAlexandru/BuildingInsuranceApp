@@ -8,10 +8,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ro.insurance.buildinginsurance.dto.clientDto.ClientIdentityPatchDTO;
-import ro.insurance.buildinginsurance.dto.clientDto.ClientRequestDTO;
-import ro.insurance.buildinginsurance.dto.clientDto.ClientResponseDTO;
-import ro.insurance.buildinginsurance.dto.clientDto.ClientUpdateRequestDTO;
+import ro.insurance.buildinginsurance.dto.clientDto.*;
 import ro.insurance.buildinginsurance.service.IClientService;
 
 @RestController
@@ -28,6 +25,24 @@ public class ClientController {
         return ResponseEntity.status(HttpStatus.CREATED).body(clientResponseDTO);
     }
 
+    @PostMapping("/search")
+    public ResponseEntity<Page<ClientResponseDTO>> searchClients(
+            @RequestBody ClientSearchRequestDTO clientSearchRequestDTO,
+            @PageableDefault(size = 5, sort = "name") Pageable pageable
+    ) {
+        return ResponseEntity.ok(clientService.searchClients(clientSearchRequestDTO.name(), clientSearchRequestDTO.identificationNumber(), pageable));
+    }
+
+    @PostMapping("/lookup")
+    public ResponseEntity<ClientResponseDTO> lookupClient(
+            @RequestBody @Valid ClientLookupRequestDTO request
+    ) {
+        return ResponseEntity.ok(
+                clientService.getClientByNameAndIdentificationNumber(request.name(), request.identificationNumber())
+        );
+    }
+
+
     // ----------------------  GET  ----------------------
 
     @GetMapping("/{clientId}"   )
@@ -36,14 +51,9 @@ public class ClientController {
         return ResponseEntity.ok(clientResponseDTO);
     }
 
-    @GetMapping("/search")
-    public ResponseEntity<ClientResponseDTO> getClientByNameAndIdentificationNumber(
-            @RequestParam String name,
-            @RequestParam String identificationNumber
-    )
-    {
-        ClientResponseDTO clientResponseDTO = clientService.getClientByNameAndIdentificationNumber(name, identificationNumber);
-        return ResponseEntity.ok(clientResponseDTO);
+    @GetMapping("/{clientId}/details")
+    public ResponseEntity<ClientDetailsResponseDTO> getClientDetails(@PathVariable Long clientId) {
+        return ResponseEntity.ok(clientService.getClientDetailsById(clientId));
     }
 
     @GetMapping
@@ -51,6 +61,7 @@ public class ClientController {
             @PageableDefault(size = 5, sort = "name") Pageable pageable){
         return ResponseEntity.ok(clientService.getAllClients(pageable));
     }
+
 
     // ----------------------  PUT  ----------------------
 
@@ -65,18 +76,17 @@ public class ClientController {
 
     // ----------------------  PATCH  ----------------------
 
-    @PatchMapping
+    @PatchMapping("/{clientId}/identity")
     public ResponseEntity<ClientResponseDTO> patchClientIdentity(
-            @RequestParam Long clientId,
+            @PathVariable Long clientId,
             @RequestBody @Valid ClientIdentityPatchDTO clientIdentityPatchDTO
-    ){
+    ) {
         String changedBy = "system";
         ClientResponseDTO clientResponseDTO = clientService.patchIdentity(clientId,clientIdentityPatchDTO,changedBy);
         return  ResponseEntity.ok(clientResponseDTO);
     }
 
     // ----------------------  DELETE  ----------------------
-
 
     @DeleteMapping("/{clientId}")
     public ResponseEntity<Void> deleteClient(@PathVariable Long clientId){

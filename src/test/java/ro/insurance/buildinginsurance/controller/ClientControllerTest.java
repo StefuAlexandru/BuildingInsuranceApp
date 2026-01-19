@@ -4,17 +4,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import ro.insurance.buildinginsurance.dto.clientDto.ClientDetailsResponseDTO;
 import ro.insurance.buildinginsurance.dto.clientDto.ClientRequestDTO;
 import ro.insurance.buildinginsurance.dto.clientDto.ClientResponseDTO;
 import ro.insurance.buildinginsurance.dto.clientDto.ClientUpdateRequestDTO;
@@ -25,6 +25,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -140,6 +141,103 @@ class ClientControllerTest {
         verifyNoInteractions(clientService);
     }
 
+    @Test
+    void searchClients_byPartialName_shouldReturn200_andDefaultPageable() throws Exception {
+        // Arrange
+        ClientResponseDTO dto = aClientResponse();
+        Pageable expectedPageable = PageRequest.of(0, 5, Sort.by("name"));
+        Page<ClientResponseDTO> page = new PageImpl<>(List.of(dto), expectedPageable, 1);
+
+        when(clientService.searchClients(eq("ghe"), isNull(), any(Pageable.class))).thenReturn(page);
+
+        ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+
+        // Act + Assert
+        mockMvc.perform(post("/api/brokers/clients/search")
+                        .contentType("application/json")
+                        .content("""
+                        {
+                          "name": "ghe",
+                          "identificationNumber": null
+                        }
+                        """))
+                .andExpectAll(
+                        status().isOk(),
+                        jsonPath("$.content[0].id").value(dto.id().intValue()),
+                        jsonPath("$.content[0].identificationNumber").value(dto.identificationNumber()),
+                        jsonPath("$.totalElements").value(1)
+                );
+
+        verify(clientService).searchClients(eq("ghe"), isNull(), pageableCaptor.capture());
+
+        Pageable used = pageableCaptor.getValue();
+        assertAll(
+                () -> assertEquals(0, used.getPageNumber()),
+                () -> assertEquals(5, used.getPageSize()),
+                () -> assertNotNull(used.getSort().getOrderFor("name"))
+        );
+
+        verifyNoMoreInteractions(clientService);
+    }
+
+    @Test
+    void searchClients_byIdentificationNumber_shouldReturn200() throws Exception {
+        // Arrange
+        ClientResponseDTO dto = aClientResponse();
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("name").ascending());
+        Page<ClientResponseDTO> page = new PageImpl<>(List.of(dto), pageable, 1);
+
+        when(clientService.searchClients(isNull(), eq("1960101123456"), any(Pageable.class))).thenReturn(page);
+
+        // Act + Assert
+        mockMvc.perform(post("/api/brokers/clients/search")
+                        .param("page", "0")
+                        .param("size", "10")
+                        .param("sort", "name,asc")
+                        .contentType("application/json")
+                        .content("""
+                        {
+                          "name": null,
+                          "identificationNumber": "1960101123456"
+                        }
+                        """))
+                .andExpectAll(
+                        status().isOk(),
+                        jsonPath("$.content[0].id").value(dto.id().intValue()),
+                        jsonPath("$.content[0].identificationNumber").value(dto.identificationNumber()),
+                        jsonPath("$.totalElements").value(1)
+                );
+
+        verify(clientService).searchClients(isNull(), eq("1960101123456"), any(Pageable.class));
+        verifyNoMoreInteractions(clientService);
+    }
+
+    @Test
+    void lookupClient_shouldReturn200() throws Exception {
+        // Arrange
+        ClientResponseDTO clientResponseDTO = aClientResponse();
+
+        when(clientService.getClientByNameAndIdentificationNumber("Gheo", "1960101123456")).thenReturn(clientResponseDTO);
+
+        // Act + Assert
+        mockMvc.perform(post("/api/brokers/clients/lookup")
+                        .contentType("application/json")
+                        .content("""
+                        {
+                          "name": "Gheo",
+                          "identificationNumber": "1960101123456"
+                        }
+                        """))
+                .andExpectAll(
+                        status().isOk(),
+                        jsonPath("$.id").value(clientResponseDTO.id().intValue()),
+                        jsonPath("$.identificationNumber").value(clientResponseDTO.identificationNumber())
+                );
+
+        verify(clientService).getClientByNameAndIdentificationNumber("Gheo", "1960101123456");
+        verifyNoMoreInteractions(clientService);
+    }
+
 
     // --------------------- GET ---------------------
 
@@ -160,27 +258,6 @@ class ClientControllerTest {
                 );
 
         verify(clientService).getClientById(1L);
-        verifyNoMoreInteractions(clientService);
-    }
-
-    @Test
-    void getClientByNameAndIdentificationNumber_shouldReturn200() throws Exception {
-        // Arrange
-        ClientResponseDTO clientResponseDTO = aClientResponse();
-
-        when(clientService.getClientByNameAndIdentificationNumber("Gheo", "1960101123456")).thenReturn(clientResponseDTO);
-
-        // Act + Assert
-        mockMvc.perform(get("/api/brokers/clients/search")
-                        .param("name", "Gheo")
-                        .param("identificationNumber", "1960101123456"))
-                .andExpectAll(
-                        status().isOk(),
-                        jsonPath("$.id").value(clientResponseDTO.id().intValue()),
-                        jsonPath("$.identificationNumber").value(clientResponseDTO.identificationNumber())
-                );
-
-        verify(clientService).getClientByNameAndIdentificationNumber("Gheo", "1960101123456");
         verifyNoMoreInteractions(clientService);
     }
 
@@ -209,6 +286,28 @@ class ClientControllerTest {
         verifyNoMoreInteractions(clientService);
     }
 
+    @Test
+    void getClientDetails_shouldReturn200_andBody() throws Exception {
+        // Arrange
+        Long clientId = 1L;
+        ClientDetailsResponseDTO dto = aClientDetailsResponse();
+
+        when(clientService.getClientDetailsById(clientId)).thenReturn(dto);
+
+        // Act + Assert
+        mockMvc.perform(get("/api/brokers/clients/{clientId}/details", clientId))
+                .andExpectAll(
+                        status().isOk(),
+                        jsonPath("$.id").value(dto.id().intValue()),
+                        jsonPath("$.name").value(dto.name()),
+                        jsonPath("$.identificationNumber").value(dto.identificationNumber()),
+                        jsonPath("$.buildings.length()").value(dto.buildings().size()),
+                        jsonPath("$.buildings[0].id").value(dto.buildings().getFirst().id().intValue())
+                );
+
+        verify(clientService).getClientDetailsById(clientId);
+        verifyNoMoreInteractions(clientService);
+    }
 
 
     // --------------------- UPDATE ---------------------
@@ -257,7 +356,7 @@ class ClientControllerTest {
         when(clientService.patchIdentity(eq(clientId), any(), eq("system"))).thenReturn(clientResponseDTO);
 
         // Act + Assert
-        mockMvc.perform(patch("/api/brokers/clients")
+        mockMvc.perform(patch("/api/brokers/clients/{clientId}/identity", clientId)
                         .param("clientId", clientId.toString())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))

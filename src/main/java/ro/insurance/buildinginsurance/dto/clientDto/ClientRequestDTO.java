@@ -4,6 +4,7 @@ import jakarta.validation.constraints.*;
 
 public record ClientRequestDTO(
         @NotBlank(message = "Client name cannot be blank")
+        @Size(max = 255, message = "Client name must be at most 255 characters")
         String name,
 
         @NotBlank(message = "Client type cannot be blank")

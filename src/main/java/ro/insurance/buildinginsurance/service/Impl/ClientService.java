@@ -5,10 +5,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ro.insurance.buildinginsurance.dto.clientDto.ClientIdentityPatchDTO;
-import ro.insurance.buildinginsurance.dto.clientDto.ClientRequestDTO;
-import ro.insurance.buildinginsurance.dto.clientDto.ClientResponseDTO;
-import ro.insurance.buildinginsurance.dto.clientDto.ClientUpdateRequestDTO;
+import ro.insurance.buildinginsurance.dto.clientDto.*;
 import ro.insurance.buildinginsurance.entity.City;
 import ro.insurance.buildinginsurance.entity.Client;
 import ro.insurance.buildinginsurance.enums.ErrorCode;
@@ -59,6 +56,14 @@ public class ClientService implements IClientService {
         return clientMapper.toResponse(findClientOrThrow(clientId));
     }
 
+    @Transactional(readOnly = true)
+    public ClientDetailsResponseDTO getClientDetailsById(Long clientId) {
+        Client client = clientRepository.findWithBuildingsById(clientId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.CLIENT_NOT_FOUND));
+
+        return clientMapper.toDetailsResponse(client);
+    }
+
     @Override
     @Transactional(readOnly = true)
     public ClientResponseDTO getClientByNameAndIdentificationNumber(String name, String identificationNumber) {
@@ -72,6 +77,16 @@ public class ClientService implements IClientService {
     @Transactional(readOnly = true)
     public Page<ClientResponseDTO> getAllClients(Pageable pageable) {
         return clientRepository.findAll(pageable)
+                .map(clientMapper::toResponse);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<ClientResponseDTO> searchClients(String name, String identificationNumber, Pageable pageable) {
+        String nameFilter = (name == null || name.isBlank()) ? null : name.trim();
+        String identificationNumberFilter = (identificationNumber == null || identificationNumber.isBlank()) ? null : identificationNumber.trim();
+
+        return clientRepository.search(nameFilter, identificationNumberFilter, pageable)
                 .map(clientMapper::toResponse);
     }
 

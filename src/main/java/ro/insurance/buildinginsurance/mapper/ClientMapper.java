@@ -1,10 +1,7 @@
 package ro.insurance.buildinginsurance.mapper;
 
 import org.mapstruct.*;
-import ro.insurance.buildinginsurance.dto.clientDto.ClientDTO;
-import ro.insurance.buildinginsurance.dto.clientDto.ClientRequestDTO;
-import ro.insurance.buildinginsurance.dto.clientDto.ClientResponseDTO;
-import ro.insurance.buildinginsurance.dto.clientDto.ClientUpdateRequestDTO;
+import ro.insurance.buildinginsurance.dto.clientDto.*;
 import ro.insurance.buildinginsurance.entity.City;
 import ro.insurance.buildinginsurance.entity.Client;
 
@@ -35,6 +32,9 @@ public interface ClientMapper {
 
     @Mapping(target = "city", source = "addressCity")
     ClientResponseDTO toResponse(Client client);
+
+    @Mapping(target = "city", source = "addressCity")
+    ClientDetailsResponseDTO toDetailsResponse(Client client);
 
     @AfterMapping
     default void normalize(@MappingTarget Client client) {
