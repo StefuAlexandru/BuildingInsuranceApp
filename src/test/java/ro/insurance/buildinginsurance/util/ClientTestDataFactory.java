@@ -1,10 +1,12 @@
 package ro.insurance.buildinginsurance.util;
 
+import ro.insurance.buildinginsurance.dto.clientDto.ClientIdentityPatchDTO;
 import ro.insurance.buildinginsurance.dto.clientDto.ClientRequestDTO;
 import ro.insurance.buildinginsurance.dto.clientDto.ClientResponseDTO;
 import ro.insurance.buildinginsurance.dto.clientDto.ClientUpdateRequestDTO;
 import ro.insurance.buildinginsurance.entity.Client;
 import ro.insurance.buildinginsurance.enums.ClientType;
+import ro.insurance.buildinginsurance.facade.ClientIdentityFacade;
 
 import java.util.ArrayList;
 
@@ -53,6 +55,15 @@ public class ClientTestDataFactory {
         );
     }
 
+    public static ClientUpdateRequestDTO aClientUpdateRequestWithAddress(Long cityId, String street, String number){
+        return new ClientUpdateRequestDTO(
+                "Vasi",
+                "vasi@test.com",
+                "0712345679",
+                cityId, street, number
+        );
+    }
+
     public static ClientResponseDTO aClientResponse() {
         return new ClientResponseDTO(
                 1L,
@@ -65,6 +76,18 @@ public class ClientTestDataFactory {
                 "Str. Gheo",
                 "10A"
         );
+    }
+
+    public static ClientIdentityPatchDTO aClientIdentityPatchDTO(){
+        return new ClientIdentityPatchDTO(
+                ClientType.INDIVIDUAL,
+                "1960101123456",
+                "fix"
+        );
+    }
+
+    public static ClientIdentityPatchDTO aClientIdentityPatchDTOCustom(ClientType clientType,String identificationNumber,String reason){
+         return new ClientIdentityPatchDTO(clientType,identificationNumber,reason);
     }
 
 
@@ -84,5 +107,16 @@ public class ClientTestDataFactory {
         client.setBuildings(new ArrayList<>());
         return client;
     }
+
+    public static Client aClientIndividual() {
+        Client client = new Client();
+        client.setId(1L);
+        client.setClientType(ClientType.INDIVIDUAL);
+        client.setIdentificationNumber("ID1");
+        return client;
+    }
+
+
+
 
 }

@@ -49,14 +49,14 @@ public class ClientChangeHistoryService implements IClientChangeHistoryService {
             String reason,
             String actor
     ) {
-        ClientChangeHistory h = new ClientChangeHistory();
-        h.setClientId(clientId);
-        h.setField(field);
-        h.setOldValue(oldValue);
-        h.setNewValue(newValue);
-        h.setReason(reason.trim());
-        h.setChangedBy(actor);
-        return h;
+        ClientChangeHistory clientChangeHistory = new ClientChangeHistory();
+        clientChangeHistory.setClientId(clientId);
+        clientChangeHistory.setField(field);
+        clientChangeHistory.setOldValue(oldValue);
+        clientChangeHistory.setNewValue(newValue);
+        clientChangeHistory.setReason(reason.trim());
+        clientChangeHistory.setChangedBy(actor);
+        return clientChangeHistory;
     }
 }
 
