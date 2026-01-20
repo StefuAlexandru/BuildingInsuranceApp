@@ -4,9 +4,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import ro.insurance.buildinginsurance.enums.ErrorCode;
 
+import java.io.Serializable;
+
 @Data
 @NoArgsConstructor
-public class ErrorModel {
+public class ErrorModel implements Serializable {
     private String code;
     private String message;
 

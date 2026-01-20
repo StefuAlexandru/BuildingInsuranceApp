@@ -11,6 +11,8 @@ import ro.insurance.buildinginsurance.error.BusinessException;
 import ro.insurance.buildinginsurance.repository.ClientRepository;
 import ro.insurance.buildinginsurance.service.IClientChangeHistoryService;
 
+import java.util.Objects;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -26,23 +28,38 @@ public class ClientIdentityFacade {
                 .orElseThrow(() -> new BusinessException(ErrorCode.CLIENT_NOT_FOUND));
 
         ClientType newType = resolveNewType(client, clientIdentityPatchDTO);
+
         String newIdentificationNumber = resolveNewIdentificationNumber(client, clientIdentityPatchDTO);
 
         boolean typeActuallyChanges = newType != client.getClientType();
-        boolean identificationNumberActuallyChanges = !newIdentificationNumber.equals(client.getIdentificationNumber());
+
+        String normalizedNewId = trimToNull(clientIdentityPatchDTO.newIdentificationNumber());
+        boolean identificationNumberActuallyChanges =
+                normalizedNewId != null && !Objects.equals(normalizedNewId, client.getIdentificationNumber());
+
+        validateUniqueness(client, newIdentificationNumber, identificationNumberActuallyChanges);
 
         validatePatchRequest(typeActuallyChanges, identificationNumberActuallyChanges);
-        validateUniqueness(client,newIdentificationNumber,identificationNumberActuallyChanges);
 
         if (typeActuallyChanges) {
-            historyService.logClientTypeChange(clientId, client.getClientType(), newType, clientIdentityPatchDTO.reason(), actor);
+            historyService.logClientTypeChange(
+                    clientId,
+                    client.getClientType(),
+                    newType,
+                    clientIdentityPatchDTO.reason(),
+                    actor
+            );
             client.setClientType(newType);
         }
 
-        if (identificationNumberActuallyChanges) {
-            historyService.logIdentificationNumberChange(clientId, client.getIdentificationNumber(), newIdentificationNumber, clientIdentityPatchDTO.reason(), actor);
-            client.setIdentificationNumber(newIdentificationNumber);
-        }
+        historyService.logIdentificationNumberChange(
+                clientId,
+                client.getIdentificationNumber(),
+                newIdentificationNumber,
+                clientIdentityPatchDTO.reason(),
+                actor
+        );
+        client.setIdentificationNumber(newIdentificationNumber);
 
         return clientRepository.save(client);
     }
@@ -71,7 +88,9 @@ public class ClientIdentityFacade {
     }
 
     private ClientType resolveNewType(Client client, ClientIdentityPatchDTO clientIdentityPatchDTO) {
-        return clientIdentityPatchDTO.newClientType() != null ? clientIdentityPatchDTO.newClientType() : client.getClientType();
+        return clientIdentityPatchDTO.newClientType() != null
+                ? clientIdentityPatchDTO.newClientType()
+                : client.getClientType();
     }
 
     private String resolveNewIdentificationNumber(Client client, ClientIdentityPatchDTO clientIdentityPatchDTO) {
@@ -79,5 +98,9 @@ public class ClientIdentityFacade {
         return (raw != null && !raw.isBlank()) ? raw.trim() : client.getIdentificationNumber();
     }
 
-
+    private static String trimToNull(String s) {
+        if (s == null) return null;
+        String t = s.trim();
+        return t.isBlank() ? null : t;
+    }
 }
