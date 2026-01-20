@@ -14,8 +14,8 @@ public interface CityRepository extends JpaRepository<City, Long> {
                 SELECT EXISTS(
                         SELECT 1
                         FROM cities
-                        WHERE LOWER(name) = LOWER(:name))
-                            AND county_id = :countyId
+                        WHERE LOWER(name) = LOWER(:name)
+                            AND county_id = :countyId)
             """, nativeQuery = true)
     boolean existsByNameIgnoreCaseAndCountyId(@Param("name") String name, @Param("countyId") Long countyId);
 

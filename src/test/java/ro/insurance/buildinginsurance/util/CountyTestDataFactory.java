@@ -1,10 +1,13 @@
 package ro.insurance.buildinginsurance.util;
 
 import ro.insurance.buildinginsurance.dto.countyDto.CountyDTO;
+import ro.insurance.buildinginsurance.dto.countyDto.CountyRequestDTO;
+import ro.insurance.buildinginsurance.dto.countyDto.CountyResponseDTO;
 import ro.insurance.buildinginsurance.entity.Country;
 import ro.insurance.buildinginsurance.entity.County;
 
 import static ro.insurance.buildinginsurance.util.CountryTestDataFactory.aCountry;
+import static ro.insurance.buildinginsurance.util.CountryTestDataFactory.aCountryDTO;
 
 public class CountyTestDataFactory {
 
@@ -16,14 +19,36 @@ public class CountyTestDataFactory {
         return new CountyDTO(1L,"Vrancea",1L,"Romania");
     }
 
+    public static CountyRequestDTO aCountyRequest() {
+        return new CountyRequestDTO("Vrancea", 1L);
+    }
+
+    public static CountyRequestDTO aCountyRequestWithName(String name) {
+        return new CountyRequestDTO(name, 1L);
+    }
+
+    public static CountyRequestDTO aCountyRequestWithNameAndCountryId(String name, Long countryId) {
+        return new CountyRequestDTO(name, countryId);
+    }
+
+    public static CountyResponseDTO aCountyResponse() {
+        return new CountyResponseDTO(1L, "Vrancea", aCountryDTO());
+    }
+    public static CountyResponseDTO aCountyResponseWithIdAndName(Long id, String name) {
+        return new CountyResponseDTO(id, name, aCountryDTO());
+    }
+
     // -------------------  ENTITY  -------------------
 
     public static County aCounty(){
+        return aCountyWithId(1L);
+    }
+
+    public static County aCountyWithId(Long id) {
         County county = new County();
-        Country country = aCountry();
-        county.setId(1L);
+        county.setId(id);
         county.setName("Vrancea");
-        county.setCountry(country);
+        county.setCountry(aCountry());
         return county;
     }
 }
