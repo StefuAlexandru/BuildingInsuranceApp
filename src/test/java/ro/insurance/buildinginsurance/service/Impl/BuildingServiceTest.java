@@ -1,4 +1,4 @@
-package ro.insurance.buildinginsurance.service;
+package ro.insurance.buildinginsurance.service.Impl;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,7 +18,6 @@ import ro.insurance.buildinginsurance.mapper.BuildingMapper;
 import ro.insurance.buildinginsurance.repository.BuildingRepository;
 import ro.insurance.buildinginsurance.repository.CityRepository;
 import ro.insurance.buildinginsurance.repository.ClientRepository;
-import ro.insurance.buildinginsurance.service.Impl.BuildingService;
 
 import java.util.List;
 import java.util.Optional;

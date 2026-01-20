@@ -1,7 +1,6 @@
 package ro.insurance.buildinginsurance.mapper;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import org.mapstruct.*;
 import ro.insurance.buildinginsurance.dto.cityDto.CityDTO;
 import ro.insurance.buildinginsurance.dto.cityDto.CityRequestDTO;
 import ro.insurance.buildinginsurance.dto.cityDto.CityResponseDTO;
@@ -24,4 +23,20 @@ public interface CityMapper {
     @Mapping(target = "countyName", source = "county.name")
     @Mapping(target = "countryName", source = "county.country.name")
     CityDTO toDTO(City city);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "name", source = "cityRequestDTO.name")
+    @Mapping(target = "county", source = "county")
+    void updateFromDTO(CityRequestDTO cityRequestDTO, County county,@MappingTarget City city);
+
+    @AfterMapping
+    default void normalize(@MappingTarget City city) {
+        city.setName(trimToNull(city.getName()));
+    }
+
+    private static String trimToNull(String s) {
+        if (s == null) return null;
+        String t = s.trim();
+        return t.isBlank() ? null : t;
+    }
 }

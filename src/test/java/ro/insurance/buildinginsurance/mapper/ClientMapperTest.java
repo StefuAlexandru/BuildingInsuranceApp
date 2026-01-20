@@ -33,7 +33,7 @@ class ClientMapperTest {
         Client client = clientMapper.toEntity(dto, city);
 
         // Assert
-        assertAll("Client entity mapping from ClientRequestDTO and City",
+        assertAll(
                 () -> assertNotNull(client),
                 () -> assertNull(client.getId()),
 
@@ -153,7 +153,7 @@ class ClientMapperTest {
         ClientResponseDTO clientResponseDTO = clientMapper.toResponse(client);
 
         // Assert
-        assertAll("ClientResponseDTO mapping",
+        assertAll(
                 () -> assertNotNull(clientResponseDTO),
                 () -> assertEquals(client.getId(), clientResponseDTO.id()),
                 () -> assertEquals(client.getClientType(), clientResponseDTO.clientType()),

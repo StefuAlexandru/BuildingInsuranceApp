@@ -22,6 +22,7 @@ public interface ClientMapper {
     @Mapping(target = "buildings", ignore = true)
     Client toEntity(ClientRequestDTO clientRequestDTO, City city);
 
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "identificationNumber", ignore = true)
     @Mapping(target = "clientType", ignore = true)
