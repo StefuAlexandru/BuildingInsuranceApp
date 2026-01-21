@@ -48,7 +48,7 @@ public class BuildingController {
     // ----------------------  PUT  ----------------------
 
     @PutMapping("/{buildingId}")
-    public ResponseEntity<BuildingResponseDTO> updateBuilding(
+    public ResponseEntity<BuildingDetailsResponseDTO> updateBuilding(
             @PathVariable Long buildingId,
             @RequestBody @Valid BuildingUpdateRequestDTO dto
     ) {

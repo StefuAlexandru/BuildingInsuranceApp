@@ -70,14 +70,14 @@ public class BuildingService implements IBuildingService {
     // ---------------------  UPDATE  ---------------------
 
     @Override
-    public BuildingResponseDTO updateBuilding(Long buildingId, BuildingUpdateRequestDTO dto) {
+    public BuildingDetailsResponseDTO updateBuilding(Long buildingId, BuildingUpdateRequestDTO dto) {
         Building building = findBuildingOrThrow(buildingId);
         City city = findCityOrThrow(dto.cityId());
 
         buildingMapper.updateFromDto(dto, city, building);
 
         Building saved = buildingRepository.save(building);
-        return buildingMapper.toResponse(saved);
+        return buildingMapper.toDetailsResponse(saved);
     }
 
     // ---------------------  PATCH  ---------------------

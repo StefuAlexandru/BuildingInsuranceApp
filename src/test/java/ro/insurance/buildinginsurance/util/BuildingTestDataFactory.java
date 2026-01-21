@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 
 import static ro.insurance.buildinginsurance.util.CityTestDataFactory.*;
 import static ro.insurance.buildinginsurance.util.ClientTestDataFactory.aClient;
+import static ro.insurance.buildinginsurance.util.ClientTestDataFactory.aClientDTO;
 
 public class BuildingTestDataFactory {
 
@@ -40,7 +41,7 @@ public class BuildingTestDataFactory {
 
     public static BuildingDetailsResponseDTO aBuildingDetailsResponse() {
         return new BuildingDetailsResponseDTO(
-                1L, null, aCityDTO(), "Street", "10A", 2000, BuildingType.OFFICE, 2,
+                1L, aClientDTO(), aCityDTO(), "Street", "10A", 2000, BuildingType.OFFICE, 2,
                 new BigDecimal("120.50"), new BigDecimal("50000"), false, true
         );
     }

@@ -392,7 +392,7 @@ class ClientServiceTest {
         Client client = aClient();
         ClientResponseDTO response = aClientResponse();
 
-        when(clientRepository.findByNameAndIdentificationNumber("Old Name", "OLD-CNP")).thenReturn(Optional.of(client));
+        when(clientRepository.findByNameIgnoreCaseAndIdentificationNumber("Old Name", "OLD-CNP")).thenReturn(Optional.of(client));
         when(clientMapper.toResponse(client)).thenReturn(response);
 
         // Act
@@ -401,7 +401,7 @@ class ClientServiceTest {
         // Assert
         assertSame(response, result);
 
-        verify(clientRepository).findByNameAndIdentificationNumber("Old Name", "OLD-CNP");
+        verify(clientRepository).findByNameIgnoreCaseAndIdentificationNumber("Old Name", "OLD-CNP");
         verify(clientMapper).toResponse(client);
         verifyNoInteractions(cityRepository, clientIdentityFacade);
     }
@@ -409,7 +409,7 @@ class ClientServiceTest {
     @Test
     void getClientByNameAndIdentificationNumber_shouldThrowWhenNotFound() {
         // Arrange
-        when(clientRepository.findByNameAndIdentificationNumber("X", "Y")).thenReturn(Optional.empty());
+        when(clientRepository.findByNameIgnoreCaseAndIdentificationNumber("X", "Y")).thenReturn(Optional.empty());
 
         // Act + Assert
         BusinessException ex = assertThrows(BusinessException.class, () -> clientService.getClientByNameAndIdentificationNumber(" X ", " Y "));
@@ -420,7 +420,7 @@ class ClientServiceTest {
         );
 
 
-        verify(clientRepository).findByNameAndIdentificationNumber("X", "Y");
+        verify(clientRepository).findByNameIgnoreCaseAndIdentificationNumber("X", "Y");
         verifyNoInteractions(clientMapper, cityRepository, clientIdentityFacade);
     }
 

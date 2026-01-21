@@ -248,15 +248,15 @@ class BuildingServiceTest {
 
         Building building = aBuilding();
         Building saved = new Building();
-        BuildingResponseDTO response = aBuildingResponse();
+        BuildingDetailsResponseDTO response = aBuildingDetailsResponse();
 
         when(buildingRepository.findById(1L)).thenReturn(Optional.of(building));
         when(cityRepository.findById(buildingUpdateRequestDTO.cityId())).thenReturn(Optional.of(city));
         when(buildingRepository.save(building)).thenReturn(saved);
-        when(buildingMapper.toResponse(saved)).thenReturn(response);
+        when(buildingMapper.toDetailsResponse(saved)).thenReturn(response);
 
         // Act
-        BuildingResponseDTO result = buildingService.updateBuilding(1L, buildingUpdateRequestDTO);
+        BuildingDetailsResponseDTO result = buildingService.updateBuilding(1L, buildingUpdateRequestDTO);
 
         // Assert
         assertSame(response, result);
@@ -265,7 +265,7 @@ class BuildingServiceTest {
         verify(cityRepository).findById(buildingUpdateRequestDTO.cityId());
         verify(buildingMapper).updateFromDto(buildingUpdateRequestDTO, city, building);
         verify(buildingRepository).save(building);
-        verify(buildingMapper).toResponse(saved);
+        verify(buildingMapper).toDetailsResponse(saved);
 
         verifyNoInteractions(clientRepository);
         verifyNoMoreInteractions(buildingRepository, cityRepository, buildingMapper);

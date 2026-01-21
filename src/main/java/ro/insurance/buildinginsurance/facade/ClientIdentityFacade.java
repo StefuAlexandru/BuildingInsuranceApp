@@ -34,31 +34,19 @@ public class ClientIdentityFacade {
         boolean typeActuallyChanges = newType != client.getClientType();
 
         String normalizedNewId = trimToNull(clientIdentityPatchDTO.newIdentificationNumber());
-        boolean identificationNumberActuallyChanges =
-                normalizedNewId != null && !Objects.equals(normalizedNewId, client.getIdentificationNumber());
+        boolean identificationNumberActuallyChanges = normalizedNewId != null && !Objects.equals(normalizedNewId, client.getIdentificationNumber());
 
         validateUniqueness(client, newIdentificationNumber, identificationNumberActuallyChanges);
 
         validatePatchRequest(typeActuallyChanges, identificationNumberActuallyChanges);
 
         if (typeActuallyChanges) {
-            historyService.logClientTypeChange(
-                    clientId,
-                    client.getClientType(),
-                    newType,
-                    clientIdentityPatchDTO.reason(),
-                    actor
-            );
+            historyService.logClientTypeChange(clientId, client.getClientType(), newType, clientIdentityPatchDTO.reason(), actor);
             client.setClientType(newType);
         }
 
-        historyService.logIdentificationNumberChange(
-                clientId,
-                client.getIdentificationNumber(),
-                newIdentificationNumber,
-                clientIdentityPatchDTO.reason(),
-                actor
-        );
+        historyService.logIdentificationNumberChange(clientId, client.getIdentificationNumber(), newIdentificationNumber, clientIdentityPatchDTO.reason(), actor);
+
         client.setIdentificationNumber(newIdentificationNumber);
 
         return clientRepository.save(client);

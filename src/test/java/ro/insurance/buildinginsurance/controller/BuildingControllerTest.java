@@ -271,7 +271,7 @@ class BuildingControllerTest {
         // Arrange
         Long buildingId = 10L;
         BuildingUpdateRequestDTO buildingUpdateRequestDTO = aBuildingUpdateRequest();
-        BuildingResponseDTO buildingResponseDTO = aBuildingResponse();
+        BuildingDetailsResponseDTO buildingResponseDTO = aBuildingDetailsResponse();
 
         String body = createBuildingUpdateRequestBody(
                 buildingUpdateRequestDTO.cityId(),
@@ -293,6 +293,16 @@ class BuildingControllerTest {
                 .andExpectAll(
                         status().isOk(),
                         jsonPath("$.id").value(buildingResponseDTO.id().intValue()),
+                        jsonPath("$.client.id").value(buildingResponseDTO.client().id().intValue()),
+                        jsonPath("$.city.id").value(buildingResponseDTO.city().id().intValue()),
+                        jsonPath("$.city.name").value(buildingResponseDTO.city().name()),
+                        jsonPath("$.number").value(buildingResponseDTO.number()),
+                        jsonPath("$.constructionYear").value(buildingResponseDTO.constructionYear()),
+                        jsonPath("$.floors").value(buildingResponseDTO.floors()),
+                        jsonPath("$.insuredValue").value(buildingResponseDTO.insuredValue()),
+                        jsonPath("$.surfaceArea").value(buildingResponseDTO.surfaceArea().doubleValue()),
+                        jsonPath("$.floodZone").value(buildingResponseDTO.floodZone()),
+                        jsonPath("$.earthquakeZone").value(buildingResponseDTO.earthquakeZone()),
                         jsonPath("$.street").value(buildingResponseDTO.street()),
                         jsonPath("$.buildingType").value(buildingResponseDTO.buildingType().name())
                 );

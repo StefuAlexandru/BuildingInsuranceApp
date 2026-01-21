@@ -1,7 +1,7 @@
 package ro.insurance.buildinginsurance.error;
 
 
-import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import tools.jackson.databind.exc.InvalidFormatException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -44,22 +44,24 @@ public class CustomExceptionHandler {
     public ResponseEntity<List<ErrorModel>> handleJsonParseError(HttpMessageNotReadableException ex) {
         List<ErrorModel> errors = new ArrayList<>();
 
-        Throwable cause = ex.getCause();
-        if (cause instanceof InvalidFormatException ife) {
-            Class<?> targetType = ife.getTargetType();
+        ex.getMostSpecificCause();
+        Throwable cause = ex.getMostSpecificCause();
 
-            if (targetType == BuildingType.class) {
+        if (cause instanceof InvalidFormatException invalidFormatException) {
+            var targetType = invalidFormatException.getTargetType();
+
+            if (targetType.equals(BuildingType.class)) {
                 errors.add(new ErrorModel(
                         "InvalidBuildingType",
-                        "Building type must be one of: " + Arrays.toString(ro.insurance.buildinginsurance.enums.BuildingType.values())
+                        "Building type must be one of: " + Arrays.toString(BuildingType.values())
                 ));
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
             }
 
-            if (targetType == ClientType.class) {
+            if (targetType.equals(ClientType.class)) {
                 errors.add(new ErrorModel(
                         "InvalidClientType",
-                        "Client type must be one of: " + Arrays.toString(ro.insurance.buildinginsurance.enums.ClientType.values())
+                        "Client type must be one of: " + Arrays.toString(ClientType.values())
                 ));
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
             }

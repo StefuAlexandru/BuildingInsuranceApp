@@ -19,6 +19,10 @@ public class ClientTestDataFactory {
 
     // -------------------  DTOS  -------------------
 
+    public static ClientDTO aClientDTO(){
+        return new ClientDTO(1L,"Gheo");
+    }
+
     public static ClientRequestDTO aClientRequest(){
         return new ClientRequestDTO(
                 "Gheo",

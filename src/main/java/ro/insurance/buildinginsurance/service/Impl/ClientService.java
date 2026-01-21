@@ -67,7 +67,7 @@ public class ClientService implements IClientService {
     @Override
     @Transactional(readOnly = true)
     public ClientResponseDTO getClientByNameAndIdentificationNumber(String name, String identificationNumber) {
-        Client client = clientRepository.findByNameAndIdentificationNumber(name.trim(),identificationNumber.trim())
+        Client client = clientRepository.findByNameIgnoreCaseAndIdentificationNumber(name.trim(),identificationNumber.trim())
                 .orElseThrow(() -> new BusinessException(ErrorCode.CLIENT_NOT_FOUND));
 
         return clientMapper.toResponse(client);

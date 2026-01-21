@@ -11,8 +11,7 @@ public interface IBuildingService {
     Page<BuildingResponseDTO> getBuildingsByClientId(Long clientId, Pageable pageable);
     BuildingDetailsResponseDTO getBuildingDetailsById(Long buildingId);
 
-
-    BuildingResponseDTO updateBuilding(Long buildingId, BuildingUpdateRequestDTO dto);
+    BuildingDetailsResponseDTO updateBuilding(Long buildingId, BuildingUpdateRequestDTO dto);
 
     BuildingResponseDTO patchBuilding(Long buildingId, BuildingPatchDTO dto);
 

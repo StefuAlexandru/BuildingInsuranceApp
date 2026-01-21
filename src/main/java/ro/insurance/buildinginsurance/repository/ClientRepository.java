@@ -21,13 +21,8 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
             )""",nativeQuery = true)
     boolean existsByIdentificationNumber(@Param("identificationNumber") String identificationNumber);
 
-    @Query(value = """
-            SELECT *
-            FROM clients
-            WHERE lower(name) = lower(:name) AND identification_number = :identificationNumber
-            """,nativeQuery = true)
-    @EntityGraph(attributePaths = {"city", "buildings", "buildings.city"})
-    Optional<Client> findByNameAndIdentificationNumber(@Param("name") String name, @Param("identificationNumber") String identificationNumber);
+    @EntityGraph(attributePaths = {"addressCity", "buildings", "buildings.city"})
+    Optional<Client> findByNameIgnoreCaseAndIdentificationNumber(String name, String identificationNumber);
 
     @Query(value = """
             SELECT EXISTS(
