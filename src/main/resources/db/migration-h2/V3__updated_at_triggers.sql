@@ -1,0 +1,1 @@
+-- H2: skip updated_at triggers

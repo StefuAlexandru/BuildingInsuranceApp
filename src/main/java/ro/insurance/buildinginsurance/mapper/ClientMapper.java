@@ -18,7 +18,7 @@ public interface ClientMapper {
     @Mapping(target = "addressStreet", source = "clientRequestDTO.addressStreet")
     @Mapping(target = "addressNumber", source = "clientRequestDTO.addressNumber")
     @Mapping(target = "addressCity", source = "city")
-    @Mapping(target = "clientType", expression = "java(ClientType.valueOf(clientRequestDTO.clientType()))")
+    @Mapping(target = "clientType", source = "clientRequestDTO.clientType")
     @Mapping(target = "buildings", ignore = true)
     Client toEntity(ClientRequestDTO clientRequestDTO, City city);
 
@@ -42,6 +42,8 @@ public interface ClientMapper {
         client.setName(trim(client.getName()));
         client.setEmail(trim(client.getEmail()));
         client.setPhone(trim(client.getPhone()));
+
+        client.setIdentificationNumber(trim(client.getIdentificationNumber()));
 
         client.setAddressStreet(trimToNull(client.getAddressStreet()));
         client.setAddressNumber(trimToNull(client.getAddressNumber()));

@@ -42,7 +42,7 @@ class ClientMapperTest {
                 () -> assertEquals(dto.email(), client.getEmail()),
                 () -> assertEquals(dto.phone(), client.getPhone()),
 
-                () -> assertEquals(ClientType.valueOf(dto.clientType()), client.getClientType()),
+                () -> assertEquals(dto.clientType(), client.getClientType()),
 
                 () -> assertEquals(city, client.getAddressCity()),
                 () -> assertEquals(dto.addressStreet(), client.getAddressStreet()),

@@ -3,7 +3,6 @@ package ro.insurance.buildinginsurance.util;
 import ro.insurance.buildinginsurance.dto.countyDto.CountyDTO;
 import ro.insurance.buildinginsurance.dto.countyDto.CountyRequestDTO;
 import ro.insurance.buildinginsurance.dto.countyDto.CountyResponseDTO;
-import ro.insurance.buildinginsurance.entity.Country;
 import ro.insurance.buildinginsurance.entity.County;
 
 import static ro.insurance.buildinginsurance.util.CountryTestDataFactory.aCountry;
@@ -47,6 +46,13 @@ public class CountyTestDataFactory {
     public static County aCountyWithId(Long id) {
         County county = new County();
         county.setId(id);
+        county.setName("Vrancea");
+        county.setCountry(aCountry());
+        return county;
+    }
+
+    public static County aCountyWithoutId(){
+        County county = new County();
         county.setName("Vrancea");
         county.setCountry(aCountry());
         return county;

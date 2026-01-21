@@ -1,6 +1,5 @@
 package ro.insurance.buildinginsurance.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,12 +17,11 @@ import ro.insurance.buildinginsurance.dto.clientDto.ClientDetailsResponseDTO;
 import ro.insurance.buildinginsurance.dto.clientDto.ClientRequestDTO;
 import ro.insurance.buildinginsurance.dto.clientDto.ClientResponseDTO;
 import ro.insurance.buildinginsurance.dto.clientDto.ClientUpdateRequestDTO;
+import ro.insurance.buildinginsurance.enums.ClientType;
 import ro.insurance.buildinginsurance.error.CustomExceptionHandler;
 import ro.insurance.buildinginsurance.service.IClientService;
 
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -43,8 +41,6 @@ class ClientControllerTest {
     @InjectMocks
     private ClientController clientController;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(clientController)
@@ -54,37 +50,6 @@ class ClientControllerTest {
                 .build();
     }
 
-    private String createClientRequestBody(String name, String clientType, String identificationNumber, String email, String phone, Long addressCityId, String addressStreet, String addressNumber) throws Exception {
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("name", name);
-        body.put("clientType", clientType);
-        body.put("identificationNumber", identificationNumber);
-        body.put("email", email);
-        body.put("phone", phone);
-        body.put("addressCityId", addressCityId);
-        body.put("addressStreet", addressStreet);
-        body.put("addressNumber", addressNumber);
-        return objectMapper.writeValueAsString(body);
-    }
-
-    private String createClientUpdateRequestBody(String name, String email, String phone, Long addressCityId, String addressStreet, String addressNumber) throws Exception {
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("name", name);
-        body.put("email", email);
-        body.put("phone", phone);
-        body.put("addressCityId", addressCityId);
-        body.put("addressStreet", addressStreet);
-        body.put("addressNumber", addressNumber);
-        return objectMapper.writeValueAsString(body);
-    }
-
-    private String createPatchIdentityBody(String newClientType, String newIdentificationNumber, String reason) throws Exception {
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("newClientType", newClientType);
-        body.put("newIdentificationNumber", newIdentificationNumber);
-        body.put("reason", reason);
-        return objectMapper.writeValueAsString(body);
-    }
 
     // ---------------------  CREATE  ---------------------
 
@@ -130,7 +95,7 @@ class ClientControllerTest {
     @Test
     void createClient_shouldReturn400WhenInvalid() throws Exception {
         // Arrange
-        String body = createClientRequestBody("Gheo", "INDIVIDUAL", "1960101123456", "bad-email", "abc", 1L, "Str", "10A");
+        String body = createClientRequestBody("Gheo", ClientType.INDIVIDUAL, "1960101123456", "bad-email", "abc", 1L, "Str", "10A");
 
         // Act + Assert
         mockMvc.perform(post("/api/brokers/clients")

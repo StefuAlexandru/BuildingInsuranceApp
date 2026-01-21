@@ -95,7 +95,7 @@ class ClientServiceTest {
                 () -> assertEquals(1, ex.getErrors().size())
         );
 
-        verify(clientRepository).existsByIdentificationNumber(clientRequestDTO.identificationNumber());
+        verify(clientRepository).existsByIdentificationNumber(clientRequestDTO.identificationNumber().trim());
         verify(clientRepository,never()).save(any());
         verifyNoInteractions(cityRepository,clientMapper,clientIdentityFacade);
     }
@@ -115,7 +115,7 @@ class ClientServiceTest {
                 () -> assertEquals(1, ex.getErrors().size())
         );
 
-        verify(clientRepository).existsByIdentificationNumber(clientRequestDTO.identificationNumber());
+        verify(clientRepository).existsByIdentificationNumber(clientRequestDTO.identificationNumber().trim());
         verify(clientRepository, never()).save(any());
         verifyNoInteractions(cityRepository, clientMapper,clientIdentityFacade);
     }
@@ -135,7 +135,7 @@ class ClientServiceTest {
                 () -> assertEquals(1, ex.getErrors().size())
         );
 
-        verify(clientRepository).existsByIdentificationNumber(clientRequestDTO.identificationNumber());
+        verify(clientRepository).existsByIdentificationNumber(clientRequestDTO.identificationNumber().trim());
         verify(clientRepository, never()).save(any());
         verifyNoInteractions(cityRepository, clientMapper,clientIdentityFacade);
     }
@@ -155,7 +155,7 @@ class ClientServiceTest {
                 () -> assertEquals(1, ex.getErrors().size())
         );
 
-        verify(clientRepository).existsByIdentificationNumber(clientRequestDTO.identificationNumber());
+        verify(clientRepository).existsByIdentificationNumber(clientRequestDTO.identificationNumber().trim());
         verify(clientRepository, never()).save(any());
         verifyNoInteractions(cityRepository, clientMapper,clientIdentityFacade);
     }

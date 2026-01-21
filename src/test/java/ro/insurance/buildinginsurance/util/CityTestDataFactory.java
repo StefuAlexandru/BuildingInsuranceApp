@@ -3,9 +3,7 @@ package ro.insurance.buildinginsurance.util;
 import ro.insurance.buildinginsurance.dto.cityDto.CityDTO;
 import ro.insurance.buildinginsurance.dto.cityDto.CityRequestDTO;
 import ro.insurance.buildinginsurance.dto.cityDto.CityResponseDTO;
-import ro.insurance.buildinginsurance.dto.clientDto.ClientDTO;
 import ro.insurance.buildinginsurance.entity.City;
-import ro.insurance.buildinginsurance.entity.County;
 
 import static ro.insurance.buildinginsurance.util.CountyTestDataFactory.aCounty;
 import static ro.insurance.buildinginsurance.util.CountyTestDataFactory.aCountyDTO;
@@ -47,6 +45,13 @@ public class CityTestDataFactory {
     public static City aCityWithId(Long id) {
         City city = new City();
         city.setId(id);
+        city.setName("Adjud");
+        city.setCounty(aCounty());
+        return city;
+    }
+
+    public static City aCityWithoutId(){
+        City city = new City();
         city.setName("Adjud");
         city.setCounty(aCounty());
         return city;

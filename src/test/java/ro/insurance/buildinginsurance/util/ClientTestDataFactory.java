@@ -1,14 +1,15 @@
 package ro.insurance.buildinginsurance.util;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import ro.insurance.buildinginsurance.dto.buildingDto.BuildingDTO;
-import ro.insurance.buildinginsurance.dto.cityDto.CityDTO;
 import ro.insurance.buildinginsurance.dto.clientDto.*;
 import ro.insurance.buildinginsurance.entity.Client;
 import ro.insurance.buildinginsurance.enums.ClientType;
-import ro.insurance.buildinginsurance.facade.ClientIdentityFacade;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import static ro.insurance.buildinginsurance.util.BuildingTestDataFactory.aBuildingDTO;
 import static ro.insurance.buildinginsurance.util.CityTestDataFactory.aCity;
@@ -16,6 +17,42 @@ import static ro.insurance.buildinginsurance.util.CityTestDataFactory.aCityDTO;
 
 public class ClientTestDataFactory {
     private ClientTestDataFactory() {}
+
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+
+    // -------------------  BUILDERS  -------------------
+
+    public static String createClientRequestBody(String name, ClientType clientType, String identificationNumber, String email, String phone, Long addressCityId, String addressStreet, String addressNumber) throws Exception {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("name", name);
+        body.put("clientType", clientType);
+        body.put("identificationNumber", identificationNumber);
+        body.put("email", email);
+        body.put("phone", phone);
+        body.put("addressCityId", addressCityId);
+        body.put("addressStreet", addressStreet);
+        body.put("addressNumber", addressNumber);
+        return objectMapper.writeValueAsString(body);
+    }
+
+    public static String createClientUpdateRequestBody(String name, String email, String phone, Long addressCityId, String addressStreet, String addressNumber) throws Exception {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("name", name);
+        body.put("email", email);
+        body.put("phone", phone);
+        body.put("addressCityId", addressCityId);
+        body.put("addressStreet", addressStreet);
+        body.put("addressNumber", addressNumber);
+        return objectMapper.writeValueAsString(body);
+    }
+
+    public static String createPatchIdentityBody(String newClientType, String newIdentificationNumber, String reason) throws Exception {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("newClientType", newClientType);
+        body.put("newIdentificationNumber", newIdentificationNumber);
+        body.put("reason", reason);
+        return objectMapper.writeValueAsString(body);
+    }
 
     // -------------------  DTOS  -------------------
 
@@ -26,7 +63,7 @@ public class ClientTestDataFactory {
     public static ClientRequestDTO aClientRequest(){
         return new ClientRequestDTO(
                 "Gheo",
-                "INDIVIDUAL",
+                ClientType.INDIVIDUAL,
                 "1960101123456",
                 "gheo@test.com",
                 "0712345678",
@@ -39,7 +76,7 @@ public class ClientTestDataFactory {
     public static ClientRequestDTO aClientRequestWithAddress(Long cityId, String street, String number) {
         return new ClientRequestDTO(
                 "Gheo",
-                "INDIVIDUAL",
+                ClientType.INDIVIDUAL,
                 "1960101123456",
                 "gheo@test.com",
                 "0712345678",

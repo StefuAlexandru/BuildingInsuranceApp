@@ -1,14 +1,14 @@
 # Building Insurance (Backend)
 
-Backend API for a **building insurance** application. In plain terms: it manages **clients**, **insured buildings**, and the **geography** data (country/county/city) required to register buildings.
+Backend API for a **building insurance** application. In plain terms: it manages **clients**, **insured buildings**, and the **geography** data required to register buildings.
 
 ## What this project does
-- **Clients**: create / update / search / view details (individual or company).
-- **Buildings**: register and manage insured buildings for a client (each building is linked to a city).
-- **Geography**: countries → counties → cities (used for selection and validation).
+- **Clients**: create / update / search / view details .
+- **Buildings**: register and manage insured buildings for a client .
+- **Geography**: countries → counties → cities .
 - **Validation + errors**: input validation with consistent, centralized error responses.
-- **Audit/history support**: tracks important changes (e.g., client identity updates).
-- **DB migrations**: database schema is managed through versioned migrations (Flyway).
+- **Audit/history support**: tracks important changes .
+- **DB migrations**: database schema is managed through versioned migrations .
 
 ## Tech stack
 - Java + Spring Boot
@@ -19,9 +19,6 @@ Backend API for a **building insurance** application. In plain terms: it manages
 
 ## Run locally
 ```bash
-# Linux/Mac
-./mvnw spring-boot:run
-
 # Windows
 .\mvnw.cmd spring-boot:run
 ```
@@ -30,6 +27,7 @@ Backend API for a **building insurance** application. In plain terms: it manages
 - `application.properties`
 - `application-dev.yml`
 - `application-ci.yml`
+- `application-test.yml`
 
 ## Tests
 ```bash
@@ -45,10 +43,9 @@ Backend API for a **building insurance** application. In plain terms: it manages
 - `repository` – database access
 - `entity` – JPA entities
 - `dto` – request/response models (client/building/city/county/country)
-- `mapper` – entity ↔ DTO mapping
+- `mapper` – entity <-> DTO mapping
 - `error` – exceptions + global handler
 - `resources/db.migration` – versioned SQL migrations
 
 ## Notes
 - Flyway migrations run automatically on startup.
-- Use the `dev` config/profile for local work and `ci` for pipelines.

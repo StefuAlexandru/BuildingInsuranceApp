@@ -93,6 +93,4 @@ public class ClientController {
         clientService.deleteClient(clientId);
         return ResponseEntity.noContent().build();
     }
-
-
 }

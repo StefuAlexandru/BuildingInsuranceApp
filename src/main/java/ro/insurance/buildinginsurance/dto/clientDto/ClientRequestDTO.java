@@ -1,15 +1,15 @@
 package ro.insurance.buildinginsurance.dto.clientDto;
 
 import jakarta.validation.constraints.*;
+import ro.insurance.buildinginsurance.enums.ClientType;
 
 public record ClientRequestDTO(
         @NotBlank(message = "Client name cannot be blank")
         @Size(max = 255, message = "Client name must be at most 255 characters")
         String name,
 
-        @NotBlank(message = "Client type cannot be blank")
-        @Pattern(regexp = "INDIVIDUAL|COMPANY", message = "clientType must be INDIVIDUAL or COMPANY")
-        String clientType,
+        @NotNull(message = "Client type cannot be null")
+        ClientType clientType,
 
         @NotBlank(message = "Identification number cannot be blank")
         String identificationNumber,
