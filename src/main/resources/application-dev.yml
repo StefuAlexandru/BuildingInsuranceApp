@@ -17,7 +17,7 @@ spring:
     user:
       name: admin
       password: admin
-      roles: ADMIN
+      roles: ADMIN,BROKER
 
 logging:
   level:

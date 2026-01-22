@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import ro.insurance.buildinginsurance.dto.clientDto.*;
 import ro.insurance.buildinginsurance.service.IClientService;
@@ -79,9 +80,10 @@ public class ClientController {
     @PatchMapping("/{clientId}/identity")
     public ResponseEntity<ClientResponseDTO> patchClientIdentity(
             @PathVariable Long clientId,
-            @RequestBody @Valid ClientIdentityPatchDTO clientIdentityPatchDTO
+            @RequestBody @Valid ClientIdentityPatchDTO clientIdentityPatchDTO,
+            Authentication authentication
     ) {
-        String changedBy = "system";
+        String changedBy = authentication.getName();
         ClientResponseDTO clientResponseDTO = clientService.patchIdentity(clientId,clientIdentityPatchDTO,changedBy);
         return  ResponseEntity.ok(clientResponseDTO);
     }

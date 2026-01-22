@@ -21,6 +21,7 @@ import ro.insurance.buildinginsurance.repository.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -31,7 +32,7 @@ import static ro.insurance.buildinginsurance.util.CountryTestDataFactory.*;
 import static ro.insurance.buildinginsurance.util.CountyTestDataFactory.*;
 
 @SpringBootTest
-@AutoConfigureMockMvc(addFilters = false)
+@AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
 class BuildingControllerIT {
@@ -87,6 +88,7 @@ class BuildingControllerIT {
         );
 
         var result = mockMvc.perform(post("/api/brokers/buildings")
+                        .with(httpBasic("broker", "pass"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isCreated())
@@ -116,7 +118,8 @@ class BuildingControllerIT {
 
         Long buildingId = createBuilding(seed.client.getId(), seed.city.getId());
 
-        mockMvc.perform(get("/api/brokers/buildings/{id}", buildingId))
+        mockMvc.perform(get("/api/brokers/buildings/{id}", buildingId)
+                        .with(httpBasic("broker", "pass")))
                 .andExpectAll(
                         status().isOk(),
                         jsonPath("$.id").value(buildingId.intValue()),
@@ -131,6 +134,7 @@ class BuildingControllerIT {
         Long buildingId = createBuilding(seed.client.getId(), seed.city.getId());
 
         mockMvc.perform(get("/api/brokers/buildings")
+                        .with(httpBasic("broker", "pass"))
                         .queryParam("clientId", String.valueOf(seed.client.getId()))
                         .queryParam("page", "0")
                         .queryParam("size", "5"))
@@ -165,6 +169,7 @@ class BuildingControllerIT {
         );
 
         mockMvc.perform(put("/api/brokers/buildings/{id}", buildingId)
+                        .with(httpBasic("broker", "pass"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(upd)))
                 .andExpectAll(
@@ -184,10 +189,12 @@ class BuildingControllerIT {
 
         Long buildingId = createBuilding(seed.client().getId(), seed.city().getId());
 
-        mockMvc.perform(delete("/api/brokers/buildings/{id}", buildingId))
+        mockMvc.perform(delete("/api/brokers/buildings/{id}", buildingId)
+                        .with(httpBasic("broker","pass")))
                 .andExpect(status().isNoContent());
 
-        mockMvc.perform(get("/api/brokers/buildings/{id}", buildingId))
+        mockMvc.perform(get("/api/brokers/buildings/{id}", buildingId)
+                        .with(httpBasic("broker","pass")))
                 .andExpect(status().isNotFound());
     }
 

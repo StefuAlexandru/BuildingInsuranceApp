@@ -10,6 +10,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
@@ -312,17 +314,21 @@ class ClientControllerTest {
 
     @Test
     void patchClientIdentity_shouldReturn200AndBody() throws Exception {
-        // Arrange
         Long clientId = 99L;
         ClientResponseDTO clientResponseDTO = aClientResponse();
 
         String body = createPatchIdentityBody("INDIVIDUAL", "NEW-CNP", "reason");
 
-        when(clientService.patchIdentity(eq(clientId), any(), eq("system"))).thenReturn(clientResponseDTO);
+        var auth = new UsernamePasswordAuthenticationToken(
+                "broker",
+                "N/A",
+                AuthorityUtils.createAuthorityList("ROLE_BROKER")
+        );
 
-        // Act + Assert
+        when(clientService.patchIdentity(eq(clientId), any(), eq("broker"))).thenReturn(clientResponseDTO);
+
         mockMvc.perform(patch("/api/brokers/clients/{clientId}/identity", clientId)
-                        .param("clientId", clientId.toString())
+                        .principal(auth)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpectAll(
@@ -331,7 +337,7 @@ class ClientControllerTest {
                         jsonPath("$.clientType").value(clientResponseDTO.clientType().name())
                 );
 
-        verify(clientService).patchIdentity(eq(clientId), any(), eq("system"));
+        verify(clientService).patchIdentity(eq(clientId), any(), eq("broker"));
         verifyNoMoreInteractions(clientService);
     }
 
