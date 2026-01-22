@@ -1,6 +1,7 @@
 package ro.insurance.buildinginsurance.service.Impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
@@ -18,6 +19,7 @@ import ro.insurance.buildinginsurance.repository.CountyRepository;
 import ro.insurance.buildinginsurance.repository.CountryRepository;
 import ro.insurance.buildinginsurance.service.ICountyService;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -32,12 +34,15 @@ public class CountyService implements ICountyService {
     @Override
     public CountyResponseDTO registerCounty(CountyRequestDTO countyRequestDTO) {
         String trimmedName = countyRequestDTO.name().trim();
+        log.info("Register county requested: name='{}', countryId={}", trimmedName, countyRequestDTO.countryId());
+
         validateCountyOrThrow(trimmedName, countyRequestDTO.countryId());
 
         Country country = findCountryOrThrow(countyRequestDTO.countryId());
         County county = countyMapper.toEntity(countyRequestDTO, country);
-
         County saved = countyRepository.save(county);
+
+        log.info("County registered: id={}, name='{}', countryId={}", saved.getId(), saved.getName(), country.getId());
         return countyMapper.toResponse(saved);
     }
 
@@ -46,6 +51,7 @@ public class CountyService implements ICountyService {
     @Override
     @Transactional(readOnly = true)
     public CountyResponseDTO getCountyById(Long countyId) {
+        log.info("Get county by id: {}", countyId);
         County county = findCountyOrThrow(countyId);
         return countyMapper.toResponse(county);
     }
@@ -54,6 +60,9 @@ public class CountyService implements ICountyService {
     @Transactional(readOnly = true)
     public Page<CountyResponseDTO> getCountyByPartialName(String countyName, Pageable pageable) {
         String name = (countyName == null) ? "" : countyName;
+        log.info("Search counties: query='{}', page={}, size={}, sort={}",
+                name, pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
+
         return countyRepository.getCountyByPartialName(name, pageable)
                 .map(countyMapper::toResponse);
     }
@@ -61,17 +70,25 @@ public class CountyService implements ICountyService {
     // --------------------- UPDATE ---------------------
 
     @Override
-    public CountyResponseDTO updateCounty(Long countyId, CountyRequestDTO countyRequestDTO) {
+    public CountyResponseDTO updateCounty(Long countyId, CountyRequestDTO dto) {
+        String trimmedName = dto.name() == null ? null : dto.name().trim();
+        log.info("Update county requested: id={}, newName='{}', newCountryId={}", countyId, trimmedName, dto.countryId());
+
         County county = findCountyOrThrow(countyId);
 
-        String trimmedName = countyRequestDTO.name().trim();
-        validateCountyOrThrow(trimmedName, countyRequestDTO.countryId());
+        validateCountyOrThrow(trimmedName, dto.countryId());
+        Country country = findCountryOrThrow(dto.countryId());
 
-        Country country = findCountryOrThrow(countyRequestDTO.countryId());
+        Long oldCountryId = county.getCountry() != null ? county.getCountry().getId() : null;
+        String oldName = county.getName();
 
-        countyMapper.updateFromDTO(countyRequestDTO, country, county);
+        countyMapper.updateFromDTO(dto, country, county);
 
         County saved = countyRepository.save(county);
+
+        log.info("County updated: id={}, name '{}' -> '{}', countryId {} -> {}",
+                saved.getId(), oldName, saved.getName(), oldCountryId, country.getId());
+
         return countyMapper.toResponse(saved);
     }
 
@@ -79,11 +96,15 @@ public class CountyService implements ICountyService {
 
     @Override
     public void deleteCounty(Long countyId) {
+        log.warn("Delete county requested: id={}", countyId);
         try {
             countyRepository.deleteById(countyId);
+            log.info("County deleted: id={}", countyId);
         } catch (EmptyResultDataAccessException e) {
+            log.warn("Delete county failed - not found: id={}", countyId);
             throw new BusinessException(ErrorCode.COUNTY_NOT_FOUND);
         } catch (DataIntegrityViolationException e) {
+            log.warn("Delete county failed - has dependencies: id={}", countyId);
             throw new BusinessException(ErrorCode.COUNTY_HAS_DEPENDENCIES);
         }
     }
@@ -92,17 +113,24 @@ public class CountyService implements ICountyService {
 
     private void validateCountyOrThrow(String countyName, Long countryId) {
         if (countyRepository.existsByNameIgnoreCaseAndCountryId(countyName, countryId)) {
+            log.warn("County already exists: name='{}', countryId={}", countyName, countryId);
             throw new BusinessException(ErrorCode.COUNTY_ALREADY_EXIST);
         }
     }
 
     private Country findCountryOrThrow(Long countryId) {
         return countryRepository.findById(countryId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.COUNTRY_NOT_FOUND));
+                .orElseThrow(() -> {
+                    log.warn("Country not found: id={}", countryId);
+                    return new BusinessException(ErrorCode.COUNTRY_NOT_FOUND);
+                });
     }
 
     private County findCountyOrThrow(Long countyId) {
         return countyRepository.findById(countyId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.COUNTY_NOT_FOUND));
+                .orElseThrow(() -> {
+                    log.warn("County not found: id={}", countyId);
+                    return new BusinessException(ErrorCode.COUNTY_NOT_FOUND);
+                });
     }
 }

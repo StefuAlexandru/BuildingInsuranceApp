@@ -13,4 +13,9 @@ spring:
 
 logging:
   level:
-    org.hibernate.SQL: warn
+    root: WARN
+    ro.insurance.buildinginsurance: INFO
+    org.springframework: WARN
+    org.hibernate: WARN
+    org.hibernate.SQL: OFF
+    org.hibernate.orm.jdbc.bind: OFF
