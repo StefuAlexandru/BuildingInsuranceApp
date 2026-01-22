@@ -1,6 +1,7 @@
 package ro.insurance.buildinginsurance.service.Impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
@@ -16,6 +17,7 @@ import ro.insurance.buildinginsurance.mapper.CountryMapper;
 import ro.insurance.buildinginsurance.repository.CountryRepository;
 import ro.insurance.buildinginsurance.service.ICountryService;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -29,11 +31,14 @@ public class CountryService implements ICountryService {
     @Override
     public CountryResponseDTO registerCountry(CountryRequestDTO countryRequestDTO) {
         String trimmedName = countryRequestDTO.name().trim();
+        log.info("Register country requested: name='{}'", trimmedName);
+
         validateCountryOrThrow(trimmedName);
 
         Country country = countryMapper.toEntity(countryRequestDTO);
-
         Country saved = countryRepository.save(country);
+
+        log.info("Country registered: id={}, name='{}'", saved.getId(), saved.getName());
         return countryMapper.toResponse(saved);
     }
 
@@ -42,6 +47,7 @@ public class CountryService implements ICountryService {
     @Override
     @Transactional(readOnly = true)
     public CountryResponseDTO getCountryById(Long countryId) {
+        log.info("Get country by id: {}", countryId);
         Country country = findCountryOrThrow(countryId);
         return countryMapper.toResponse(country);
     }
@@ -50,6 +56,8 @@ public class CountryService implements ICountryService {
     @Transactional(readOnly = true)
     public Page<CountryResponseDTO> getCountryByPartialName(String countryName, Pageable pageable) {
         String name = (countryName == null) ? "" : countryName;
+        log.info("Search countries: query='{}', page={}, size={}, sort={}",
+                name, pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
         return countryRepository.getCountryByPartialName(name, pageable)
                 .map(countryMapper::toResponse);
     }
@@ -57,15 +65,21 @@ public class CountryService implements ICountryService {
     // --------------------- UPDATE ---------------------
 
     @Override
-    public CountryResponseDTO updateCountry(Long countryId, CountryRequestDTO countryRequestDTO) {
-        Country country = findCountryOrThrow(countryId);
+    public CountryResponseDTO updateCountry(Long countryId, CountryRequestDTO dto) {
+        String trimmedName = dto.name() == null ? null : dto.name().trim();
+        log.info("Update country requested: id={}, newName='{}'", countryId, trimmedName);
 
-        String trimmedName = countryRequestDTO.name().trim();
+        Country country = findCountryOrThrow(countryId);
         validateCountryOrThrow(trimmedName);
 
-        countryMapper.updateFromDTO(countryRequestDTO, country);
+        String oldName = country.getName();
+
+        countryMapper.updateFromDTO(dto, country);
 
         Country saved = countryRepository.save(country);
+
+        log.info("Country updated: id={}, name '{}' -> '{}'", saved.getId(), oldName, saved.getName());
+
         return countryMapper.toResponse(saved);
     }
 
@@ -73,11 +87,15 @@ public class CountryService implements ICountryService {
 
     @Override
     public void deleteCountry(Long countryId) {
+        log.warn("Delete country requested: id={}", countryId);
         try {
             countryRepository.deleteById(countryId);
+            log.info("Country deleted: id={}", countryId);
         } catch (EmptyResultDataAccessException e) {
+            log.warn("Delete country failed - not found: id={}", countryId);
             throw new BusinessException(ErrorCode.COUNTRY_NOT_FOUND);
         } catch (DataIntegrityViolationException e) {
+            log.warn("Delete country failed - has dependencies: id={}", countryId);
             throw new BusinessException(ErrorCode.COUNTRY_HAS_DEPENDENCIES);
         }
     }
@@ -86,12 +104,16 @@ public class CountryService implements ICountryService {
 
     private void validateCountryOrThrow(String countryName) {
         if (countryRepository.existsByNameIgnoreCase(countryName)) {
+            log.warn("Country already exists: name='{}'", countryName);
             throw new BusinessException(ErrorCode.COUNTRY_ALREADY_EXIST);
         }
     }
 
     private Country findCountryOrThrow(Long countryId) {
         return countryRepository.findById(countryId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.COUNTRY_NOT_FOUND));
+                .orElseThrow(() -> {
+                    log.warn("Country not found: id={}", countryId);
+                    return new BusinessException(ErrorCode.COUNTRY_NOT_FOUND);
+                });
     }
 }

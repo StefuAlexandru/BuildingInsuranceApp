@@ -2,6 +2,7 @@ package ro.insurance.buildinginsurance.service.Impl;
 
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,6 +11,7 @@ import ro.insurance.buildinginsurance.enums.ClientType;
 import ro.insurance.buildinginsurance.repository.ClientChangeHistoryRepository;
 import ro.insurance.buildinginsurance.service.IClientChangeHistoryService;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -21,12 +23,16 @@ public class ClientChangeHistoryService implements IClientChangeHistoryService {
         if (oldType == newType) return;
 
         clientChangeHistoryRepository.save(build(clientId, ClientChangeHistory.Field.CLIENT_TYPE, oldType.name(), newType.name(), reason, actor));
+
+        log.debug("Client history saved: clientId={}, field={}, {} -> {}, actor={}", clientId, ClientChangeHistory.Field.CLIENT_TYPE, oldType, newType, actor);
     }
 
     public void logIdentificationNumberChange(Long clientId, String oldId, String newId, String reason, String actor) {
         if (oldId.equals(newId)) return;
 
         clientChangeHistoryRepository.save(build(clientId, ClientChangeHistory.Field.IDENTIFICATION_NUMBER, oldId, newId, reason, actor));
+
+        log.debug("Client history saved: clientId={}, field={}, oldId='{}' -> newId='{}', actor={}", clientId, ClientChangeHistory.Field.IDENTIFICATION_NUMBER, oldId, newId, actor);
     }
 
     private ClientChangeHistory build(
