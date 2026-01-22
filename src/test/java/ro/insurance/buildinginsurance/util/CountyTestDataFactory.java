@@ -50,11 +50,4 @@ public class CountyTestDataFactory {
         county.setCountry(aCountry());
         return county;
     }
-
-    public static County aCountyWithoutId(){
-        County county = new County();
-        county.setName("Vrancea");
-        county.setCountry(aCountry());
-        return county;
-    }
 }

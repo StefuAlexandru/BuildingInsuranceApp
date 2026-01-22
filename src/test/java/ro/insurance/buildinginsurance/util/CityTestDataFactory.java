@@ -49,14 +49,4 @@ public class CityTestDataFactory {
         city.setCounty(aCounty());
         return city;
     }
-
-    public static City aCityWithoutId(){
-        City city = new City();
-        city.setName("Adjud");
-        city.setCounty(aCounty());
-        return city;
-    }
-
-
-
 }
