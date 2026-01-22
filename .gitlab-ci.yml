@@ -8,6 +8,9 @@ variables:
   MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
   SONAR_USER_HOME: "$CI_PROJECT_DIR/.sonar"
 
+before_script:
+  - git config --global --add safe.directory "$CI_PROJECT_DIR"
+
 cache:
   key: maven
   paths:
