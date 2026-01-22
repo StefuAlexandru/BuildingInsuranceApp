@@ -174,8 +174,4 @@ public class ClientTestDataFactory {
         client.setIdentificationNumber("ID1");
         return client;
     }
-
-
-
-
 }

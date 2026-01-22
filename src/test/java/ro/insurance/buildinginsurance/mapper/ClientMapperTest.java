@@ -3,6 +3,7 @@ package ro.insurance.buildinginsurance.mapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import ro.insurance.buildinginsurance.dto.clientDto.ClientDetailsResponseDTO;
 import ro.insurance.buildinginsurance.dto.clientDto.ClientRequestDTO;
 import ro.insurance.buildinginsurance.dto.clientDto.ClientResponseDTO;
@@ -18,6 +19,7 @@ import static ro.insurance.buildinginsurance.util.ClientTestDataFactory.*;
 import static ro.insurance.buildinginsurance.util.BuildingTestDataFactory.*;
 
 @SpringBootTest
+@ActiveProfiles("test")
 class ClientMapperTest {
 
     @Autowired

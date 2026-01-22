@@ -33,10 +33,4 @@ public class CountryTestDataFactory {
         c.setName("Romania");
         return c;
     }
-
-    public static Country aCountryWithoutId() {
-        Country c = new Country();
-        c.setName("Romania");
-        return c;
-    }
 }

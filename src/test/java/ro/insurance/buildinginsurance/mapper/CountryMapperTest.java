@@ -3,6 +3,7 @@ package ro.insurance.buildinginsurance.mapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import ro.insurance.buildinginsurance.dto.countryDto.CountryDTO;
 import ro.insurance.buildinginsurance.dto.countryDto.CountryRequestDTO;
 import ro.insurance.buildinginsurance.dto.countryDto.CountryResponseDTO;
@@ -12,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static ro.insurance.buildinginsurance.util.CountryTestDataFactory.*;
 
 @SpringBootTest
+@ActiveProfiles("test")
 class CountryMapperTest {
 
     @Autowired

@@ -3,6 +3,7 @@ package ro.insurance.buildinginsurance.mapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import ro.insurance.buildinginsurance.dto.cityDto.CityDTO;
 import ro.insurance.buildinginsurance.dto.cityDto.CityRequestDTO;
 import ro.insurance.buildinginsurance.dto.cityDto.CityResponseDTO;
@@ -15,6 +16,7 @@ import static ro.insurance.buildinginsurance.util.CityTestDataFactory.aCityWithI
 import static ro.insurance.buildinginsurance.util.CountyTestDataFactory.aCounty;
 
 @SpringBootTest
+@ActiveProfiles("test")
 class CityMapperTest {
 
     @Autowired
