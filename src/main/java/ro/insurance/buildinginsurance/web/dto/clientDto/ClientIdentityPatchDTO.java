@@ -1,0 +1,12 @@
+package ro.insurance.buildinginsurance.web.dto.clientDto;
+
+import jakarta.validation.constraints.NotBlank;
+import ro.insurance.buildinginsurance.domain.enums.ClientType;
+
+public record ClientIdentityPatchDTO(
+        ClientType newClientType,
+        String newIdentificationNumber,
+        @NotBlank(message = "Reason for changing client identity cannot pe blank")
+        String reason
+) {}
+

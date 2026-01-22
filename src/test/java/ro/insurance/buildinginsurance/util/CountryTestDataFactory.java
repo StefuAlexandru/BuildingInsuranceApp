@@ -1,7 +1,8 @@
 package ro.insurance.buildinginsurance.util;
 
-import ro.insurance.buildinginsurance.dto.countryDto.*;
-import ro.insurance.buildinginsurance.entity.Country;
+import ro.insurance.buildinginsurance.domain.entity.Country;
+import ro.insurance.buildinginsurance.web.dto.countryDto.CountryDTO;
+import ro.insurance.buildinginsurance.web.dto.countryDto.CountryRequestDTO;
 
 public class CountryTestDataFactory {
 

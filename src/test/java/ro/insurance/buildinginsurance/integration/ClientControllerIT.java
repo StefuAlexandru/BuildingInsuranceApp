@@ -9,14 +9,14 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-import ro.insurance.buildinginsurance.dto.clientDto.ClientRequestDTO;
-import ro.insurance.buildinginsurance.entity.*;
-import ro.insurance.buildinginsurance.enums.ClientType;
-import ro.insurance.buildinginsurance.mapper.CityMapper;
-import ro.insurance.buildinginsurance.mapper.ClientMapper;
-import ro.insurance.buildinginsurance.mapper.CountryMapper;
-import ro.insurance.buildinginsurance.mapper.CountyMapper;
-import ro.insurance.buildinginsurance.repository.*;
+import ro.insurance.buildinginsurance.domain.entity.*;
+import ro.insurance.buildinginsurance.infrastructure.persistance.repository.*;
+import ro.insurance.buildinginsurance.web.dto.clientDto.ClientRequestDTO;
+import ro.insurance.buildinginsurance.domain.enums.ClientType;
+import ro.insurance.buildinginsurance.application.mapper.CityMapper;
+import ro.insurance.buildinginsurance.application.mapper.ClientMapper;
+import ro.insurance.buildinginsurance.application.mapper.CountryMapper;
+import ro.insurance.buildinginsurance.application.mapper.CountyMapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
@@ -37,11 +37,16 @@ class ClientControllerIT {
 
     @Autowired MockMvc mockMvc;
 
-    @Autowired ClientRepository clientRepository;
-    @Autowired CityRepository cityRepository;
-    @Autowired CountyRepository countyRepository;
-    @Autowired CountryRepository countryRepository;
-    @Autowired ClientChangeHistoryRepository clientChangeHistoryRepository;
+    @Autowired
+    ClientRepository clientRepository;
+    @Autowired
+    CityRepository cityRepository;
+    @Autowired
+    CountyRepository countyRepository;
+    @Autowired
+    CountryRepository countryRepository;
+    @Autowired
+    ClientChangeHistoryRepository clientChangeHistoryRepository;
 
     @Autowired ClientMapper clientMapper;
     @Autowired CityMapper cityMapper;

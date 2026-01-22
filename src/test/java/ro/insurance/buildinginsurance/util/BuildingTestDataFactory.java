@@ -1,10 +1,10 @@
 package ro.insurance.buildinginsurance.util;
 
-import ro.insurance.buildinginsurance.dto.buildingDto.*;
-import ro.insurance.buildinginsurance.entity.City;
-import ro.insurance.buildinginsurance.entity.Client;
-import ro.insurance.buildinginsurance.enums.BuildingType;
-import ro.insurance.buildinginsurance.entity.Building;
+import ro.insurance.buildinginsurance.domain.entity.City;
+import ro.insurance.buildinginsurance.domain.entity.Client;
+import ro.insurance.buildinginsurance.domain.enums.BuildingType;
+import ro.insurance.buildinginsurance.domain.entity.Building;
+import ro.insurance.buildinginsurance.web.dto.buildingDto.*;
 
 import java.math.BigDecimal;
 

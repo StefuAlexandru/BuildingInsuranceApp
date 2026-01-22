@@ -1,10 +1,10 @@
 package ro.insurance.buildinginsurance.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ro.insurance.buildinginsurance.dto.buildingDto.BuildingDTO;
-import ro.insurance.buildinginsurance.dto.clientDto.*;
-import ro.insurance.buildinginsurance.entity.Client;
-import ro.insurance.buildinginsurance.enums.ClientType;
+import ro.insurance.buildinginsurance.web.dto.buildingDto.BuildingDTO;
+import ro.insurance.buildinginsurance.domain.entity.Client;
+import ro.insurance.buildinginsurance.domain.enums.ClientType;
+import ro.insurance.buildinginsurance.web.dto.clientDto.*;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
