@@ -27,7 +27,7 @@ import static ro.insurance.buildinginsurance.util.CountryTestDataFactory.aCountr
 import static ro.insurance.buildinginsurance.util.CountyTestDataFactory.aCountyRequest;
 
 @SpringBootTest
-@AutoConfigureMockMvc(addFilters = false)
+@AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
 class GeographyIT {
