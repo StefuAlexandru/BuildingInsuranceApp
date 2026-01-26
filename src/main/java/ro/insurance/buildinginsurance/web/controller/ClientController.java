@@ -11,7 +11,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import ro.insurance.buildinginsurance.web.dto.clientDto.*;
 import ro.insurance.buildinginsurance.application.service.IClientService;
-import ro.insurance.buildinginsurance.web.dto.clientDto.*;
 
 @RestController
 @RequestMapping("/api/brokers/clients")

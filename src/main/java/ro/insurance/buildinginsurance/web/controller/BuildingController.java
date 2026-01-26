@@ -10,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ro.insurance.buildinginsurance.web.dto.buildingDto.*;
 import ro.insurance.buildinginsurance.application.service.IBuildingService;
-import ro.insurance.buildinginsurance.web.dto.buildingDto.*;
 
 @RestController
 @RequestMapping("/api/brokers/buildings")
