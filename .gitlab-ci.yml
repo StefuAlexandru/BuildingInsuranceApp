@@ -23,6 +23,15 @@ test:
     - |
         $ErrorActionPreference = "Stop"
 
+
+        $env:JAVA_HOME = "C:\Program Files\Java\jdk-21"
+        $env:PATH = "$env:JAVA_HOME\bin;$env:PATH"
+
+        Write-Host "JAVA_HOME=$env:JAVA_HOME"
+        where java
+        java -version
+
+
         & .\mvnw.cmd -B -ntp clean verify
         if ($LASTEXITCODE -ne 0) { throw "Maven failed with exit code $LASTEXITCODE" }
 
@@ -58,6 +67,13 @@ sonar:
   script:
     - |
         $ErrorActionPreference = "Stop"
+
+        $env:JAVA_HOME = "C:\Program Files\Java\jdk-21"
+        $env:PATH = "$env:JAVA_HOME\bin;$env:PATH"
+
+        Write-Host "JAVA_HOME=$env:JAVA_HOME"
+        where java
+        java -version
 
         if (-not $env:SONAR_HOST_URL) { throw "Missing SONAR_HOST_URL" }
         if (-not $env:SONAR_TOKEN) { throw "Missing SONAR_TOKEN (check CI/CD variable scope/protection)" }
