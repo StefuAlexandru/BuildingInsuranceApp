@@ -1,4 +1,4 @@
-package ro.insurance.buildinginsurance.application.service.Impl;
+package ro.insurance.buildinginsurance.application.service;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -8,6 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.*;
+import ro.insurance.buildinginsurance.application.service.impl.CityService;
 import ro.insurance.buildinginsurance.web.dto.cityDto.CityRequestDTO;
 import ro.insurance.buildinginsurance.web.dto.cityDto.CityResponseDTO;
 import ro.insurance.buildinginsurance.domain.entity.City;

@@ -1,6 +1,8 @@
 package ro.insurance.buildinginsurance.integration;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,6 +21,8 @@ import ro.insurance.buildinginsurance.infrastructure.persistance.repository.City
 import ro.insurance.buildinginsurance.infrastructure.persistance.repository.CountryRepository;
 import ro.insurance.buildinginsurance.infrastructure.persistance.repository.CountyRepository;
 
+
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -52,43 +56,17 @@ class GeographyIT {
         cityRepository.save(cityMapper.toEntity(cityRequestDTO, county));
     }
 
-    @Test
-    void getCountries() throws Exception {
+    @ParameterizedTest(name = "GET {0} returns paged content")
+    @ValueSource(strings = {
+            "/api/geography/countries",
+            "/api/geography/counties",
+            "/api/geography/cities"
+    })
+    void getGeography(String uri) throws Exception {
         seedGeo();
 
-        mockMvc.perform(get("/api/brokers/countries")
-                        .queryParam("page", "0")
-                        .queryParam("size", "5"))
-                .andExpectAll(
-                        status().isOk(),
-                        jsonPath("$.content").isArray(),
-                        jsonPath("$.content.length()").value(greaterThan(0)),
-                        jsonPath("$.content[0].id").exists(),
-                        jsonPath("$.content[0].name").exists()
-                );
-    }
-
-    @Test
-    void getCounties() throws Exception {
-        seedGeo();
-
-        mockMvc.perform(get("/api/brokers/counties")
-                        .queryParam("page", "0")
-                        .queryParam("size", "5"))
-                .andExpectAll(
-                        status().isOk(),
-                        jsonPath("$.content").isArray(),
-                        jsonPath("$.content.length()").value(greaterThan(0)),
-                        jsonPath("$.content[0].id").exists(),
-                        jsonPath("$.content[0].name").exists()
-                );
-    }
-
-    @Test
-    void getCities() throws Exception {
-        seedGeo();
-
-        mockMvc.perform(get("/api/brokers/cities")
+        mockMvc.perform(get(uri)
+                        .with(httpBasic("broker", "pass"))
                         .queryParam("page", "0")
                         .queryParam("size", "5"))
                 .andExpectAll(

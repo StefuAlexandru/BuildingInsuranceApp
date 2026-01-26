@@ -14,7 +14,7 @@ import ro.insurance.buildinginsurance.application.service.ICountryService;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/brokers/countries")
+@RequestMapping("/api/geography/countries")
 public class CountryController {
 
     private final ICountryService countryService;

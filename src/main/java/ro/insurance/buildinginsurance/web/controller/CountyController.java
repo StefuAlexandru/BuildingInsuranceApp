@@ -14,7 +14,7 @@ import ro.insurance.buildinginsurance.application.service.ICountyService;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/brokers/counties")
+@RequestMapping("/api/geography/counties")
 public class CountyController {
 
     private final ICountyService countyService;

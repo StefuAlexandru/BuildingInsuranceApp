@@ -14,7 +14,7 @@ import ro.insurance.buildinginsurance.application.service.ICityService;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/brokers/cities")
+@RequestMapping("/api/geography/cities")
 public class CityController {
 
     private final ICityService cityService;

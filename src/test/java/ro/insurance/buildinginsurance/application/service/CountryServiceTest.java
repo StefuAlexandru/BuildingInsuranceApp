@@ -1,4 +1,4 @@
-package ro.insurance.buildinginsurance.application.service.Impl;
+package ro.insurance.buildinginsurance.application.service;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -8,6 +8,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.*;
 
+import ro.insurance.buildinginsurance.application.service.impl.CountryService;
 import ro.insurance.buildinginsurance.web.dto.countryDto.CountryRequestDTO;
 import ro.insurance.buildinginsurance.web.dto.countryDto.CountryResponseDTO;
 import ro.insurance.buildinginsurance.domain.entity.Country;
