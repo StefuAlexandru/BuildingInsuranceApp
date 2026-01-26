@@ -69,7 +69,7 @@ class CountyControllerTest {
         when(countyService.registerCounty(any(CountyRequestDTO.class))).thenReturn(responseDTO);
 
         // Act + Assert
-        mockMvc.perform(post("/api/brokers/counties")
+        mockMvc.perform(post("/api/geography/counties")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpectAll(
@@ -88,7 +88,7 @@ class CountyControllerTest {
     void registerCounty_shouldReturn400WhenInvalid() throws Exception {
         String body = createCountyRequestBody("   ", null);
 
-        mockMvc.perform(post("/api/brokers/counties")
+        mockMvc.perform(post("/api/geography/counties")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isBadRequest());
@@ -105,7 +105,7 @@ class CountyControllerTest {
         when(countyService.getCountyById(1L)).thenReturn(responseDTO);
 
         // Act + Assert
-        mockMvc.perform(get("/api/brokers/counties/{countyId}", 1L))
+        mockMvc.perform(get("/api/geography/counties/{countyId}", 1L))
                 .andExpectAll(
                         status().isOk(),
                         jsonPath("$.id").value(responseDTO.id().intValue()),
@@ -130,7 +130,7 @@ class CountyControllerTest {
         when(countyService.getCountyByPartialName(eq(""), any(Pageable.class))).thenReturn(page);
 
         // Act + Assert
-        mockMvc.perform(get("/api/brokers/counties")
+        mockMvc.perform(get("/api/geography/counties")
                         .param("page", "0")
                         .param("size", "5")
                         .param("sort", "name,asc"))
@@ -160,7 +160,7 @@ class CountyControllerTest {
         when(countyService.getCountyByPartialName(eq("vra"), any(Pageable.class))).thenReturn(page);
 
         // Act + Assert
-        mockMvc.perform(get("/api/brokers/counties")
+        mockMvc.perform(get("/api/geography/counties")
                         .param("name", "vra")
                         .param("page", "0")
                         .param("size", "5")
@@ -190,7 +190,7 @@ class CountyControllerTest {
         when(countyService.updateCounty(eq(1L), any(CountyRequestDTO.class))).thenReturn(responseDTO);
 
         // Act + Assert
-        mockMvc.perform(put("/api/brokers/counties/{countyId}", 1L)
+        mockMvc.perform(put("/api/geography/counties/{countyId}", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpectAll(
@@ -209,7 +209,7 @@ class CountyControllerTest {
     void updateCounty_shouldReturn400WhenInvalid() throws Exception {
         String body = createCountyRequestBody("   ", null);
 
-        mockMvc.perform(put("/api/brokers/counties/{countyId}", 1L)
+        mockMvc.perform(put("/api/geography/counties/{countyId}", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isBadRequest());
@@ -223,7 +223,7 @@ class CountyControllerTest {
     void deleteCounty_shouldReturn204() throws Exception {
         doNothing().when(countyService).deleteCounty(1L);
 
-        mockMvc.perform(delete("/api/brokers/counties/{countyId}", 1L))
+        mockMvc.perform(delete("/api/geography/counties/{countyId}", 1L))
                 .andExpect(status().isNoContent());
 
         verify(countyService).deleteCounty(1L);

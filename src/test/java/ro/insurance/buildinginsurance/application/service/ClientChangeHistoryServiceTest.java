@@ -1,4 +1,4 @@
-package ro.insurance.buildinginsurance.application.service.Impl;
+package ro.insurance.buildinginsurance.application.service;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -6,6 +6,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ro.insurance.buildinginsurance.application.service.impl.ClientChangeHistoryService;
 import ro.insurance.buildinginsurance.domain.entity.ClientChangeHistory;
 import ro.insurance.buildinginsurance.domain.enums.ClientType;
 import ro.insurance.buildinginsurance.infrastructure.persistance.repository.ClientChangeHistoryRepository;

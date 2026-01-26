@@ -1,4 +1,4 @@
-package ro.insurance.buildinginsurance.application.service.Impl;
+package ro.insurance.buildinginsurance.application.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

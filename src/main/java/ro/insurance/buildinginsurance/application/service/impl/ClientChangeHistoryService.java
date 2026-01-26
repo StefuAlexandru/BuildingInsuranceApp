@@ -1,4 +1,4 @@
-package ro.insurance.buildinginsurance.application.service.Impl;
+package ro.insurance.buildinginsurance.application.service.impl;
 
 
 import lombok.RequiredArgsConstructor;
