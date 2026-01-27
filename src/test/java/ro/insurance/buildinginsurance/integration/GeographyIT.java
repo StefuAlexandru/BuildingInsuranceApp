@@ -1,14 +1,15 @@
 package ro.insurance.buildinginsurance.integration;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
+import ro.insurance.buildinginsurance.TestSecurityUsersConfig;
 import ro.insurance.buildinginsurance.web.dto.cityDto.CityRequestDTO;
 import ro.insurance.buildinginsurance.web.dto.countryDto.CountryRequestDTO;
 import ro.insurance.buildinginsurance.web.dto.countyDto.CountyRequestDTO;
@@ -33,6 +34,7 @@ import static ro.insurance.buildinginsurance.util.CountyTestDataFactory.aCountyR
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@Import(TestSecurityUsersConfig.class)
 @Transactional
 class GeographyIT {
 

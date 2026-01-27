@@ -10,11 +10,6 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
-  security:
-    user:
-      name: broker
-      password: pass
-      roles: BROKER
 
 logging:
   level:

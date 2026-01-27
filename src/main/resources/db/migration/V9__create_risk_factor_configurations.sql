@@ -1,0 +1,33 @@
+CREATE TABLE risk_factor_configurations (
+                                            id BIGSERIAL PRIMARY KEY,
+                                            level VARCHAR(32) NOT NULL CHECK (level IN ('CITY','COUNTY','COUNTRY','BUILDING_TYPE')),
+
+                                            reference_id BIGINT,
+                                            building_type VARCHAR(30),
+
+                                            adjustment_percentage NUMERIC(7,4) NOT NULL,
+                                            effective_from DATE NOT NULL,
+                                            effective_to DATE,
+                                            is_active BOOLEAN NOT NULL DEFAULT TRUE,
+
+                                            created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+                                            updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+                                            CONSTRAINT chk_risk_effective_dates CHECK (effective_to IS NULL OR effective_from <= effective_to),
+
+                                            CONSTRAINT chk_risk_target
+                                                CHECK (
+                                                    (level IN ('CITY','COUNTY','COUNTRY') AND reference_id IS NOT NULL AND building_type IS NULL)
+                                                        OR
+                                                    (level = 'BUILDING_TYPE' AND building_type IS NOT NULL AND reference_id IS NULL)
+                                                    )
+);
+
+CREATE TRIGGER trg_risk_factor_configurations_updated_at
+    BEFORE UPDATE ON risk_factor_configurations
+    FOR EACH ROW
+    EXECUTE FUNCTION set_updated_at();
+
+CREATE INDEX idx_risk_cfg_active_level_ref ON risk_factor_configurations (is_active, level, reference_id);
+
+CREATE INDEX idx_risk_cfg_active_level_building_type ON risk_factor_configurations (is_active, level, building_type);
