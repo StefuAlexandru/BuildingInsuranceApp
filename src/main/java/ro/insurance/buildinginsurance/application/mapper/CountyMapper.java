@@ -10,6 +10,8 @@ import ro.insurance.buildinginsurance.web.dto.countyDto.CountyResponseDTO;
 import ro.insurance.buildinginsurance.domain.entity.Country;
 import ro.insurance.buildinginsurance.domain.entity.County;
 
+import static ro.insurance.buildinginsurance.util.StringNormalizer.trimToNull;
+
 @Mapper(
         componentModel = "spring",
         uses = {CountryMapper.class}
@@ -34,11 +36,6 @@ public interface CountyMapper {
     @AfterMapping
     default void normalize(@MappingTarget County county) {
         county.setName(trimToNull(county.getName()));
-    }
-    private static String trimToNull(String s) {
-        if (s == null) return null;
-        String t = s.trim();
-        return t.isBlank() ? null : t;
     }
 }
 

@@ -7,6 +7,8 @@ import ro.insurance.buildinginsurance.domain.entity.City;
 import ro.insurance.buildinginsurance.domain.entity.Client;
 import ro.insurance.buildinginsurance.web.dto.buildingDto.*;
 
+import static ro.insurance.buildinginsurance.util.StringNormalizer.trimToNull;
+
 @Mapper(
         componentModel = "spring",
         uses = {ClientMapper.class,CityMapper.class}
@@ -58,11 +60,4 @@ public interface BuildingMapper {
             if (n != null) building.setNumber(n);
         }
     }
-
-    private static String trimToNull(String s) {
-        if (s == null) return null;
-        String t = s.trim();
-        return t.isBlank() ? null : t;
-    }
-
 }

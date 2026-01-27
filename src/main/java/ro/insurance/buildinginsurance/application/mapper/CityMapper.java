@@ -7,6 +7,8 @@ import ro.insurance.buildinginsurance.web.dto.cityDto.CityResponseDTO;
 import ro.insurance.buildinginsurance.domain.entity.City;
 import ro.insurance.buildinginsurance.domain.entity.County;
 
+import static ro.insurance.buildinginsurance.util.StringNormalizer.trimToNull;
+
 @Mapper(
         componentModel = "spring",
         uses = {CountyMapper.class}
@@ -32,11 +34,5 @@ public interface CityMapper {
     @AfterMapping
     default void normalize(@MappingTarget City city) {
         city.setName(trimToNull(city.getName()));
-    }
-
-    private static String trimToNull(String s) {
-        if (s == null) return null;
-        String t = s.trim();
-        return t.isBlank() ? null : t;
     }
 }

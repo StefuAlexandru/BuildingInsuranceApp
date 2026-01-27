@@ -9,6 +9,8 @@ import ro.insurance.buildinginsurance.web.dto.countryDto.CountryRequestDTO;
 import ro.insurance.buildinginsurance.web.dto.countryDto.CountryResponseDTO;
 import ro.insurance.buildinginsurance.domain.entity.Country;
 
+import static ro.insurance.buildinginsurance.util.StringNormalizer.trimToNull;
+
 @Mapper(componentModel = "spring")
 public interface CountryMapper {
     @Mapping(target = "id", ignore = true)
@@ -26,11 +28,5 @@ public interface CountryMapper {
     @AfterMapping
     default void normalize(@MappingTarget Country country) {
         country.setName(trimToNull(country.getName()));
-    }
-
-    private static String trimToNull(String s) {
-        if (s == null) return null;
-        String t = s.trim();
-        return t.isBlank() ? null : t;
     }
 }

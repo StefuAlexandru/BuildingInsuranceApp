@@ -8,6 +8,8 @@ import ro.insurance.buildinginsurance.web.dto.clientDto.ClientRequestDTO;
 import ro.insurance.buildinginsurance.web.dto.clientDto.ClientResponseDTO;
 import ro.insurance.buildinginsurance.web.dto.clientDto.ClientUpdateRequestDTO;
 
+import static ro.insurance.buildinginsurance.util.StringNormalizer.trimToNull;
+
 @Mapper(
         componentModel = "spring",
         uses = {CityMapper.class}
@@ -54,11 +56,5 @@ public interface ClientMapper {
 
     private static String trim(String s) {
         return s == null ? null : s.trim();
-    }
-
-    private static String trimToNull(String s) {
-        if (s == null) return null;
-        String t = s.trim();
-        return t.isBlank() ? null : t;
     }
 }

@@ -19,6 +19,8 @@ public enum ErrorCode {
     COUNTY_ALREADY_EXIST(HttpStatus.CONFLICT, "County already exists"),
     COUNTRY_HAS_DEPENDENCIES(HttpStatus.CONFLICT, "Country has dependencies"),
     COUNTRY_ALREADY_EXIST(HttpStatus.CONFLICT, "Country already exists"),
+    CURRENCY_CODE_ALREADY_EXISTS(HttpStatus.CONFLICT, "Currency code already exists"),
+    CURRENCY_IN_USE_BY_ACTIVE_POLICIES(HttpStatus.CONFLICT, "Currency in use by active policies"),
 
     // 404
     CITY_NOT_FOUND(HttpStatus.NOT_FOUND, "City not found"),
@@ -26,6 +28,7 @@ public enum ErrorCode {
     BUILDING_NOT_FOUND(HttpStatus.NOT_FOUND, "Building not found"),
     COUNTY_NOT_FOUND(HttpStatus.NOT_FOUND, "County not found"),
     COUNTRY_NOT_FOUND(HttpStatus.NOT_FOUND, "Country not found"),
+    CURRENCY_NOT_FOUND(HttpStatus.NOT_FOUND, "Currency not found"),
 
     // 400
     ADDRESS_INCOMPLETE(HttpStatus.BAD_REQUEST, "Address incomplete"),
