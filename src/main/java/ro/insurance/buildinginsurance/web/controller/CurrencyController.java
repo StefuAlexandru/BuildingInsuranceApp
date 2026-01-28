@@ -39,7 +39,7 @@ public class CurrencyController {
         return ResponseEntity.ok(page);
     }
 
-    // ----------------------  UPDATE  ----------------------
+    // ----------------------  PUT  ----------------------
 
     @PostMapping("/{id}/activate")
     public ResponseEntity<CurrencyResponseDTO> activate(@PathVariable Long id) {

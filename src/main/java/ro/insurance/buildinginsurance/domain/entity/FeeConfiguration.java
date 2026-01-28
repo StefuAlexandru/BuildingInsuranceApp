@@ -14,7 +14,13 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @NoArgsConstructor
-@Table(name = "fee_configurations")
+@Table(
+        name = "fee_configurations",
+        uniqueConstraints = @UniqueConstraint(
+                name = "uq_fee_config_fee_type_name",
+                columnNames = {"fee_type", "name"}
+        )
+)
 public class FeeConfiguration {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,9 +41,9 @@ public class FeeConfiguration {
 
     private LocalDate effectiveTo;
 
-    private boolean isActive = true;
+    private boolean isActive;
 
     public boolean isActiveOn(LocalDate date) {
-        return ValidityUtils.isActiveOn(isActive, effectiveFrom, effectiveTo, date);
+        return ValidityUtils.isActiveOn(effectiveFrom, effectiveTo, date);
     }
 }
