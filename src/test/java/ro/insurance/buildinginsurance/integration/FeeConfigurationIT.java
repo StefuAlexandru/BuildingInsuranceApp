@@ -32,7 +32,7 @@ import static ro.insurance.buildinginsurance.util.FeeConfigurationTestDataFactor
 @ActiveProfiles("test")
 @Import(TestSecurityUsersConfig.class)
 @Transactional
-public class FeeConfigurationIT {
+class FeeConfigurationIT {
 
     @Autowired
     MockMvc mockMvc;

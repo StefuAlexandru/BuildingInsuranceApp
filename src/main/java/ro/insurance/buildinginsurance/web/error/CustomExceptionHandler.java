@@ -2,6 +2,7 @@ package ro.insurance.buildinginsurance.web.error;
 
 
 import lombok.extern.slf4j.Slf4j;
+import ro.insurance.buildinginsurance.domain.enums.FeeType;
 import tools.jackson.databind.exc.InvalidFormatException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -77,6 +78,16 @@ public class CustomExceptionHandler {
 
                 log.warn("JSON parse error -> InvalidClientType, value='{}'", invalidFormatException.getValue());
 
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+            }
+
+            if (targetType.equals(FeeType.class)) {
+                errors.add(new ErrorModel(
+                        "InvalidFeeType",
+                        "Fee type must be one of: " + Arrays.toString(FeeType.values())
+                ));
+
+                log.warn("JSON parse error -> InvalidFeeType, value='{}'", invalidFormatException.getValue());
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
             }
         }
