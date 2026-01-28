@@ -17,8 +17,8 @@ import java.time.LocalDate;
 @Table(
         name = "fee_configurations",
         uniqueConstraints = @UniqueConstraint(
-                name = "uq_fee_config_fee_type_name",
-                columnNames = {"fee_type", "name"}
+                name = "uq_fee_config_fee_type_name_from",
+                columnNames = {"fee_type", "name","effective_from"}
         )
 )
 public class FeeConfiguration {
@@ -44,6 +44,6 @@ public class FeeConfiguration {
     private boolean isActive;
 
     public boolean isActiveOn(LocalDate date) {
-        return ValidityUtils.isActiveOn(effectiveFrom, effectiveTo, date);
+        return isActive && ValidityUtils.isActiveOn(effectiveFrom, effectiveTo, date);
     }
 }

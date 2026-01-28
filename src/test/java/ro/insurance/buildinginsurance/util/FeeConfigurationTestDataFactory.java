@@ -61,7 +61,7 @@ public class FeeConfigurationTestDataFactory {
     public static FeeConfiguration aFeeWithId(Long id) {
         FeeConfiguration fee = new FeeConfiguration();
         fee.setId(id);
-        fee.setName("Standard broker fee");
+        fee.setName("Standard admin fee");
         fee.setFeeType(FeeType.ADMIN_FEE);
         fee.setPercentage(new BigDecimal("5.00"));
         fee.setEffectiveFrom(LocalDate.of(2026, 1, 1));
@@ -69,6 +69,7 @@ public class FeeConfigurationTestDataFactory {
         fee.setActive(true);
         return fee;
     }
+
 
     public static FeeConfiguration aFeeWithoutId() {
         FeeConfiguration fee = new FeeConfiguration();

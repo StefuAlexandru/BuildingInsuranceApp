@@ -5,9 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import ro.insurance.buildinginsurance.domain.entity.County;
 import ro.insurance.buildinginsurance.domain.entity.FeeConfiguration;
-import ro.insurance.buildinginsurance.domain.enums.FeeType;
 
 import java.time.LocalDate;
 
@@ -18,20 +16,73 @@ public interface FeeConfigurationRepository extends JpaRepository<FeeConfigurati
                     FROM fee_configurations
                     WHERE LOWER(name) = LOWER(:name)
                         AND fee_type = :feeType
+                        AND effective_from = :effectiveFrom
                 )
                 """,nativeQuery=true)
-    boolean existsByNameAndFeeTypeIgnoreCase(@Param("name") String name, @Param("feeType") String feeType);
+    boolean existsByNameAndFeeTypeAndEffectiveFromIgnoreCase(
+            @Param("name") String name,
+            @Param("feeType") String feeType,
+            @Param("effectiveFrom") LocalDate effectiveFrom
+    );
 
     @Query(value = """
-                SELECT EXISTS(
-                    SELECT 1
-                    FROM fee_configurations
-                    WHERE LOWER(name) = LOWER(:name)
-                        AND fee_type = :feeType
-                        AND id <> :feeId
-                )
-                """,nativeQuery=true)
-    boolean existsByNameAndFeeTypeIgnoreCaseAndIdNot(@Param("name") String name,@Param("feeType") String feeType,@Param("feeId") Long feeId);
+            SELECT EXISTS(
+                SELECT 1
+                FROM fee_configurations
+                WHERE LOWER(name) = LOWER(:name)
+                  AND fee_type = :feeType
+                  AND effective_from = :effectiveFrom
+                  AND id <> :feeId
+            )
+            """,
+            nativeQuery = true)
+    boolean existsByNameAndFeeTypeAndEffectiveFromIgnoreCaseAndIdNot(
+            @Param("name") String name,
+            @Param("feeType") String feeType,
+            @Param("effectiveFrom") LocalDate effectiveFrom,
+            @Param("feeId") Long feeId
+    );
+
+    @Query(value = """
+            SELECT EXISTS(
+                SELECT 1
+                FROM fee_configurations
+                WHERE fee_type = :feeType
+                  AND LOWER(name) = LOWER(:name)
+                  AND is_active = true
+                  AND effective_from <= COALESCE(:newEffectiveTo, DATE '9999-12-31')
+                  AND COALESCE(effective_to, DATE '9999-12-31') >= :newEffectiveFrom
+            )
+            """,
+            nativeQuery = true)
+    boolean existsOverlappingIntervalForCreate(
+            @Param("feeType") String feeType,
+            @Param("name") String name,
+            @Param("newEffectiveFrom") LocalDate newEffectiveFrom,
+            @Param("newEffectiveTo") LocalDate newEffectiveTo
+    );
+
+
+    @Query(value = """
+            SELECT EXISTS(
+                SELECT 1
+                FROM fee_configurations
+                WHERE fee_type = :feeType
+                  AND LOWER(name) = LOWER(:name)
+                  AND id <> :feeId
+                  AND is_active = true
+                  AND effective_from <= COALESCE(:newEffectiveTo, DATE '9999-12-31')
+                  AND COALESCE(effective_to, DATE '9999-12-31') >= :newEffectiveFrom
+            )
+            """,
+            nativeQuery = true)
+    boolean existsOverlappingIntervalForUpdate(
+            @Param("feeId") Long feeId,
+            @Param("feeType") String feeType,
+            @Param("name") String name,
+            @Param("newEffectiveFrom") LocalDate newEffectiveFrom,
+            @Param("newEffectiveTo") LocalDate newEffectiveTo
+    );
 
     @Query(value = """
         SELECT fc.*

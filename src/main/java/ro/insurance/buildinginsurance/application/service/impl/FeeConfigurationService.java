@@ -87,21 +87,61 @@ public class FeeConfigurationService implements IFeeConfigurationService {
     private void validateCreateOrThrow(FeeConfigurationRequestDTO feeConfigurationRequestDTO) {
         validateDatesOrThrow(feeConfigurationRequestDTO);
 
-        if(feeConfigurationRepository.existsByNameAndFeeTypeIgnoreCase(feeConfigurationRequestDTO.name().trim(), feeConfigurationRequestDTO.feeType().name())){
+        if(feeConfigurationRepository.existsByNameAndFeeTypeAndEffectiveFromIgnoreCase(
+                feeConfigurationRequestDTO.name().trim(),
+                feeConfigurationRequestDTO.feeType().name(),
+                feeConfigurationRequestDTO.effectiveFrom())) {
             log.warn("Fee configuration with name {} and type {} already exists", feeConfigurationRequestDTO.name().trim(),feeConfigurationRequestDTO.feeType());
             throw new BusinessException(ErrorCode.FEE_CONFIGURATION_ALREADY_EXISTS);
+        }
+
+        if (feeConfigurationRepository.existsOverlappingIntervalForCreate(
+                feeConfigurationRequestDTO.feeType().name(),
+                feeConfigurationRequestDTO.name().trim(),
+                feeConfigurationRequestDTO.effectiveFrom(),
+                feeConfigurationRequestDTO.effectiveTo())) {
+
+            log.warn("Fee configuration overlap: name={}, type={}, from={}, to={}",
+                    feeConfigurationRequestDTO.name().trim(),
+                    feeConfigurationRequestDTO.feeType(),
+                    feeConfigurationRequestDTO.effectiveFrom(),
+                    feeConfigurationRequestDTO.effectiveTo());
+
+            throw new BusinessException(ErrorCode.FEE_CONFIGURATION_OVERLAP);
         }
     }
 
     private void validateFeeUpdateOrThrow(Long id, FeeConfigurationRequestDTO feeConfigurationRequestDTO) {
         validateDatesOrThrow(feeConfigurationRequestDTO);
 
-        if (feeConfigurationRepository.existsByNameAndFeeTypeIgnoreCaseAndIdNot(feeConfigurationRequestDTO.name().trim(), feeConfigurationRequestDTO.feeType().name(), id)) {
-            log.warn("Fee configuration already exists: name='{}', type='{}', excludingId={}",
+        if (feeConfigurationRepository.existsByNameAndFeeTypeAndEffectiveFromIgnoreCaseAndIdNot(
+                feeConfigurationRequestDTO.name().trim(),
+                feeConfigurationRequestDTO.feeType().name(),
+                feeConfigurationRequestDTO.effectiveFrom(),
+                id)) {
+            log.warn("Fee configuration already exists: name={}, type={}, effectiveFrom={}, excludingId={}",
                     feeConfigurationRequestDTO.name().trim(),
                     feeConfigurationRequestDTO.feeType(),
+                    feeConfigurationRequestDTO.effectiveFrom(),
                     id);
             throw new BusinessException(ErrorCode.FEE_CONFIGURATION_ALREADY_EXISTS);
+        }
+
+        if (feeConfigurationRepository.existsOverlappingIntervalForUpdate(
+                id,
+                feeConfigurationRequestDTO.feeType().name(),
+                feeConfigurationRequestDTO.name().trim(),
+                feeConfigurationRequestDTO.effectiveFrom(),
+                feeConfigurationRequestDTO.effectiveTo())) {
+
+            log.warn("Fee configuration overlap on update: id={}, name={}, type={}, from={}, to={}",
+                    id,
+                    feeConfigurationRequestDTO.name().trim(),
+                    feeConfigurationRequestDTO.feeType(),
+                    feeConfigurationRequestDTO.effectiveFrom(),
+                    feeConfigurationRequestDTO.effectiveTo());
+
+            throw new BusinessException(ErrorCode.FEE_CONFIGURATION_OVERLAP);
         }
     }
 

@@ -22,6 +22,7 @@ public enum ErrorCode {
     CURRENCY_CODE_ALREADY_EXISTS(HttpStatus.CONFLICT, "Currency code already exists"),
     CURRENCY_IN_USE_BY_ACTIVE_POLICIES(HttpStatus.CONFLICT, "Currency in use by active policies"),
     FEE_CONFIGURATION_ALREADY_EXISTS(HttpStatus.CONFLICT, "Fee configuration already exists"),
+    FEE_CONFIGURATION_OVERLAP(HttpStatus.CONFLICT, "Fee configuration overlap"),
 
     // 404
     CITY_NOT_FOUND(HttpStatus.NOT_FOUND, "City not found"),
