@@ -21,6 +21,7 @@ public enum ErrorCode {
     COUNTRY_ALREADY_EXIST(HttpStatus.CONFLICT, "Country already exists"),
     CURRENCY_CODE_ALREADY_EXISTS(HttpStatus.CONFLICT, "Currency code already exists"),
     CURRENCY_IN_USE_BY_ACTIVE_POLICIES(HttpStatus.CONFLICT, "Currency in use by active policies"),
+    FEE_CONFIGURATION_ALREADY_EXISTS(HttpStatus.CONFLICT, "Fee configuration already exists"),
 
     // 404
     CITY_NOT_FOUND(HttpStatus.NOT_FOUND, "City not found"),
@@ -29,10 +30,12 @@ public enum ErrorCode {
     COUNTY_NOT_FOUND(HttpStatus.NOT_FOUND, "County not found"),
     COUNTRY_NOT_FOUND(HttpStatus.NOT_FOUND, "Country not found"),
     CURRENCY_NOT_FOUND(HttpStatus.NOT_FOUND, "Currency not found"),
+    FEE_CONFIGURATION_NOT_FOUND(HttpStatus.NOT_FOUND, "Fee configuration not found"),
 
     // 400
     ADDRESS_INCOMPLETE(HttpStatus.BAD_REQUEST, "Address incomplete"),
-    CHANGED_BY_REQUIRED(HttpStatus.BAD_REQUEST, "Change by required"),;
+    CHANGED_BY_REQUIRED(HttpStatus.BAD_REQUEST, "Change by required"),
+    INVALID_DATES(HttpStatus.BAD_REQUEST, "Invalid dates"),;
 
 
     private final HttpStatus status;

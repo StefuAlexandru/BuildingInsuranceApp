@@ -20,20 +20,9 @@ public class CurrencyTestDataFactory {
         CurrencyRequestDTO base = aCurrencyRequest();
         return new CurrencyRequestDTO(code, base.name(), base.exchangeRateToBase());
     }
-
-    public static CurrencyRequestDTO aCurrencyRequest(String code, String name, BigDecimal rate) {
-        return new CurrencyRequestDTO(code, name, rate);
-    }
-
     public static CurrencyResponseDTO aCurrencyResponse() {
         return new CurrencyResponseDTO(1L, "RON", "Romanian Leu", new BigDecimal("1.000000"), true);
     }
-
-    public static CurrencyResponseDTO aCurrencyResponseWithIdAndActive(Long id, boolean active) {
-        CurrencyResponseDTO base = aCurrencyResponse();
-        return new CurrencyResponseDTO(id, base.code(), base.name(), base.exchangeRateToBase(), active);
-    }
-
     public static CurrencyResponseDTO aCurrencyResponse(Long id, String code, String name, BigDecimal rate, boolean active) {
         return new CurrencyResponseDTO(id, code, name, rate, active);
     }
