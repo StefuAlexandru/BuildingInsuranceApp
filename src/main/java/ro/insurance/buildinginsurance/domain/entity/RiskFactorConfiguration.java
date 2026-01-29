@@ -15,7 +15,13 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @NoArgsConstructor
-@Table(name = "risk_factor_configurations")
+@Table(
+        name = "risk_factor_configurations",
+        uniqueConstraints = @UniqueConstraint(
+                name = "uq_level_ref_building_type_effective_from",
+                columnNames = {"level", "reference_id", "building_type", "effective_from"}
+        )
+)
 public class RiskFactorConfiguration {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

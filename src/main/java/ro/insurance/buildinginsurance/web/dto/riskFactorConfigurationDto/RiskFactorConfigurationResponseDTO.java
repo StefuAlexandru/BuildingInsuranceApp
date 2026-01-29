@@ -14,5 +14,5 @@ public record RiskFactorConfigurationResponseDTO(
         BigDecimal adjustmentPercentage,
         LocalDate effectiveFrom,
         LocalDate effectiveTo,
-        boolean active
+        boolean isActive
 ) {}
