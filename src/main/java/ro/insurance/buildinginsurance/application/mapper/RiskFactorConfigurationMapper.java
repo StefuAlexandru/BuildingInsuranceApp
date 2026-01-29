@@ -13,7 +13,7 @@ public interface RiskFactorConfigurationMapper {
     @Mapping(target = "active", constant = "true")
     RiskFactorConfiguration toEntity(RiskFactorConfigurationRequestDTO riskFactorConfigurationRequestDTO);
 
-    @Mapping(target = "active", source = "riskFactorConfiguration.active")
+    @Mapping(target = "isActive", source = "riskFactorConfiguration.active")
     RiskFactorConfigurationResponseDTO toResponse(RiskFactorConfiguration riskFactorConfiguration);
 
     @Mapping(target = "id", ignore = true)

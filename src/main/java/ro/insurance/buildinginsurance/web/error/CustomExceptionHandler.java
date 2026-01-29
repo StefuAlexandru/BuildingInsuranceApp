@@ -2,7 +2,7 @@ package ro.insurance.buildinginsurance.web.error;
 
 
 import lombok.extern.slf4j.Slf4j;
-import ro.insurance.buildinginsurance.domain.enums.FeeType;
+import ro.insurance.buildinginsurance.domain.enums.*;
 import tools.jackson.databind.exc.InvalidFormatException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,17 +11,22 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import ro.insurance.buildinginsurance.domain.enums.BuildingType;
-import ro.insurance.buildinginsurance.domain.enums.ClientType;
-import ro.insurance.buildinginsurance.domain.enums.ErrorCode;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @ControllerAdvice
 public class CustomExceptionHandler {
+
+    private static final Map<Class<?>,String> ENUM_ERROR_CODES = Map.of(
+            BuildingType.class, "InvalidBuildingType",
+            ClientType.class, "InvalidClientType",
+            FeeType.class, "InvalidFeeType",
+            RiskFactorLevel.class, "InvalidRiskFactorLevel"
+    );
 
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<List<ErrorModel>> handleBusinessException(BusinessException ex){
@@ -51,51 +56,23 @@ public class CustomExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<List<ErrorModel>> handleJsonParseError(HttpMessageNotReadableException ex) {
-        List<ErrorModel> errors = new ArrayList<>();
-
-        ex.getMostSpecificCause();
         Throwable cause = ex.getMostSpecificCause();
 
         if (cause instanceof InvalidFormatException invalidFormatException) {
             var targetType = invalidFormatException.getTargetType();
 
-            if (targetType.equals(BuildingType.class)) {
-                errors.add(new ErrorModel(
-                        "InvalidBuildingType",
-                        "Building type must be one of: " + Arrays.toString(BuildingType.values())
-                ));
+            String code = ENUM_ERROR_CODES.get(targetType);
 
-                log.warn("JSON parse error -> InvalidBuildingType, value='{}'", invalidFormatException.getValue());
+            if (code != null && targetType.isEnum()) {
+                String message = "Value must be one of: " + Arrays.toString(targetType.getEnumConstants());
 
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
-            }
-
-            if (targetType.equals(ClientType.class)) {
-                errors.add(new ErrorModel(
-                        "InvalidClientType",
-                        "Client type must be one of: " + Arrays.toString(ClientType.values())
-                ));
-
-                log.warn("JSON parse error -> InvalidClientType, value='{}'", invalidFormatException.getValue());
-
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
-            }
-
-            if (targetType.equals(FeeType.class)) {
-                errors.add(new ErrorModel(
-                        "InvalidFeeType",
-                        "Fee type must be one of: " + Arrays.toString(FeeType.values())
-                ));
-
-                log.warn("JSON parse error -> InvalidFeeType, value='{}'", invalidFormatException.getValue());
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+                log.warn("JSON parse error -> {}, value='{}'", code, invalidFormatException.getValue());
+                return ResponseEntity.badRequest().body(List.of(new ErrorModel(code, message)));
             }
         }
 
-        errors.add(new ErrorModel("InvalidRequestBody", "Malformed JSON"));
         log.warn("JSON parse error -> Malformed JSON: {}", cause.getMessage());
-
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+        return ResponseEntity.badRequest().body(List.of(new ErrorModel("InvalidRequestBody", "Malformed JSON")));
     }
 
     @ExceptionHandler(Exception.class)
