@@ -54,6 +54,13 @@ public class FeeConfigurationTestDataFactory {
 
     // -------------------  ENTITY  -------------------
 
+    public static FeeConfiguration aFee(FeeType type, BigDecimal percentage) {
+        FeeConfiguration f = new FeeConfiguration();
+        f.setFeeType(type);
+        f.setPercentage(percentage);
+        return f;
+    }
+
     public static FeeConfiguration aFeeWithId(Long id) {
         FeeConfiguration fee = new FeeConfiguration();
         fee.setId(id);

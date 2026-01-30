@@ -140,10 +140,31 @@ public class RiskFactorConfigurationTestDataFactory {
         );
     }
 
+    public static RiskFactorConfigurationRequestDTO aRiskFactorConfigurationRequestBuildingType() {
+        return new RiskFactorConfigurationRequestDTO(
+                RiskFactorLevel.BUILDING_TYPE,
+                null,
+                BuildingType.RESIDENTIAL,
+                new BigDecimal("0.0500"),
+                LocalDate.of(2026, 1, 1),
+                null
+        );
+    }
+
 
     // -------------------  ENTITY  -------------------
 
-    public static RiskFactorConfiguration aRiskFactorConfigurationEntity() {
+    public static RiskFactorConfiguration aRisk(RiskFactorLevel level, Long refId,
+                                                BuildingType buildingType, BigDecimal pct) {
+        RiskFactorConfiguration r = new RiskFactorConfiguration();
+        r.setLevel(level);
+        r.setReferenceId(refId);
+        r.setBuildingType(buildingType);
+        r.setAdjustmentPercentage(pct);
+        return r;
+    }
+
+    public static RiskFactorConfiguration aRiskFactorConfiguration() {
         RiskFactorConfiguration e = new RiskFactorConfiguration();
         e.setLevel(RiskFactorLevel.CITY);
         e.setReferenceId(10L);
@@ -155,19 +176,8 @@ public class RiskFactorConfigurationTestDataFactory {
     }
 
     public static RiskFactorConfiguration aRiskFactorConfigurationWithId(Long id) {
-        RiskFactorConfiguration e = aRiskFactorConfigurationEntity();
+        RiskFactorConfiguration e = aRiskFactorConfiguration();
         e.setId(id);
         return e;
-    }
-
-    public static RiskFactorConfigurationRequestDTO aRiskFactorConfigurationRequestBuildingType() {
-        return new RiskFactorConfigurationRequestDTO(
-                RiskFactorLevel.BUILDING_TYPE,
-                null,
-                BuildingType.RESIDENTIAL,
-                new BigDecimal("0.0500"),
-                LocalDate.of(2026, 1, 1),
-                null
-        );
     }
 }

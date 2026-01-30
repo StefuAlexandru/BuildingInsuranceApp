@@ -41,6 +41,7 @@ public enum ErrorCode {
     CHANGED_BY_REQUIRED(HttpStatus.BAD_REQUEST, "Change by required"),
     INVALID_DATES(HttpStatus.BAD_REQUEST, "Invalid dates"),
     INVALID_RISK_FACTOR_SCOPE(HttpStatus.BAD_REQUEST, "Invalid risk factor scope"),
+    CURRENCY_IS_NOT_ACTIVE(HttpStatus.BAD_REQUEST, "Currency is not active"),
     ;
 
 
