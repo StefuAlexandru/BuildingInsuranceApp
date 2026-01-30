@@ -45,7 +45,7 @@ class RiskFactorConfigurationServiceTest {
     void createRiskFactorConfiguration_shouldCreateAndReturnResponse() {
         // Arrange
         RiskFactorConfigurationRequestDTO dto = aRiskFactorConfigurationRequestCity();
-        RiskFactorConfiguration entity = aRiskFactorConfigurationEntity();
+        RiskFactorConfiguration entity = aRiskFactorConfiguration();
         RiskFactorConfiguration saved = aRiskFactorConfigurationWithId(1L);
         RiskFactorConfigurationResponseDTO response = aRiskFactorConfigurationResponse();
 

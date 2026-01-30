@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import ro.insurance.buildinginsurance.domain.entity.FeeConfiguration;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public interface FeeConfigurationRepository extends JpaRepository<FeeConfiguration, Long> {
     @Query(value = """
@@ -96,5 +97,16 @@ public interface FeeConfigurationRepository extends JpaRepository<FeeConfigurati
         """,
             nativeQuery = true)
     Page<FeeConfiguration> getAllFeesActiveOn(@Param("date") LocalDate date, Pageable pageable);
+
+    @Query(value = """
+            SELECT fc.*
+            FROM fee_configurations fc
+            WHERE fc.is_active = true
+              AND fc.effective_from <= :date
+              AND (fc.effective_to IS NULL OR fc.effective_to >= :date)
+        """, nativeQuery = true)
+    List<FeeConfiguration> findAllActiveOn(@Param("date") LocalDate date);
+
+
 
 }
