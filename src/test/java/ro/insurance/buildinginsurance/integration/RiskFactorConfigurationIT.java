@@ -87,7 +87,6 @@ class RiskFactorConfigurationIT {
                 .andExpect(jsonPath("$.buildingType").doesNotExist())
                 .andExpect(jsonPath("$.effectiveFrom").value("2026-01-29"))
                 .andExpect(jsonPath("$.effectiveTo").value("2026-12-31"))
-                .andExpect(jsonPath("$.isActive").value(true))
                 .andReturn();
 
         JsonNode created = objectMapper.readTree(createResult.getResponse().getContentAsString());
@@ -102,8 +101,7 @@ class RiskFactorConfigurationIT {
                 () -> assertNull(fromDbAfterCreate.getBuildingType()),
                 () -> assertEquals(0, new BigDecimal("0.1000").compareTo(fromDbAfterCreate.getAdjustmentPercentage())),
                 () -> assertEquals(LocalDate.of(2026, 1, 29), fromDbAfterCreate.getEffectiveFrom()),
-                () -> assertEquals(LocalDate.of(2026, 12, 31), fromDbAfterCreate.getEffectiveTo()),
-                () -> assertTrue(fromDbAfterCreate.isActive())
+                () -> assertEquals(LocalDate.of(2026, 12, 31), fromDbAfterCreate.getEffectiveTo())
         );
 
         // --------- UPDATE ----------
@@ -126,8 +124,7 @@ class RiskFactorConfigurationIT {
                 .andExpect(jsonPath("$.level").value("CITY"))
                 .andExpect(jsonPath("$.referenceId").value(cityId))
                 .andExpect(jsonPath("$.effectiveFrom").value("2026-02-01"))
-                .andExpect(jsonPath("$.effectiveTo").doesNotExist()) // same note as above
-                .andExpect(jsonPath("$.isActive").value(true));
+                .andExpect(jsonPath("$.effectiveTo").doesNotExist());
 
         // --------- VERIFY IN DB ----------
         RiskFactorConfiguration fromDbAfterUpdate = riskFactorConfigurationRepository.findById(id).orElseThrow();
@@ -138,8 +135,7 @@ class RiskFactorConfigurationIT {
                 () -> assertNull(fromDbAfterUpdate.getBuildingType()),
                 () -> assertEquals(0, new BigDecimal("0.0700").compareTo(fromDbAfterUpdate.getAdjustmentPercentage())),
                 () -> assertEquals(LocalDate.of(2026, 2, 1), fromDbAfterUpdate.getEffectiveFrom()),
-                () -> assertNull(fromDbAfterUpdate.getEffectiveTo()),
-                () -> assertTrue(fromDbAfterUpdate.isActive())
+                () -> assertNull(fromDbAfterUpdate.getEffectiveTo())
         );
     }
 }

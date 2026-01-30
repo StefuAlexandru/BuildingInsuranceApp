@@ -64,7 +64,6 @@ class FeeConfigurationIT {
                 .andExpect(jsonPath("$.feeType").value("ADMIN_FEE"))
                 .andExpect(jsonPath("$.effectiveFrom").value("2026-01-01"))
                 .andExpect(jsonPath("$.effectiveTo").value("2026-12-31"))
-                .andExpect(jsonPath("$.isActive").value(true))
                 .andReturn();
 
         JsonNode created = objectMapper.readTree(createResult.getResponse().getContentAsString());
@@ -90,8 +89,7 @@ class FeeConfigurationIT {
                 .andExpect(jsonPath("$.name").value("Standard admin fee UPDATED"))
                 .andExpect(jsonPath("$.feeType").value("ADMIN_FEE"))
                 .andExpect(jsonPath("$.effectiveFrom").value("2026-02-02"))
-                .andExpect(jsonPath("$.effectiveTo").value("2027-12-31"))
-                .andExpect(jsonPath("$.isActive").value(true));
+                .andExpect(jsonPath("$.effectiveTo").value("2027-12-31"));
 
         // --------- VERIFY IN DB ----------
         FeeConfiguration fromDb = feeConfigurationRepository.findById(id).orElseThrow();
@@ -101,8 +99,7 @@ class FeeConfigurationIT {
                 () -> assertEquals(FeeType.ADMIN_FEE, fromDb.getFeeType()),
                 () -> assertEquals(0, new BigDecimal("6.00").compareTo(fromDb.getPercentage())),
                 () -> assertEquals(LocalDate.of(2026, 2, 2), fromDb.getEffectiveFrom()),
-                () -> assertEquals(LocalDate.of(2027, 12, 31), fromDb.getEffectiveTo()),
-                () -> assertTrue(fromDb.isActive())
+                () -> assertEquals(LocalDate.of(2027, 12, 31), fromDb.getEffectiveTo())
         );
     }
 

@@ -40,10 +40,4 @@ public class FeeConfiguration {
     private LocalDate effectiveFrom;
 
     private LocalDate effectiveTo;
-
-    private boolean isActive;
-
-    public boolean isActiveOn(LocalDate date) {
-        return isActive && ValidityUtils.isActiveOn(effectiveFrom, effectiveTo, date);
-    }
 }

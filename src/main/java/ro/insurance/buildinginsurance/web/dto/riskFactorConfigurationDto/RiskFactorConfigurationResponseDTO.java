@@ -13,6 +13,5 @@ public record RiskFactorConfigurationResponseDTO(
         BuildingType buildingType,
         BigDecimal adjustmentPercentage,
         LocalDate effectiveFrom,
-        LocalDate effectiveTo,
-        boolean isActive
+        LocalDate effectiveTo
 ) {}

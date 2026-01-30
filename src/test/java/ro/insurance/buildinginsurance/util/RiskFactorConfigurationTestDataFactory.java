@@ -1,7 +1,6 @@
 package ro.insurance.buildinginsurance.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import ro.insurance.buildinginsurance.domain.entity.RiskFactorConfiguration;
 import ro.insurance.buildinginsurance.domain.enums.BuildingType;
 import ro.insurance.buildinginsurance.domain.enums.RiskFactorLevel;
@@ -60,8 +59,7 @@ public class RiskFactorConfigurationTestDataFactory {
                 null,
                 new BigDecimal("0.1000"),
                 LocalDate.of(2026, 1, 1),
-                LocalDate.of(2026, 12, 31),
-                true
+                LocalDate.of(2026, 12, 31)
         );
     }
 
@@ -153,7 +151,6 @@ public class RiskFactorConfigurationTestDataFactory {
         e.setAdjustmentPercentage(new BigDecimal("0.1000"));
         e.setEffectiveFrom(LocalDate.of(2026, 1, 1));
         e.setEffectiveTo(LocalDate.of(2026, 12, 31));
-        e.setActive(true);
         return e;
     }
 

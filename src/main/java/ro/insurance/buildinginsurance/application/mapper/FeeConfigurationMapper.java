@@ -15,14 +15,11 @@ import static ro.insurance.buildinginsurance.util.StringNormalizer.trimToNull;
 public interface FeeConfigurationMapper {
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "active", constant = "true")
     FeeConfiguration toEntity(FeeConfigurationRequestDTO feeConfigurationRequestDTO);
 
-    @Mapping(target = "isActive", source = "feeConfiguration.active")
     FeeConfigurationResponseDTO toResponse(FeeConfiguration feeConfiguration);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "active", ignore = true)
     void updateFromDTO(FeeConfigurationRequestDTO feeConfigurationRequestDTO, @MappingTarget FeeConfiguration feeConfiguration);
 
     @AfterMapping

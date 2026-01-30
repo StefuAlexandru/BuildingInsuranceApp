@@ -171,7 +171,7 @@ class FeeConfigurationServiceTest {
         FeeConfigurationResponseDTO resp1 = aFeeResponse();
         FeeConfigurationResponseDTO resp2 = new FeeConfigurationResponseDTO(
                 2L, "Standard admin fee 2", resp1.feeType(), resp1.percentage(),
-                resp1.effectiveFrom(), resp1.effectiveTo(), true
+                resp1.effectiveFrom(), resp1.effectiveTo()
         );
 
         when(feeConfigurationRepository.getAllFeesActiveOn(date, pageable)).thenReturn(page);
@@ -202,7 +202,7 @@ class FeeConfigurationServiceTest {
 
         FeeConfigurationResponseDTO response = new FeeConfigurationResponseDTO(
                 1L, "Updated admin fee", request.feeType(), request.percentage(),
-                request.effectiveFrom(), request.effectiveTo(), true
+                request.effectiveFrom(), request.effectiveTo()
         );
 
         when(feeConfigurationRepository.findById(1L)).thenReturn(Optional.of(existing));

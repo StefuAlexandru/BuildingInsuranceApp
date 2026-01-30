@@ -49,14 +49,10 @@ public class FeeConfigurationTestDataFactory {
     public static FeeConfigurationResponseDTO aFeeResponse() {
         FeeConfigurationRequestDTO base = aFeeRequest();
         return new FeeConfigurationResponseDTO(1L, base.name(), base.feeType(), base.percentage(),
-                base.effectiveFrom(), base.effectiveTo(), true);
+                base.effectiveFrom(), base.effectiveTo());
     }
 
     // -------------------  ENTITY  -------------------
-
-    public static FeeConfiguration aFee() {
-        return aFeeWithId(1L);
-    }
 
     public static FeeConfiguration aFeeWithId(Long id) {
         FeeConfiguration fee = new FeeConfiguration();
@@ -66,7 +62,6 @@ public class FeeConfigurationTestDataFactory {
         fee.setPercentage(new BigDecimal("5.00"));
         fee.setEffectiveFrom(LocalDate.of(2026, 1, 1));
         fee.setEffectiveTo(LocalDate.of(2026, 12, 31));
-        fee.setActive(true);
         return fee;
     }
 
@@ -78,7 +73,6 @@ public class FeeConfigurationTestDataFactory {
         fee.setPercentage(new BigDecimal("5.00"));
         fee.setEffectiveFrom(LocalDate.of(2026, 1, 1));
         fee.setEffectiveTo(LocalDate.of(2026, 12, 31));
-        fee.setActive(true);
         return fee;
     }
 }
