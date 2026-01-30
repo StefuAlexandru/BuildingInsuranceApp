@@ -11,6 +11,5 @@ public record FeeConfigurationResponseDTO(
         FeeType feeType,
         BigDecimal percentage,
         LocalDate effectiveFrom,
-        LocalDate effectiveTo,
-        boolean isActive
+        LocalDate effectiveTo
 ) { }

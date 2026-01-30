@@ -49,9 +49,8 @@ public interface FeeConfigurationRepository extends JpaRepository<FeeConfigurati
                 FROM fee_configurations
                 WHERE fee_type = :feeType
                   AND LOWER(name) = LOWER(:name)
-                  AND is_active = true
-                  AND effective_from <= COALESCE(:newEffectiveTo, DATE '9999-12-31')
-                  AND COALESCE(effective_to, DATE '9999-12-31') >= :newEffectiveFrom
+                  AND effective_from < COALESCE(:newEffectiveTo, DATE '9999-12-31')
+                  AND COALESCE(effective_to, DATE '9999-12-31') > :newEffectiveFrom
             )
             """,
             nativeQuery = true)
@@ -70,9 +69,8 @@ public interface FeeConfigurationRepository extends JpaRepository<FeeConfigurati
                 WHERE fee_type = :feeType
                   AND LOWER(name) = LOWER(:name)
                   AND id <> :feeId
-                  AND is_active = true
-                  AND effective_from <= COALESCE(:newEffectiveTo, DATE '9999-12-31')
-                  AND COALESCE(effective_to, DATE '9999-12-31') >= :newEffectiveFrom
+                  AND effective_from < COALESCE(:newEffectiveTo, DATE '9999-12-31')
+                  AND COALESCE(effective_to, DATE '9999-12-31') > :newEffectiveFrom
             )
             """,
             nativeQuery = true)
@@ -87,16 +85,14 @@ public interface FeeConfigurationRepository extends JpaRepository<FeeConfigurati
     @Query(value = """
         SELECT fc.*
         FROM fee_configurations fc
-        WHERE fc.is_active = true
-          AND fc.effective_from <= :date
-          AND (fc.effective_to IS NULL OR fc.effective_to >= :date)
+        WHERE fc.effective_from <= :date
+          AND (fc.effective_to IS NULL OR fc.effective_to > :date)
         """,
             countQuery = """
         SELECT COUNT(*)
         FROM fee_configurations fc
-        WHERE fc.is_active = true
-          AND fc.effective_from <= :date
-          AND (fc.effective_to IS NULL OR fc.effective_to >= :date)
+        WHERE fc.effective_from <= :date
+          AND (fc.effective_to IS NULL OR fc.effective_to > :date)
         """,
             nativeQuery = true)
     Page<FeeConfiguration> getAllFeesActiveOn(@Param("date") LocalDate date, Pageable pageable);

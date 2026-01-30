@@ -10,13 +10,10 @@ import ro.insurance.buildinginsurance.web.dto.riskFactorConfigurationDto.RiskFac
 @Mapper(componentModel = "spring")
 public interface RiskFactorConfigurationMapper {
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "active", constant = "true")
     RiskFactorConfiguration toEntity(RiskFactorConfigurationRequestDTO riskFactorConfigurationRequestDTO);
 
-    @Mapping(target = "isActive", source = "riskFactorConfiguration.active")
     RiskFactorConfigurationResponseDTO toResponse(RiskFactorConfiguration riskFactorConfiguration);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "active", ignore = true)
     void updateFromDTO(RiskFactorConfigurationRequestDTO riskFactorConfigurationRequestDTO, @MappingTarget RiskFactorConfiguration riskFactorConfiguration);
 }

@@ -46,10 +46,4 @@ public class RiskFactorConfiguration {
     private LocalDate effectiveFrom;
 
     private LocalDate effectiveTo;
-
-    private boolean isActive = true;
-
-    public boolean isActiveOn(LocalDate date) {
-        return ValidityUtils.isActiveOn(effectiveFrom, effectiveTo, date);
-    }
 }
