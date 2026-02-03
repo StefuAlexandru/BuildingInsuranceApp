@@ -34,4 +34,15 @@ public interface BuildingRepository extends JpaRepository<Building, Long> {
                 WHERE b.id = :buildingId
             """, nativeQuery = true)
     Optional<Building> findDetailsById(@Param("buildingId") Long buildingId);
+
+    @Query(value = """
+            SELECT EXISTS(
+                SELECT 1
+                FROM buildings b
+                WHERE b.id = :buildingId
+                  AND b.client_id = :clientId
+            )
+            """, nativeQuery = true)
+    boolean existsByIdAndClientId(@Param("buildingId") Long buildingId, @Param("clientId") Long clientId);
+
 }

@@ -167,6 +167,12 @@ public class ClientTestDataFactory {
         return client;
     }
 
+    public static Client aClientWithId(Long id) {
+        Client client = aClient();
+        client.setId(id);
+        return client;
+    }
+
     public static Client aClientIndividual() {
         Client client = new Client();
         client.setId(1L);

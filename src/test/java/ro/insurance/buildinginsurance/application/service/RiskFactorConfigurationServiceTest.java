@@ -92,8 +92,8 @@ class RiskFactorConfigurationServiceTest {
         Page<RiskFactorConfigurationResponseDTO> result = riskFactorConfigurationService.getAllRiskFactors(pageable);
 
         // Assert
-        org.junit.jupiter.api.Assertions.assertEquals(2, result.getTotalElements());
-        org.junit.jupiter.api.Assertions.assertEquals(2, result.getContent().size());
+        assertEquals(2, result.getTotalElements());
+        assertEquals(2, result.getContent().size());
 
         verify(riskFactorConfigurationRepository).findAll(pageable);
         verify(riskFactorConfigurationMapper).toResponse(e1);

@@ -101,8 +101,7 @@ public interface FeeConfigurationRepository extends JpaRepository<FeeConfigurati
     @Query(value = """
             SELECT fc.*
             FROM fee_configurations fc
-            WHERE fc.is_active = true
-              AND fc.effective_from <= :date
+            WHERE fc.effective_from <= :date
               AND (fc.effective_to IS NULL OR fc.effective_to >= :date)
         """, nativeQuery = true)
     List<FeeConfiguration> findAllActiveOn(@Param("date") LocalDate date);

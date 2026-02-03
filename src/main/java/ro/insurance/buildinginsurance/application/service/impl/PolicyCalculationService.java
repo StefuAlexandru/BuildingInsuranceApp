@@ -5,12 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ro.insurance.buildinginsurance.application.service.IPolicyCalculationService;
-import ro.insurance.buildinginsurance.domain.entity.Building;
 import ro.insurance.buildinginsurance.domain.entity.Currency;
 import ro.insurance.buildinginsurance.domain.entity.FeeConfiguration;
 import ro.insurance.buildinginsurance.domain.entity.RiskFactorConfiguration;
 import ro.insurance.buildinginsurance.domain.enums.ErrorCode;
-import ro.insurance.buildinginsurance.infrastructure.persistance.repository.BuildingRepository;
 import ro.insurance.buildinginsurance.infrastructure.persistance.repository.CurrencyRepository;
 import ro.insurance.buildinginsurance.infrastructure.persistance.repository.FeeConfigurationRepository;
 import ro.insurance.buildinginsurance.infrastructure.persistance.repository.RiskFactorConfigurationRepository;
@@ -22,8 +20,6 @@ import ro.insurance.buildinginsurance.web.error.BusinessException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -34,7 +30,6 @@ import java.util.stream.Stream;
 @Transactional(readOnly = true)
 public class PolicyCalculationService implements IPolicyCalculationService {
 
-    private final BuildingRepository buildingRepository;
     private final FeeConfigurationRepository feeConfigurationRepository;
     private final RiskFactorConfigurationRepository riskFactorConfigurationRepository;
     private final CurrencyRepository currencyRepository;
@@ -42,16 +37,10 @@ public class PolicyCalculationService implements IPolicyCalculationService {
 
     @Override
     public PolicyCalculationResponseDTO calculatePremium(PolicyCalculationRequestDTO policyCalculationRequestDTO) {
-        Long buildingId = policyCalculationRequestDTO.buildingId();
-        Long currencyId = policyCalculationRequestDTO.currencyId();
-
         LocalDate date = policyCalculationRequestDTO.now() == null? LocalDate.now() : policyCalculationRequestDTO.now();
 
-        Building building = validateBuildingOrThrow(buildingId);
-        validateCurrencyOrThrow(currencyId);
-
         List<FeeConfiguration> activeFees = feeConfigurationRepository.findAllActiveOn(date);
-        List<RiskFactorConfiguration> riskFees = riskFactorConfigurationRepository.findRiskFactorsByBuildingIdActiveOn(building.getId(), date);
+        List<RiskFactorConfiguration> riskFees = riskFactorConfigurationRepository.findRiskFactorsByBuildingIdActiveOn(policyCalculationRequestDTO.buildingId(), date);
 
         BigDecimal feesPercent = activeFees.stream()
                 .map(FeeConfiguration::getPercentage)
@@ -61,7 +50,8 @@ public class PolicyCalculationService implements IPolicyCalculationService {
                 .map(RiskFactorConfiguration::getAdjustmentPercentage)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        BigDecimal totalPercent = feesPercent.add(riskPercent);
+        BigDecimal totalPercentRaw = feesPercent.add(riskPercent);
+        BigDecimal totalPercent = totalPercentRaw.divide(new BigDecimal("100"),6,RoundingMode.HALF_UP);
 
         List<AppliedAdjustment> breakdown = Stream.concat(
                 activeFees.stream()
@@ -73,38 +63,29 @@ public class PolicyCalculationService implements IPolicyCalculationService {
         BigDecimal multiplier = BigDecimal.ONE.add(totalPercent);
         BigDecimal finalPremium = policyCalculationRequestDTO.basePremium().multiply(multiplier);
 
+        Currency currency = currencyRepository.findById(policyCalculationRequestDTO.currencyId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.CURRENCY_NOT_FOUND));
+
+        finalPremium = convertFromBase(finalPremium,currency);
+
         finalPremium = finalPremium.setScale(2, RoundingMode.HALF_UP);
 
-        return new PolicyCalculationResponseDTO(finalPremium,totalPercent,breakdown);
+        return new PolicyCalculationResponseDTO(finalPremium,totalPercentRaw,breakdown);
     }
 
     // --------------------- HELPERS ---------------------
 
-    private Building validateBuildingOrThrow(Long buildingId){
-        return buildingRepository.findById(buildingId)
-                .orElseThrow(() -> {
-                    log.warn("Building with id {} not found for premium calculation", buildingId);
-                    return new BusinessException(ErrorCode.BUILDING_NOT_FOUND);
-                });
-    }
-
-    private void validateCurrencyOrThrow(Long currencyId){
-        Currency currency = currencyRepository.findById(currencyId)
-                .orElseThrow(() -> {
-                    log.warn("Currency with id {} not found for premium calculation", currencyId);
-                    return new BusinessException(ErrorCode.CURRENCY_NOT_FOUND);
-                });
-
-        if(!currency.isActive()){
-            log.warn("Currency with id {} is not active for premium calculation", currencyId);
-            throw new BusinessException(ErrorCode.CURRENCY_IS_NOT_ACTIVE);
-        }
-    }
-
     private static String riskCode(RiskFactorConfiguration riskFactorConfiguration){
         return switch(riskFactorConfiguration.getLevel()){
-            case CITY,COUNTY,COUNTRY -> riskFactorConfiguration.getLevel().name() + ":" + riskFactorConfiguration.getReferenceId();
-            case BUILDING_TYPE -> riskFactorConfiguration.getLevel().name() + ":" + riskFactorConfiguration.getBuildingType().name();
+            case CITY,COUNTY,COUNTRY -> riskFactorConfiguration.getLevel().name() + " : " + riskFactorConfiguration.getReferenceId();
+            case BUILDING_TYPE -> riskFactorConfiguration.getLevel().name() + " : " + riskFactorConfiguration.getBuildingType().name();
         };
+    }
+
+    private BigDecimal convertFromBase(BigDecimal amountRon, Currency currency) {
+        if ("RON".equalsIgnoreCase(currency.getCode())) return amountRon;
+
+        BigDecimal rate = currency.getExchangeRateToBase();
+        return amountRon.divide(rate, 6, RoundingMode.HALF_UP);
     }
 }
