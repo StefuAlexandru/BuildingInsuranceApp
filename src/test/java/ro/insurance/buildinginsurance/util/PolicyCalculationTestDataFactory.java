@@ -1,6 +1,10 @@
 package ro.insurance.buildinginsurance.util;
 
+import ro.insurance.buildinginsurance.domain.entity.Policy;
+import ro.insurance.buildinginsurance.domain.enums.PolicyStatus;
 import ro.insurance.buildinginsurance.web.dto.policyCalculationDto.PolicyCalculationRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.policyDto.PolicyCreateRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.policyDto.PolicyResponseDTO;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -25,6 +29,5 @@ public class PolicyCalculationTestDataFactory {
         LocalDate date = LocalDate.of(2026, 1, 30);
         return new PolicyCalculationRequestDTO(new BigDecimal("100.00"), 1L,1L,date);
     }
-
 
 }

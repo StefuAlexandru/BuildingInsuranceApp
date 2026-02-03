@@ -8,7 +8,7 @@ import java.time.LocalDate;
 
 public record PolicyCalculationRequestDTO(
         @NotNull(message = "Base premium cannot be null")
-        @DecimalMin(value = "0.00", message = "Base premium cannot be negative")
+        @DecimalMin(value = "0.01", message = "Base premium should be greater than zero")
         BigDecimal basePremium,
 
         @NotNull(message = "Building id cannot be null")

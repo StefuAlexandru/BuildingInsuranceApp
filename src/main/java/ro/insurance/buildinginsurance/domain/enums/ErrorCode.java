@@ -25,6 +25,13 @@ public enum ErrorCode {
     FEE_CONFIGURATION_OVERLAP(HttpStatus.CONFLICT, "Fee configuration overlap"),
     DUPLICATE_RISK_FACTOR_CONFIG(HttpStatus.CONFLICT, "Duplicate risk factor configuration"),
     RISK_FACTOR_CONFIGURATION_OVERLAP(HttpStatus.CONFLICT, "Risk factor configuration overlap"),
+    BUILDING_NOT_OWNED_BY_CLIENT(HttpStatus.CONFLICT, "Building not owned by client"),
+    POLICY_NOT_ACTIVATABLE(HttpStatus.CONFLICT, "Policy not activatable"),
+    POLICY_INVALID_STATE(HttpStatus.CONFLICT, "Policy invalid state"),
+    POLICY_START_DATE_IN_PAST(HttpStatus.CONFLICT, "Policy start date in past"),
+    BROKER_CODE_ALREADY_EXISTS(HttpStatus.CONFLICT, "Broker code already exists"),
+    POLICY_NOT_CANCELLABLE(HttpStatus.CONFLICT, "Policy not cancellable"),
+    POLICY_CANCELLATION_DATE_OUT_OF_RANGE(HttpStatus.CONFLICT, "Policy is out of availability range"),
 
     // 404
     CITY_NOT_FOUND(HttpStatus.NOT_FOUND, "City not found"),
@@ -35,6 +42,8 @@ public enum ErrorCode {
     CURRENCY_NOT_FOUND(HttpStatus.NOT_FOUND, "Currency not found"),
     FEE_CONFIGURATION_NOT_FOUND(HttpStatus.NOT_FOUND, "Fee configuration not found"),
     RISK_FACTOR_CONFIGURATION_NOT_FOUND(HttpStatus.NOT_FOUND, "Risk factor configuration not found"),
+    BROKER_NOT_FOUND(HttpStatus.NOT_FOUND, "Broker not found"),
+    POLICY_NOT_FOUND(HttpStatus.NOT_FOUND, "Policy not found"),
 
     // 400
     ADDRESS_INCOMPLETE(HttpStatus.BAD_REQUEST, "Address incomplete"),

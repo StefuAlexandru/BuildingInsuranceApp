@@ -56,6 +56,12 @@ public class Policy {
     @Column(nullable = false, precision = 14, scale = 2)
     private BigDecimal finalPremiumAmount;
 
+    @Column(precision = 7, scale = 4)
+    private BigDecimal brokerCommissionPct;
+
+    @Column(precision = 14, scale = 2)
+    private BigDecimal brokerCommissionAmount;
+
     private OffsetDateTime activatedAt;
     private OffsetDateTime cancelledAt;
 
