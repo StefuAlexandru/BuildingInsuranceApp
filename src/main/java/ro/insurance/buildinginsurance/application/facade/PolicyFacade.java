@@ -31,6 +31,7 @@ public class PolicyFacade {
         Building building = getBuildingOrThrow(request.buildingId());
         validateBuildingOwnership(request.buildingId(), request.clientId());
         Broker broker = getBrokerOrThrow(request.brokerId());
+        validateBrokerActive(broker, request.brokerId());
         Currency currency = getCurrencyOrThrow(request.currencyId());
 
         validateCurrencyActive(currency, request.currencyId());
@@ -57,6 +58,7 @@ public class PolicyFacade {
             throw new BusinessException(ErrorCode.POLICY_INVALID_STATE);
         }
 
+        validateBrokerActive(policy.getBroker(), policy.getBroker().getId());
         validateCurrencyActive(policy.getCurrency(), policy.getCurrency().getId());
     }
 
@@ -64,6 +66,13 @@ public class PolicyFacade {
         if(policy.getStatus() != PolicyStatus.ACTIVE){
             log.warn("Policy with id {} cannot be cancelled because status is {}", policy.getId(), policy.getStatus());
             throw new BusinessException(ErrorCode.POLICY_NOT_CANCELLABLE);
+        }
+    }
+
+    private void validateBrokerActive(Broker broker, Long brokerId) {
+        if (!broker.isActive()) {
+            log.warn("Broker with id {} is not active", brokerId);
+            throw new BusinessException(ErrorCode.BROKER_IS_NOT_ACTIVE);
         }
     }
 

@@ -19,8 +19,7 @@ public interface CityMapper {
     @Mapping(target = "county", source = "county")
     City toEntity(CityRequestDTO cityRequestDTO, County county);
 
-
-    CityResponseDTO toResponse(City client);
+    CityResponseDTO toResponse(City city);
 
     @Mapping(target = "countyName", source = "county.name")
     @Mapping(target = "countryName", source = "county.country.name")

@@ -48,7 +48,7 @@ public class PolicyController {
 
     // ----------------------  GET  ----------------------
 
-    @GetMapping("/api/brokers/policies")
+    @GetMapping
     public ResponseEntity<Page<PolicyListItemDTO>> listPolicies(
             @RequestParam(required = false) Long clientId,
             @RequestParam(required = false) Long brokerId,
@@ -65,6 +65,8 @@ public class PolicyController {
         return ResponseEntity.ok(policyService.listPolicies(filter, pageable));
     }
 
-
-
+    @GetMapping("/{id}")
+    public ResponseEntity<PolicyDetailsResponseDTO> getPolicyDetails(@PathVariable Long id) {
+        return ResponseEntity.ok(policyService.getPolicyDetails(id));
+    }
 }

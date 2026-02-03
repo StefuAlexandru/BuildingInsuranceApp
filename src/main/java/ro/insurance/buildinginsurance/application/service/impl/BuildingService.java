@@ -31,6 +31,7 @@ public class BuildingService implements IBuildingService {
     private final CityRepository cityRepository;
     private final BuildingMapper buildingMapper;
 
+    // ---------------------  CREATE  ---------------------
 
     @Override
     public BuildingResponseDTO registerNewBuilding(BuildingRequestDTO buildingRequestDTO) {
@@ -71,7 +72,7 @@ public class BuildingService implements IBuildingService {
         log.info("Get building details by id: {}", buildingId);
         Building building = buildingRepository.findDetailsById(buildingId)
                 .orElseThrow(() -> {
-                    log.warn("Building not found: id={}", buildingId);
+                    log.warn("Building details not found: id={}", buildingId);
                     return new BusinessException(ErrorCode.BUILDING_NOT_FOUND);
                 });
 

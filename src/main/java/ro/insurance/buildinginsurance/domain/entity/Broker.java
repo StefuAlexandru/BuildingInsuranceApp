@@ -35,4 +35,6 @@ public class Broker {
     private String phone;
 
     private BigDecimal commissionPct;
+
+    private boolean isActive;
 }

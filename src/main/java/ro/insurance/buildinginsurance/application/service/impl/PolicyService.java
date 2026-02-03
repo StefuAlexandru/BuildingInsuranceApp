@@ -107,7 +107,7 @@ public class PolicyService implements IPolicyService {
         policyMapper.applyActivation(request, policy);
 
         if (policy.getActivatedAt() == null) {
-            policy.setActivatedAt(OffsetDateTime.now());
+            policy.setActivatedAt(OffsetDateTime.now(ZoneOffset.UTC));
         }
 
         Policy saved = policyRepository.save(policy);
@@ -129,7 +129,7 @@ public class PolicyService implements IPolicyService {
         OffsetDateTime start = policy.getStartDate().atStartOfDay(zone).toOffsetDateTime();
         OffsetDateTime endExclusive = policy.getEndDate().plusDays(1).atStartOfDay(zone).toOffsetDateTime();
 
-        if (cancelledAt.isBefore(start) || !cancelledAt.isBefore(endExclusive)) {
+        if (cancelledAt.isBefore(start) || cancelledAt.isAfter(endExclusive)) {
             log.warn("Policy cancellation date out of range. policyId={} cancelledAt={} startDate={} endDate={}",
                     id, cancelledAt, policy.getStartDate(), policy.getEndDate());
             throw new BusinessException(ErrorCode.POLICY_CANCELLATION_DATE_OUT_OF_RANGE);
@@ -184,12 +184,10 @@ public class PolicyService implements IPolicyService {
 
     @Override
     @Transactional(readOnly = true)
-    public PolicyResponseDTO getPolicyDetails(Long id) {
+    public PolicyDetailsResponseDTO getPolicyDetails(Long id) {
         log.info("Policy details requested. policyId={}", id);
-        Policy policy = getPolicyOrThrow(id);
-        PolicyCalculationResponseDTO calculationResponse = new PolicyCalculationResponseDTO(policy.getFinalPremiumAmount(), null, null);
-
-        return policyMapper.toResponse(policy, calculationResponse);
+        Policy policy = getPolicyDetailsOrThrow(id);
+        return policyMapper.toDetailsResponse(policy);
     }
 
     // --------------------- HELPERS ---------------------
@@ -197,7 +195,15 @@ public class PolicyService implements IPolicyService {
     private Policy getPolicyOrThrow(Long id){
         return policyRepository.findById(id)
                 .orElseThrow(() -> {
-                    log.warn("Policy with id {} not found for activation", id);
+                    log.warn("Policy with id {} not found for status change", id);
+                    return new BusinessException(ErrorCode.POLICY_NOT_FOUND);
+                });
+    }
+
+    private Policy getPolicyDetailsOrThrow(Long id){
+        return policyRepository.findDetailsById(id)
+                .orElseThrow(() -> {
+                    log.warn("Policy with id {} not found for fetching details", id);
                     return new BusinessException(ErrorCode.POLICY_NOT_FOUND);
                 });
     }

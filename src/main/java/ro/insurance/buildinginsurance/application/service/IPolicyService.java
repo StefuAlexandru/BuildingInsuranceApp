@@ -10,5 +10,5 @@ public interface IPolicyService {
     PolicyResponseDTO cancelPolicy(Long id, PolicyCancelRequestDTO request);
 
     Page<PolicyListItemDTO> listPolicies(PolicyListFilterDTO filter, Pageable pageable);
-    PolicyResponseDTO getPolicyDetails(Long id);
+    PolicyDetailsResponseDTO getPolicyDetails(Long id);
 }

@@ -12,6 +12,7 @@ import ro.insurance.buildinginsurance.web.dto.brokerDto.BrokerResponseDTO;
 @Mapper(componentModel = "spring")
 public interface BrokerMapper {
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "active", constant = "true")
     Broker toEntity(BrokerRequestDTO brokerRequestDTO);
 
     BrokerResponseDTO toResponse(Broker broker);
