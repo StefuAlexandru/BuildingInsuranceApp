@@ -31,11 +31,8 @@ public class PolicyController {
     }
 
     @PostMapping("/{id}/activate")
-    public ResponseEntity<PolicyResponseDTO> activatePolicy(
-            @PathVariable Long id,
-            @RequestBody(required = false) PolicyActivateRequestDTO request
-    ) {
-        return ResponseEntity.ok(policyService.activatePolicy(id, request));
+    public ResponseEntity<PolicyResponseDTO> activatePolicy(@PathVariable Long id) {
+        return ResponseEntity.ok(policyService.activatePolicy(id));
     }
 
     @PostMapping("/{id}/cancel")

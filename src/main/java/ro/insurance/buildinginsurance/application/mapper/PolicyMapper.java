@@ -54,13 +54,6 @@ public interface PolicyMapper {
     @Mapping(target = "currency", source = "currency")
     PolicyDetailsResponseDTO toDetailsResponse(Policy policy);
 
-    @Mapping(target = "status", constant = "ACTIVE")
-    void applyActivation(PolicyActivateRequestDTO request, @MappingTarget Policy policy);
-
-    @Mapping(target = "status", constant = "CANCELLED")
-    @Mapping(target = "cancelledAt", source = "cancelledAt")
-    void applyCancel(PolicyCancelRequestDTO request, OffsetDateTime cancelledAt, @MappingTarget Policy policy);
-
     @Mapping(target = "premium", expression = "java(resolvePremium(policy))")
     @Mapping(target = "currencyCode", source = "currency.code")
     @Mapping(target = "clientName", expression = "java(resolveClientName(policy))")

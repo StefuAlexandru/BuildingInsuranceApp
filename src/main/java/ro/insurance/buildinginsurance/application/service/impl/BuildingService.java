@@ -72,7 +72,7 @@ public class BuildingService implements IBuildingService {
         log.info("Get building details by id: {}", buildingId);
         Building building = buildingRepository.findDetailsById(buildingId)
                 .orElseThrow(() -> {
-                    log.warn("Building details not found: id={}", buildingId);
+                    log.warn("Building not found for fetching details : id={}", buildingId);
                     return new BusinessException(ErrorCode.BUILDING_NOT_FOUND);
                 });
 

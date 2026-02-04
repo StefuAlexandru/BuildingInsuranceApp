@@ -1,10 +1,22 @@
 package ro.insurance.buildinginsurance.util;
 
 import ro.insurance.buildinginsurance.domain.entity.Broker;
+import ro.insurance.buildinginsurance.web.dto.brokerDto.BrokerRequestDTO;
+
+import java.math.BigDecimal;
 
 public class BrokerTestDataFactory {
 
     private BrokerTestDataFactory() {}
+
+    // -------------------  DTOS  -------------------
+
+    public static BrokerRequestDTO aBrokerRequest(){
+        return new BrokerRequestDTO(
+                "CODE-111","Test Broker","broker@email.com",
+                "0777777777",new BigDecimal("10")
+        );
+    }
 
     // -------------------  ENTITIES  -------------------
 
@@ -12,7 +24,11 @@ public class BrokerTestDataFactory {
         Broker broker = new Broker();
         broker.setId(id);
         broker.setActive(true);
+        broker.setBrokerCode("CODE-111");
+        broker.setEmail("broker@email.com");
+        broker.setPhone("0777777777");
         broker.setName("Test Broker");
+        broker.setCommissionPct(new BigDecimal("10"));
         return broker;
     }
 

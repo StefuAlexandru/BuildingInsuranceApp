@@ -52,6 +52,7 @@ public enum ErrorCode {
     INVALID_DATES(HttpStatus.BAD_REQUEST, "Invalid dates"),
     INVALID_RISK_FACTOR_SCOPE(HttpStatus.BAD_REQUEST, "Invalid risk factor scope"),
     CURRENCY_IS_NOT_ACTIVE(HttpStatus.BAD_REQUEST, "Currency is not active"),
+    REPORT_INVALID_REQUEST(HttpStatus.BAD_REQUEST, "Report invalid request"),
     ;
 
 

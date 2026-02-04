@@ -11,7 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-import ro.insurance.buildinginsurance.TestSecurityUsersConfig;
+import ro.insurance.buildinginsurance.config.TestSecurityUsersConfig;
 import ro.insurance.buildinginsurance.domain.entity.Currency;
 import ro.insurance.buildinginsurance.infrastructure.persistance.repository.CurrencyRepository;
 import ro.insurance.buildinginsurance.web.dto.currencyDto.CurrencyRequestDTO;
@@ -29,7 +29,7 @@ import static ro.insurance.buildinginsurance.util.CurrencyTestDataFactory.*;
 @ActiveProfiles("test")
 @Import(TestSecurityUsersConfig.class)
 @Transactional
-class CurrencyIT {
+class CurrencyControllerIT {
 
     @Autowired MockMvc mockMvc;
     @Autowired CurrencyRepository currencyRepository;

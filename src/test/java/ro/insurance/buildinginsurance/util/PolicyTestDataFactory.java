@@ -27,6 +27,15 @@ public class PolicyTestDataFactory {
                 new BigDecimal("100.00")
         );
     }
+
+    public static PolicyCreateRequestDTO aPolicyCreateRequest(Long clientId, Long buildingId, Long brokerId, Long currencyId, LocalDate startDate, LocalDate endDate) {
+        return new PolicyCreateRequestDTO(
+                clientId, buildingId, brokerId, currencyId,
+                startDate, endDate,
+                new BigDecimal("100.00")
+        );
+    }
+
     public static PolicyResponseDTO aPolicyResponse() {
         return new PolicyResponseDTO(
                 10L,

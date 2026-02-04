@@ -2,6 +2,8 @@ package ro.insurance.buildinginsurance.application.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ro.insurance.buildinginsurance.application.mapper.BrokerMapper;
@@ -26,7 +28,7 @@ public class BrokerService implements IBrokerService {
 
     @Override
     public BrokerResponseDTO createBroker(BrokerRequestDTO brokerRequestDTO) {
-        log.info("Creating new broker request");
+        log.info("Creating new broker request with code {}", brokerRequestDTO.brokerCode());
 
         if (brokerRepository.existsByBrokerCodeIgnoreCase(brokerRequestDTO.brokerCode())) {
             log.warn("Broker code {} already exists", brokerRequestDTO.brokerCode());
@@ -35,6 +37,7 @@ public class BrokerService implements IBrokerService {
 
         Broker broker = brokerMapper.toEntity(brokerRequestDTO);
         Broker saved = brokerRepository.save(broker);
+        log.info("Created broker with code {}", saved.getBrokerCode());
         return brokerMapper.toResponse(saved);
     }
 
@@ -72,13 +75,28 @@ public class BrokerService implements IBrokerService {
         return brokerMapper.toResponse(saved);
     }
 
+    // ---------------------  GET  ---------------------
+
+    @Override
+    public BrokerResponseDTO getBroker(Long id) {
+        log.info("Getting broker with id {}", id);
+        Broker broker = findBrokerOrThrow(id);
+        return brokerMapper.toResponse(broker);
+    }
+
+    @Override
+    public Page<BrokerResponseDTO> getBrokers(Pageable pageable) {
+        log.info("Getting all brokers. pageable={}", pageable);
+        Page<Broker> brokers = brokerRepository.findAll(pageable);
+        return brokers.map(brokerMapper::toResponse);
+    }
+
     // ---------------------  HELPERS  ---------------------
 
     private Broker findBrokerOrThrow(Long id){
         return brokerRepository.findById(id).orElseThrow(() -> {
-                    log.warn("Broker with id {} not found", id);
-                    return new BusinessException(ErrorCode.BROKER_NOT_FOUND);
-                });
+            log.warn("Broker with id {} not found", id);
+            return new BusinessException(ErrorCode.BROKER_NOT_FOUND);
+        });
     }
-
 }

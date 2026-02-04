@@ -6,7 +6,7 @@ import ro.insurance.buildinginsurance.web.dto.policyDto.*;
 
 public interface IPolicyService {
     PolicyResponseDTO createDraftPolicy(PolicyCreateRequestDTO policyCreateRequestDTO);
-    PolicyResponseDTO activatePolicy(Long id, PolicyActivateRequestDTO request);
+    PolicyResponseDTO activatePolicy(Long id);
     PolicyResponseDTO cancelPolicy(Long id, PolicyCancelRequestDTO request);
 
     Page<PolicyListItemDTO> listPolicies(PolicyListFilterDTO filter, Pageable pageable);
