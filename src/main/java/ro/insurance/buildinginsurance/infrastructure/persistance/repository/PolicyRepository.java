@@ -11,6 +11,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ro.insurance.buildinginsurance.domain.entity.Policy;
 
+import java.util.Optional;
+
 public interface PolicyRepository extends JpaRepository<Policy,Long>, JpaSpecificationExecutor<Policy> {
     @Query(value = """
             SELECT EXISTS (
@@ -27,4 +29,15 @@ public interface PolicyRepository extends JpaRepository<Policy,Long>, JpaSpecifi
     @EntityGraph(attributePaths = {"client", "building", "building.city", "currency"})
     @NonNull
     Page<Policy> findAll(@NonNull Specification<Policy> specification, @NonNull Pageable pageable);
+
+    @EntityGraph(attributePaths = {
+            "client",
+            "building",
+            "building.city",
+            "building.city.county",
+            "building.city.county.country",
+            "currency"
+    })
+    Optional<Policy> findDetailsById(Long id);
+
 }

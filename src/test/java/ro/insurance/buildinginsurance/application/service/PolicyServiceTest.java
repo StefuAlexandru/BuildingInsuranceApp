@@ -55,7 +55,7 @@ class PolicyServiceTest {
     private ArgumentCaptor<PolicyCalculationRequestDTO> calcReqCaptor;
 
     @Captor
-    private ArgumentCaptor<PolicyCalculationResponseDTO> calcRespCaptor;
+    private ArgumentCaptor<OffsetDateTime> cancelledAtCaptor;
 
     @Captor
     private ArgumentCaptor<Policy> policyCaptor;
@@ -335,8 +335,6 @@ class PolicyServiceTest {
         when(policyRepository.save(any())).thenReturn(saved);
         when(policyMapper.toResponse(eq(saved), any(PolicyCalculationResponseDTO.class))).thenReturn(mock(PolicyResponseDTO.class));
 
-        ArgumentCaptor<OffsetDateTime> cancelledAtCaptor = ArgumentCaptor.forClass(OffsetDateTime.class);
-
         OffsetDateTime before = OffsetDateTime.now().truncatedTo(ChronoUnit.SECONDS);
 
         // Act
@@ -525,33 +523,26 @@ class PolicyServiceTest {
     }
 
     @Test
-    void getPolicyDetails_shouldLoadPolicy_buildCalcResponse_fromFinalPremium_andReturnMappedResponse() {
+    void getPolicyDetails_shouldLoadPolicy_andReturnDetailsMappedResponse() {
         // Arrange
         Long id = 10L;
         Policy policy = aDraftPolicyWithAllMandatoryFields(id);
-        policy.setFinalPremiumAmount(new BigDecimal("130.00"));
 
-        PolicyResponseDTO expected = mock(PolicyResponseDTO.class);
+        PolicyDetailsResponseDTO expected = mock(PolicyDetailsResponseDTO.class);
 
-        when(policyRepository.findById(id)).thenReturn(Optional.of(policy));
-        when(policyMapper.toResponse(eq(policy), any(PolicyCalculationResponseDTO.class))).thenReturn(expected);
+        when(policyRepository.findDetailsById(id)).thenReturn(Optional.of(policy));
+        when(policyMapper.toDetailsResponse(policy)).thenReturn(expected);
 
         // Act
-        PolicyResponseDTO res = policyService.getPolicyDetails(id);
+        PolicyDetailsResponseDTO response = policyService.getPolicyDetails(id);
 
         // Assert
-        assertSame(expected, res);
+        assertSame(expected, response);
 
-        verify(policyRepository).findById(id);
-        verify(policyMapper).toResponse(eq(policy), calcRespCaptor.capture());
-
-        PolicyCalculationResponseDTO captured = calcRespCaptor.getValue();
-        assertEquals(new BigDecimal("130.00"), captured.finalPremium());
-        assertEquals(new PolicyCalculationResponseDTO(new BigDecimal("130.00"), null, null), captured);
+        verify(policyRepository).findDetailsById(id);
+        verify(policyMapper).toDetailsResponse(policy);
 
         verifyNoMoreInteractions(policyRepository, policyMapper, policyFacade, policyCalculationService, policyNumberGenerator);
     }
-
-
 
 }

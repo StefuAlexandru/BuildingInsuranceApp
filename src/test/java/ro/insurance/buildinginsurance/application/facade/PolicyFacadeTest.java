@@ -2,6 +2,9 @@ package ro.insurance.buildinginsurance.application.facade;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -18,6 +21,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -38,6 +43,17 @@ class PolicyFacadeTest {
 
     @InjectMocks
     private PolicyFacade policyFacade;
+
+    static Stream<Arguments> missingMandatoryPolicyMutations() {
+        return Stream.of(
+                Arguments.of((Consumer<Policy>) policy -> policy.setClient(null)),
+                Arguments.of((Consumer<Policy>) policy -> policy.setBuilding(null)),
+                Arguments.of((Consumer<Policy>) policy -> policy.setBroker(null)),
+                Arguments.of((Consumer<Policy>) policy -> policy.setCurrency(null)),
+                Arguments.of( (Consumer<Policy>) policy -> policy.setEndDate(null)),
+                Arguments.of((Consumer<Policy>) policy -> policy.setBasePremiumAmount(null))
+        );
+    }
 
     @Test
     void resolveCreateContext_happyPath_shouldLoadAll_validateOwnership_currency_dates_andReturnContext() {
@@ -215,6 +231,56 @@ class PolicyFacadeTest {
     }
 
     @Test
+    void resolveCreateContext_whenBrokerInactive_shouldThrow_andStopBeforeCurrencyLoad() {
+        // Arrange
+        PolicyCreateRequestDTO request = aPolicyCreateRequest();
+
+        Client client = aClientWithId(request.clientId());
+        Building building = aBuildingWithId(request.buildingId());
+        Broker broker = aBrokerWithId(request.brokerId());
+        broker.setActive(false);
+
+        when(clientRepository.findById(request.clientId())).thenReturn(Optional.of(client));
+        when(buildingRepository.findById(request.buildingId())).thenReturn(Optional.of(building));
+        when(buildingRepository.existsByIdAndClientId(request.buildingId(), request.clientId())).thenReturn(true);
+        when(brokerRepository.findById(request.brokerId())).thenReturn(Optional.of(broker));
+
+        // Act + Assert
+        BusinessException ex = assertThrows(BusinessException.class, () -> policyFacade.resolveCreateContext(request));
+        assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.BROKER_IS_NOT_ACTIVE.name().equals(e.getCode())));
+
+        verify(currencyRepository, never()).findById(anyLong());
+    }
+
+    @Test
+    void resolveCreateContext_whenStartEqualsEnd_shouldNotThrow() {
+        // Arrange
+        LocalDate date = LocalDate.of(2026, 2, 10);
+        PolicyCreateRequestDTO request = new PolicyCreateRequestDTO(
+                1L, 1L, 1L, 1L,
+                date, date,
+                new BigDecimal("100.00")
+        );
+
+        Client client = aClientWithId(request.clientId());
+        Building building = aBuildingWithId(request.buildingId());
+        Broker broker = aBrokerWithId(request.brokerId());
+        broker.setActive(true);
+
+        Currency currency = aCurrencyWithId(request.currencyId());
+        currency.setActive(true);
+
+        when(clientRepository.findById(request.clientId())).thenReturn(Optional.of(client));
+        when(buildingRepository.findById(request.buildingId())).thenReturn(Optional.of(building));
+        when(buildingRepository.existsByIdAndClientId(request.buildingId(), request.clientId())).thenReturn(true);
+        when(brokerRepository.findById(request.brokerId())).thenReturn(Optional.of(broker));
+        when(currencyRepository.findById(request.currencyId())).thenReturn(Optional.of(currency));
+
+        // Act + Assert
+        assertDoesNotThrow(() -> policyFacade.resolveCreateContext(request));
+    }
+
+    @Test
     void validateActivateOrThrow_whenStatusNotDraft_shouldThrow() {
         Policy policy = new Policy();
         policy.setId(10L);
@@ -240,23 +306,37 @@ class PolicyFacadeTest {
     }
 
     @Test
-    void validateActivateOrThrow_whenMissingMandatoryFields_shouldThrow() {
-        Policy policy = new Policy();
-        policy.setId(10L);
-        policy.setStatus(PolicyStatus.DRAFT);
+    void validateActivateOrThrow_whenBrokerInactive_shouldThrow() {
+        // Arrange
+        Policy policy = aDraftPolicyWithAllMandatoryFields(10L);
         policy.setStartDate(LocalDate.now().plusDays(1));
+        policy.getBroker().setActive(false);
+        policy.getCurrency().setActive(true);
 
+        // Act + Assert
         BusinessException ex = assertThrows(BusinessException.class,
                 () -> policyFacade.validateActivateOrThrow(policy, new PolicyActivateRequestDTO(null)));
 
-        assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.POLICY_INVALID_STATE.name().equals(e.getCode())));
+        assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.BROKER_IS_NOT_ACTIVE.name().equals(e.getCode())));
+    }
+
+    @Test
+    void validateActivateOrThrow_whenStartDateIsToday_shouldNotThrow() {
+        // Arrange
+        Policy policy = aDraftPolicyWithAllMandatoryFields(10L);
+        policy.setStartDate(LocalDate.now());
+        policy.getBroker().setActive(true);
+        policy.getCurrency().setActive(true);
+
+        // Act + Assert
+        assertDoesNotThrow(() -> policyFacade.validateActivateOrThrow(policy, new PolicyActivateRequestDTO(null)));
     }
 
     @Test
     void validateActivateOrThrow_whenCurrencyInactive_shouldThrow() {
         // Arrange
         Policy policy = aDraftPolicyWithAllMandatoryFields(10L);
-        policy.setStartDate(LocalDate.now().plusDays(1)); // safe
+        policy.setStartDate(LocalDate.now().plusDays(1));
         policy.getCurrency().setActive(false);
 
         // Act + Assert
@@ -299,5 +379,23 @@ class PolicyFacadeTest {
         policy.setStatus(PolicyStatus.ACTIVE);
 
         assertDoesNotThrow(() -> policyFacade.validateCancelOrThrow(policy, new PolicyCancelRequestDTO("x", null)));
+    }
+
+    @ParameterizedTest(name = "missing {0} -> POLICY_INVALID_STATE")
+    @MethodSource("missingMandatoryPolicyMutations")
+    void validateActivateOrThrow_whenAnyMandatoryFieldMissing_shouldThrow(Consumer<Policy> mutate) {
+        Policy policy = aDraftPolicyWithAllMandatoryFields(10L);
+
+        policy.setStatus(PolicyStatus.DRAFT);
+        policy.setStartDate(LocalDate.now().plusDays(1));
+        policy.getBroker().setActive(true);
+        policy.getCurrency().setActive(true);
+
+        mutate.accept(policy);
+
+        BusinessException ex = assertThrows(BusinessException.class,
+                () -> policyFacade.validateActivateOrThrow(policy, new PolicyActivateRequestDTO(null)));
+
+        assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.POLICY_INVALID_STATE.name().equals(e.getCode())));
     }
 }

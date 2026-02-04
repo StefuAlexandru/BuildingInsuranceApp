@@ -8,7 +8,10 @@ import ro.insurance.buildinginsurance.web.dto.policyDto.*;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
-@Mapper(componentModel = "spring")
+@Mapper(
+        componentModel = "spring",
+        uses = {ClientMapper.class, CityMapper.class, BuildingMapper.class, CurrencyMapper.class}
+    )
 public interface PolicyMapper {
 
     @Mapping(target = "id", ignore = true)
@@ -43,9 +46,17 @@ public interface PolicyMapper {
     @Mapping(target = "brokerCommissionAmount", source = "policy.brokerCommissionAmount")
     PolicyResponseDTO toResponse(Policy policy, PolicyCalculationResponseDTO calculationResponse);
 
+    @Mapping(target = "client", source = "client")
+    @Mapping(target = "building", source = "building")
+    @Mapping(target = "city", source = "building.city")
+    @Mapping(target = "basePremium", source = "basePremiumAmount")
+    @Mapping(target = "finalPremium", source = "finalPremiumAmount")
+    @Mapping(target = "currency", source = "currency")
+    PolicyDetailsResponseDTO toDetailsResponse(Policy policy);
 
     @Mapping(target = "status", constant = "ACTIVE")
     void applyActivation(PolicyActivateRequestDTO request, @MappingTarget Policy policy);
+
     @Mapping(target = "status", constant = "CANCELLED")
     @Mapping(target = "cancelledAt", source = "cancelledAt")
     void applyCancel(PolicyCancelRequestDTO request, OffsetDateTime cancelledAt, @MappingTarget Policy policy);

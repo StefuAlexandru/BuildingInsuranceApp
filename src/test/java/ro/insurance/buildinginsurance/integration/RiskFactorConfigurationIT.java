@@ -58,9 +58,11 @@ class RiskFactorConfigurationIT {
         country = countryRepository.save(country);
 
         County county = aCountyWithoutId();
+        county.setCountry(country);
         county = countyRepository.save(county);
 
         City city = aCityWithoutId();
+        city.setCounty(county);
         city = cityRepository.save(city);
 
         Long cityId = city.getId();

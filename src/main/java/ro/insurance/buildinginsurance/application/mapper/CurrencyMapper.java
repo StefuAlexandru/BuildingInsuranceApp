@@ -6,6 +6,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import ro.insurance.buildinginsurance.domain.entity.Currency;
+import ro.insurance.buildinginsurance.web.dto.currencyDto.CurrencyDTO;
 import ro.insurance.buildinginsurance.web.dto.currencyDto.CurrencyRequestDTO;
 import ro.insurance.buildinginsurance.web.dto.currencyDto.CurrencyResponseDTO;
 
@@ -20,6 +21,8 @@ public interface CurrencyMapper {
 
     @Mapping(target = "isActive", source = "currency.active")
     CurrencyResponseDTO toResponse(Currency currency);
+
+    CurrencyDTO toDto(Currency currency);
 
     @AfterMapping
     default void normalize(@MappingTarget Currency currency) {
