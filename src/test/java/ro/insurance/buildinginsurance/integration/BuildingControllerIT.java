@@ -10,7 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-import ro.insurance.buildinginsurance.TestSecurityUsersConfig;
+import ro.insurance.buildinginsurance.config.TestSecurityUsersConfig;
 import ro.insurance.buildinginsurance.application.mapper.CityMapper;
 import ro.insurance.buildinginsurance.application.mapper.ClientMapper;
 import ro.insurance.buildinginsurance.application.mapper.CountryMapper;

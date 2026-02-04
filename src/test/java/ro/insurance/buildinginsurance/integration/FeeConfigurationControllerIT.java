@@ -11,7 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-import ro.insurance.buildinginsurance.TestSecurityUsersConfig;
+import ro.insurance.buildinginsurance.config.TestSecurityUsersConfig;
 import ro.insurance.buildinginsurance.domain.entity.FeeConfiguration;
 import ro.insurance.buildinginsurance.domain.enums.FeeType;
 import ro.insurance.buildinginsurance.infrastructure.persistance.repository.FeeConfigurationRepository;
@@ -32,7 +32,7 @@ import static ro.insurance.buildinginsurance.util.FeeConfigurationTestDataFactor
 @ActiveProfiles("test")
 @Import(TestSecurityUsersConfig.class)
 @Transactional
-class FeeConfigurationIT {
+class FeeConfigurationControllerIT {
 
     @Autowired
     MockMvc mockMvc;

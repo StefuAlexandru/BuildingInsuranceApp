@@ -25,7 +25,9 @@ public class CustomExceptionHandler {
             BuildingType.class, "InvalidBuildingType",
             ClientType.class, "InvalidClientType",
             FeeType.class, "InvalidFeeType",
-            RiskFactorLevel.class, "InvalidRiskFactorLevel"
+            RiskFactorLevel.class, "InvalidRiskFactorLevel",
+            GroupBy.class,"InvalidGroupBy",
+            PeriodGranularity.class,"InvalidPeriodGranularity"
     );
 
     @ExceptionHandler(BusinessException.class)

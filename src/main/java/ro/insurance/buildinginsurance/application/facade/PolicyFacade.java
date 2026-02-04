@@ -8,11 +8,10 @@ import ro.insurance.buildinginsurance.domain.entity.*;
 import ro.insurance.buildinginsurance.domain.enums.ErrorCode;
 import ro.insurance.buildinginsurance.domain.enums.PolicyStatus;
 import ro.insurance.buildinginsurance.infrastructure.persistance.repository.*;
-import ro.insurance.buildinginsurance.web.dto.policyDto.PolicyActivateRequestDTO;
-import ro.insurance.buildinginsurance.web.dto.policyDto.PolicyCancelRequestDTO;
 import ro.insurance.buildinginsurance.web.dto.policyDto.PolicyCreateRequestDTO;
 import ro.insurance.buildinginsurance.web.error.BusinessException;
 
+import java.time.Clock;
 import java.time.LocalDate;
 
 @Service
@@ -25,6 +24,8 @@ public class PolicyFacade {
     private final BuildingRepository buildingRepository;
     private final BrokerRepository brokerRepository;
     private final CurrencyRepository currencyRepository;
+    private final Clock clock;
+
 
     public PolicyCreateContext resolveCreateContext(PolicyCreateRequestDTO request) {
         Client client = getClientOrThrow(request.clientId());
@@ -40,13 +41,13 @@ public class PolicyFacade {
         return new PolicyCreateContext(client,broker,building,currency);
     }
 
-    public void validateActivateOrThrow(Policy policy, PolicyActivateRequestDTO request){
+    public void validateActivateOrThrow(Policy policy){
         if (policy.getStatus() != PolicyStatus.DRAFT) {
             log.warn("Policy {} cannot be activated because status is {}", policy.getId(), policy.getStatus());
             throw new BusinessException(ErrorCode.POLICY_NOT_ACTIVATABLE);
         }
 
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(clock);
         if (policy.getStartDate().isBefore(today)) {
             log.warn("Policy {} cannot be activated because start date {} is in the past", policy.getId(), policy.getStartDate());
             throw new BusinessException(ErrorCode.POLICY_START_DATE_IN_PAST);
@@ -62,9 +63,13 @@ public class PolicyFacade {
         validateCurrencyActive(policy.getCurrency(), policy.getCurrency().getId());
     }
 
-    public void validateCancelOrThrow(Policy policy, PolicyCancelRequestDTO request) {
+    public void validateCancelOrThrow(Policy policy) {
         if(policy.getStatus() != PolicyStatus.ACTIVE){
             log.warn("Policy with id {} cannot be cancelled because status is {}", policy.getId(), policy.getStatus());
+            throw new BusinessException(ErrorCode.POLICY_NOT_CANCELLABLE);
+        }
+        if (policy.getCancelledAt() != null) {
+            log.warn("Policy {} cannot be cancelled because cancelledAt is already set {}", policy.getId(), policy.getCancelledAt());
             throw new BusinessException(ErrorCode.POLICY_NOT_CANCELLABLE);
         }
     }

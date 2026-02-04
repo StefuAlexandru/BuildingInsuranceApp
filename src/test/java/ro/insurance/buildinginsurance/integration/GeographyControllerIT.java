@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-import ro.insurance.buildinginsurance.TestSecurityUsersConfig;
+import ro.insurance.buildinginsurance.config.TestSecurityUsersConfig;
 import ro.insurance.buildinginsurance.web.dto.cityDto.CityRequestDTO;
 import ro.insurance.buildinginsurance.web.dto.countryDto.CountryRequestDTO;
 import ro.insurance.buildinginsurance.web.dto.countyDto.CountyRequestDTO;
@@ -36,7 +36,7 @@ import static ro.insurance.buildinginsurance.util.CountyTestDataFactory.aCountyR
 @ActiveProfiles("test")
 @Import(TestSecurityUsersConfig.class)
 @Transactional
-class GeographyIT {
+class GeographyControllerIT {
 
     @Autowired MockMvc mockMvc;
 

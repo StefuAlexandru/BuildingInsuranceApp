@@ -13,6 +13,7 @@ import ro.insurance.buildinginsurance.application.service.IPolicyCalculationServ
 import ro.insurance.buildinginsurance.application.service.IPolicyService;
 import ro.insurance.buildinginsurance.domain.entity.Policy;
 import ro.insurance.buildinginsurance.domain.enums.ErrorCode;
+import ro.insurance.buildinginsurance.domain.enums.PolicyStatus;
 import ro.insurance.buildinginsurance.infrastructure.persistance.repository.*;
 import ro.insurance.buildinginsurance.util.PolicyNumberGenerator;
 import ro.insurance.buildinginsurance.web.dto.policyCalculationDto.PolicyCalculationRequestDTO;
@@ -22,6 +23,7 @@ import ro.insurance.buildinginsurance.web.error.BusinessException;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -39,6 +41,7 @@ public class PolicyService implements IPolicyService {
     private final PolicyFacade policyFacade;
     private final IPolicyCalculationService policyCalculationService;
     private final PolicyNumberGenerator policyNumberGenerator;
+    private final Clock clock;
 
     // --------------------- CREATE ---------------------
 
@@ -61,7 +64,7 @@ public class PolicyService implements IPolicyService {
                 policyCreateRequestDTO.basePremiumAmount(),
                 policyCreateRequestDTO.buildingId(),
                 policyCreateRequestDTO.currencyId(),
-                LocalDate.now()
+                LocalDate.now(clock)
         );
 
         PolicyCalculationResponseDTO calculationResponse = policyCalculationService.calculatePremium(policyCalculationRequestDTO);
@@ -76,18 +79,18 @@ public class PolicyService implements IPolicyService {
     // --------------------- PATCH ---------------------
 
     @Override
-    public PolicyResponseDTO activatePolicy(Long id, PolicyActivateRequestDTO request) {
+    public PolicyResponseDTO activatePolicy(Long id) {
         log.info("Policy activate requested. policyId={}", id);
 
         Policy policy = getPolicyOrThrow(id);
 
-        policyFacade.validateActivateOrThrow(policy, request);
+        policyFacade.validateActivateOrThrow(policy);
 
         PolicyCalculationRequestDTO calcReq = new PolicyCalculationRequestDTO(
                 policy.getBasePremiumAmount(),
                 policy.getBuilding().getId(),
                 policy.getCurrency().getId(),
-                LocalDate.now()
+                LocalDate.now(clock)
         );
 
         PolicyCalculationResponseDTO calculationResponse = policyCalculationService.calculatePremium(calcReq);
@@ -98,17 +101,13 @@ public class PolicyService implements IPolicyService {
         BigDecimal commissionPct = policy.getBroker().getCommissionPct();
         BigDecimal commissionAmount = policy.getFinalPremiumAmount()
                 .multiply(commissionPct)
-                .divide(new BigDecimal("100"), 6, RoundingMode.HALF_UP)
-                .setScale(2, RoundingMode.HALF_UP);
+                .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
 
         policy.setBrokerCommissionPct(commissionPct);
         policy.setBrokerCommissionAmount(commissionAmount);
 
-        policyMapper.applyActivation(request, policy);
-
-        if (policy.getActivatedAt() == null) {
-            policy.setActivatedAt(OffsetDateTime.now(ZoneOffset.UTC));
-        }
+        policy.setStatus(PolicyStatus.ACTIVE);
+        policy.setActivatedAt(OffsetDateTime.now(clock));
 
         Policy saved = policyRepository.save(policy);
         log.info("Policy activated successfully. policyId={} status={} activatedAt={}",
@@ -119,34 +118,39 @@ public class PolicyService implements IPolicyService {
     @Override
     public PolicyResponseDTO cancelPolicy(Long id, PolicyCancelRequestDTO request) {
         log.info("Policy cancel requested. policyId={} reason='{}'", id, request.cancellationReason());
+
         Policy policy = getPolicyOrThrow(id);
+        policyFacade.validateCancelOrThrow(policy);
 
-        policyFacade.validateCancelOrThrow(policy, request);
+        OffsetDateTime cancelledAt = OffsetDateTime.now(clock);
 
-        ZoneOffset zone = ZoneOffset.UTC;
+        // you can cancel even before startDate, but NOT after coverage ended
+        OffsetDateTime endExclusive = policy.getEndDate()
+                .plusDays(1)
+                .atStartOfDay(ZoneOffset.UTC)
+                .toOffsetDateTime();
 
-        OffsetDateTime cancelledAt = request.cancelledAt() != null ? request.cancelledAt() : OffsetDateTime.now(zone);
-        OffsetDateTime start = policy.getStartDate().atStartOfDay(zone).toOffsetDateTime();
-        OffsetDateTime endExclusive = policy.getEndDate().plusDays(1).atStartOfDay(zone).toOffsetDateTime();
-
-        if (cancelledAt.isBefore(start) || cancelledAt.isAfter(endExclusive)) {
-            log.warn("Policy cancellation date out of range. policyId={} cancelledAt={} startDate={} endDate={}",
-                    id, cancelledAt, policy.getStartDate(), policy.getEndDate());
+        if (!cancelledAt.isBefore(endExclusive)) {  // cancelledAt >= endExclusive
+            log.warn("Policy cancellation out of range. policyId={} cancelledAt={} endDate={}",
+                    id, cancelledAt, policy.getEndDate());
             throw new BusinessException(ErrorCode.POLICY_CANCELLATION_DATE_OUT_OF_RANGE);
         }
 
-        policyMapper.applyCancel(request,cancelledAt,policy);
-
-        PolicyCalculationResponseDTO calculationResponse = new PolicyCalculationResponseDTO(
-                policy.getFinalPremiumAmount(),
-                null,null
-        );
+        policy.setStatus(PolicyStatus.CANCELLED);
+        policy.setCancelledAt(cancelledAt);
+        policy.setCancellationReason(request.cancellationReason());
 
         Policy saved = policyRepository.save(policy);
+
         log.info("Policy cancelled successfully. policyId={} status={} cancelledAt={}",
                 saved.getId(), saved.getStatus(), saved.getCancelledAt());
-        return policyMapper.toResponse(saved,calculationResponse);
+
+        PolicyCalculationResponseDTO calculationResponse =
+                new PolicyCalculationResponseDTO(saved.getFinalPremiumAmount(), null, null);
+
+        return policyMapper.toResponse(saved, calculationResponse);
     }
+
 
     // --------------------- GET ---------------------
 

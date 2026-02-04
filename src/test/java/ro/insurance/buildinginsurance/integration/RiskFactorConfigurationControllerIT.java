@@ -11,7 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-import ro.insurance.buildinginsurance.TestSecurityUsersConfig;
+import ro.insurance.buildinginsurance.config.TestSecurityUsersConfig;
 import ro.insurance.buildinginsurance.domain.entity.City;
 import ro.insurance.buildinginsurance.domain.entity.Country;
 import ro.insurance.buildinginsurance.domain.entity.County;
@@ -40,7 +40,7 @@ import static ro.insurance.buildinginsurance.util.RiskFactorConfigurationTestDat
 @ActiveProfiles("test")
 @Import(TestSecurityUsersConfig.class)
 @Transactional
-class RiskFactorConfigurationIT {
+class RiskFactorConfigurationControllerIT {
 
     @Autowired MockMvc mockMvc;
 
