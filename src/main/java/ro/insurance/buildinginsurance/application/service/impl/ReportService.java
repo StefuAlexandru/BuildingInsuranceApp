@@ -24,13 +24,13 @@ public class ReportService implements IReportService {
 
     private final EntityManager entityManager;
 
-    private final static String countryName = "cn.name";
-    private final static String countyName = "co.name";
-    private final static String cityName = "c.name";
-    private final static String brokerName = "br.name";
-    private final static String startDate = "p.startDate";
-    private final static String yearStartDate = "year(" + startDate + ")";
-    private final static String monthStartDate = "month(" + startDate + ")";
+    private final static String COUNTRY_NAME = "cn.name";
+    private final static String COUNTY_NAME = "co.name";
+    private final static String CITY_NAME = "c.name";
+    private final static String BROKER_NAME = "br.name";
+    private final static String START_DATE = "p.startDate";
+    private final static String YEAR_START_DATE = "year(" + START_DATE + ")";
+    private final static String MONTH_START_DATE = "month(" + START_DATE + ")";
 
     @Override
     public ReportResponseDTO getPoliciesReport(ReportRequestDTO request) {
@@ -89,31 +89,31 @@ public class ReportService implements IReportService {
             switch (g) {
                 case COUNTRY -> {
                     select.add("cast(cn.id as string)");
-                    select.add(countryName);
+                    select.add(COUNTRY_NAME);
                     groupBy.add("cn.id");
-                    groupBy.add(countryName);
-                    orderBy.add(countryName);
+                    groupBy.add(COUNTRY_NAME);
+                    orderBy.add(COUNTRY_NAME);
                 }
                 case COUNTY -> {
                     select.add("cast(co.id as string)");
-                    select.add(countyName);
+                    select.add(COUNTY_NAME);
                     groupBy.add("co.id");
-                    groupBy.add(countyName);
-                    orderBy.add(countyName);
+                    groupBy.add(COUNTY_NAME);
+                    orderBy.add(COUNTY_NAME);
                 }
                 case CITY -> {
                     select.add("cast(c.id as string)");
-                    select.add(cityName);
+                    select.add(CITY_NAME);
                     groupBy.add("c.id");
-                    groupBy.add(cityName);
-                    orderBy.add(cityName);
+                    groupBy.add(CITY_NAME);
+                    orderBy.add(CITY_NAME);
                 }
                 case BROKER -> {
                     select.add("cast(br.id as string)");
-                    select.add(brokerName);
+                    select.add(BROKER_NAME);
                     groupBy.add("br.id");
-                    groupBy.add(brokerName);
-                    orderBy.add(brokerName);
+                    groupBy.add(BROKER_NAME);
+                    orderBy.add(BROKER_NAME);
                 }
             }
         }
@@ -124,17 +124,17 @@ public class ReportService implements IReportService {
                 // nothing
             }
             case DAY -> {
-                select.add(startDate);
-                groupBy.add(startDate);
-                orderBy.add(startDate);
+                select.add(START_DATE);
+                groupBy.add(START_DATE);
+                orderBy.add(START_DATE);
             }
             case MONTH -> {
-                select.add(yearStartDate);
-                select.add(monthStartDate);
-                groupBy.add(yearStartDate);
-                groupBy.add(monthStartDate);
-                orderBy.add(yearStartDate);
-                orderBy.add(monthStartDate);
+                select.add(YEAR_START_DATE);
+                select.add(MONTH_START_DATE);
+                groupBy.add(YEAR_START_DATE);
+                groupBy.add(MONTH_START_DATE);
+                orderBy.add(YEAR_START_DATE);
+                orderBy.add(MONTH_START_DATE);
             }
         }
 
@@ -149,8 +149,8 @@ public class ReportService implements IReportService {
         select.add("coalesce(sum(b.insuredValue), 0)");
 
         List<String> where = new ArrayList<>();
-        where.add("p.startDate >= :from");
-        where.add("p.startDate <= :to");
+        where.add(START_DATE + " >= :from");
+        where.add(START_DATE + " <= :to");
 
         if (request.status() != null) where.add("p.status = :status");
         if (request.currencyId() != null) where.add("p.currency.id = :currencyId");
