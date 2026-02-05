@@ -24,13 +24,13 @@ public class ReportService implements IReportService {
 
     private final EntityManager entityManager;
 
-    private final static String COUNTRY_NAME = "cn.name";
-    private final static String COUNTY_NAME = "co.name";
-    private final static String CITY_NAME = "c.name";
-    private final static String BROKER_NAME = "br.name";
-    private final static String START_DATE = "p.startDate";
-    private final static String YEAR_START_DATE = "year(" + START_DATE + ")";
-    private final static String MONTH_START_DATE = "month(" + START_DATE + ")";
+    private static final String COUNTRY_NAME = "cn.name";
+    private static final String COUNTY_NAME = "co.name";
+    private static final String CITY_NAME = "c.name";
+    private static final String BROKER_NAME = "br.name";
+    private static final String START_DATE = "p.startDate";
+    private static final String YEAR_START_DATE = "year(" + START_DATE + ")";
+    private static final String MONTH_START_DATE = "month(" + START_DATE + ")";
 
     @Override
     public ReportResponseDTO getPoliciesReport(ReportRequestDTO request) {
