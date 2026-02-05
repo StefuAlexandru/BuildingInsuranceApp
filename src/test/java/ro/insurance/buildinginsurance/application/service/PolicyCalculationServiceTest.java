@@ -10,6 +10,7 @@ import ro.insurance.buildinginsurance.domain.entity.Currency;
 import ro.insurance.buildinginsurance.domain.entity.FeeConfiguration;
 import ro.insurance.buildinginsurance.domain.entity.RiskFactorConfiguration;
 import ro.insurance.buildinginsurance.domain.enums.BuildingType;
+import ro.insurance.buildinginsurance.domain.enums.ErrorCode;
 import ro.insurance.buildinginsurance.domain.enums.FeeType;
 import ro.insurance.buildinginsurance.domain.enums.RiskFactorLevel;
 import ro.insurance.buildinginsurance.infrastructure.persistance.repository.CurrencyRepository;
@@ -18,6 +19,7 @@ import ro.insurance.buildinginsurance.infrastructure.persistance.repository.Risk
 import ro.insurance.buildinginsurance.util.CurrencyTestDataFactory;
 import ro.insurance.buildinginsurance.web.dto.policyCalculationDto.PolicyCalculationRequestDTO;
 import ro.insurance.buildinginsurance.web.dto.policyCalculationDto.PolicyCalculationResponseDTO;
+import ro.insurance.buildinginsurance.web.error.BusinessException;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -153,22 +155,70 @@ class PolicyCalculationServiceTest {
     }
 
     @Test
-    void calculatePremium_nonRonCurrency_shouldConvertFromBase() {
-        LocalDate date = LocalDate.of(2026, 1, 30);
-        PolicyCalculationRequestDTO req = aPolicyCalculationRequestWithDate(date);
+    void calculatePremium_shouldConvertFromRON_whenCurrencyIsNotRON() {
+        // Arrange
+        LocalDate date = LocalDate.of(2026, 2, 4);
 
-        Currency eur = aCurrencyWithId(1L);
+        when(feeConfigurationRepository.findAllActiveOn(date)).thenReturn(List.of());
+        when(riskFactorConfigurationRepository.findRiskFactorsByBuildingIdActiveOn(1L, date)).thenReturn(List.of());
+
+        Currency eur = new Currency();
+        eur.setId(2L);
         eur.setCode("EUR");
-        eur.setExchangeRateToBase(new BigDecimal("5.00"));
+        eur.setExchangeRateToBase(new BigDecimal("5")); // 1 EUR = 5 RON (rate to base)
+        when(currencyRepository.findById(2L)).thenReturn(Optional.of(eur));
 
-        FeeConfiguration fee = aFee(FeeType.ADMIN_FEE, new BigDecimal("30"));
+        PolicyCalculationRequestDTO req = new PolicyCalculationRequestDTO(new BigDecimal("100.00"), 1L, 2L, date);
 
-        when(currencyRepository.findById(1L)).thenReturn(Optional.of(eur));
+        // Act
+        PolicyCalculationResponseDTO res = policyCalculationService.calculatePremium(req);
+
+        // Assert
+        // 100 RON / 5 = 20 EUR
+        assertEquals(0, new BigDecimal("20.00").compareTo(res.finalPremium()));
+        assertEquals(0, new BigDecimal("0").compareTo(res.totalPercent()));
+        assertTrue(res.breakdown().isEmpty());
+    }
+
+    @Test
+    void calculatePremium_shouldThrow_whenCurrencyNotFound() {
+        // Arrange
+        LocalDate date = LocalDate.of(2026, 2, 4);
+
+        when(feeConfigurationRepository.findAllActiveOn(date)).thenReturn(List.of());
+        when(riskFactorConfigurationRepository.findRiskFactorsByBuildingIdActiveOn(1L, date)).thenReturn(List.of());
+        when(currencyRepository.findById(999L)).thenReturn(Optional.empty());
+
+        PolicyCalculationRequestDTO req = new PolicyCalculationRequestDTO(new BigDecimal("100.00"), 1L, 999L, date);// Act
+
+        // Act + Assert
+        BusinessException ex = assertThrows(BusinessException.class, () -> policyCalculationService.calculatePremium(req));
+        assertAll(
+                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.CURRENCY_NOT_FOUND.name().equals(e.getCode()))),
+                () -> assertEquals(1, ex.getErrors().size())
+        );
+    }
+
+    @Test
+    void calculatePremium_shouldThrow_whenFinalPremiumNonPositive() {
+        // Arrange
+        LocalDate date = LocalDate.of(2026, 2, 4);
+
+        FeeConfiguration fee = new FeeConfiguration();
+        fee.setFeeType(FeeType.ADMIN_FEE);
+        fee.setPercentage(new BigDecimal("-200"));
+
         when(feeConfigurationRepository.findAllActiveOn(date)).thenReturn(List.of(fee));
         when(riskFactorConfigurationRepository.findRiskFactorsByBuildingIdActiveOn(1L, date)).thenReturn(List.of());
 
-        PolicyCalculationResponseDTO res = policyCalculationService.calculatePremium(req);
+        PolicyCalculationRequestDTO req = new PolicyCalculationRequestDTO(new BigDecimal("100.00"), 1L, 1L, date);
 
-        assertEquals(new BigDecimal("26.00"), res.finalPremium());
+        // Act + Assert
+        BusinessException ex = assertThrows(BusinessException.class, () -> policyCalculationService.calculatePremium(req));
+
+        assertAll(
+                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.INVALID_FINAL_PREMIUM.name().equals(e.getCode()))),
+                () -> assertEquals(1, ex.getErrors().size())
+        );
     }
 }

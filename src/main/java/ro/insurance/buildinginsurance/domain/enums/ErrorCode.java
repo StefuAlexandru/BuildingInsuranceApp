@@ -32,8 +32,6 @@ public enum ErrorCode {
     BROKER_CODE_ALREADY_EXISTS(HttpStatus.CONFLICT, "Broker code already exists"),
     POLICY_NOT_CANCELLABLE(HttpStatus.CONFLICT, "Policy not cancellable"),
     POLICY_CANCELLATION_DATE_OUT_OF_RANGE(HttpStatus.CONFLICT, "Policy is out of availability range"),
-    BROKER_IS_NOT_ACTIVE(HttpStatus.CONFLICT, "Broker is not active"),
-
     // 404
     CITY_NOT_FOUND(HttpStatus.NOT_FOUND, "City not found"),
     CLIENT_NOT_FOUND(HttpStatus.NOT_FOUND, "Client not found"),
@@ -53,6 +51,8 @@ public enum ErrorCode {
     INVALID_RISK_FACTOR_SCOPE(HttpStatus.BAD_REQUEST, "Invalid risk factor scope"),
     CURRENCY_IS_NOT_ACTIVE(HttpStatus.BAD_REQUEST, "Currency is not active"),
     REPORT_INVALID_REQUEST(HttpStatus.BAD_REQUEST, "Report invalid request"),
+    INVALID_FINAL_PREMIUM(HttpStatus.BAD_REQUEST, "Final premium invalid"),
+    BROKER_IS_NOT_ACTIVE(HttpStatus.BAD_REQUEST, "Broker is not active"),
     ;
 
 

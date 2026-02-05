@@ -62,9 +62,16 @@ public class PolicyCalculationService implements IPolicyCalculationService {
 
         BigDecimal multiplier = BigDecimal.ONE.add(totalPercent);
         BigDecimal finalPremium = policyCalculationRequestDTO.basePremium().multiply(multiplier);
+        if(finalPremium.compareTo(BigDecimal.ZERO)<=0){
+            log.warn("Policy final premium is negative");
+            throw new BusinessException(ErrorCode.INVALID_FINAL_PREMIUM);
+        }
 
         Currency currency = currencyRepository.findById(policyCalculationRequestDTO.currencyId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.CURRENCY_NOT_FOUND));
+                .orElseThrow(() -> {
+                    log.warn("Currency with id {} not found for policy calculation", policyCalculationRequestDTO.currencyId());
+                    return new BusinessException(ErrorCode.CURRENCY_NOT_FOUND);}
+                );
 
         finalPremium = convertFromBase(finalPremium,currency);
 

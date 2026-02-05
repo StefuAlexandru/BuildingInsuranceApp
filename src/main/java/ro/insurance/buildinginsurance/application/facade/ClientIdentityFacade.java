@@ -3,6 +3,7 @@ package ro.insurance.buildinginsurance.application.facade;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ro.insurance.buildinginsurance.util.StringNormalizer;
 import ro.insurance.buildinginsurance.web.dto.clientDto.ClientIdentityPatchDTO;
 import ro.insurance.buildinginsurance.domain.entity.Client;
 import ro.insurance.buildinginsurance.domain.enums.ClientType;
@@ -12,6 +13,8 @@ import ro.insurance.buildinginsurance.infrastructure.persistance.repository.Clie
 import ro.insurance.buildinginsurance.application.service.IClientChangeHistoryService;
 
 import java.util.Objects;
+
+import static ro.insurance.buildinginsurance.util.StringNormalizer.trimToNull;
 
 @Service
 @RequiredArgsConstructor
@@ -84,11 +87,5 @@ public class ClientIdentityFacade {
     private String resolveNewIdentificationNumber(Client client, ClientIdentityPatchDTO clientIdentityPatchDTO) {
         String raw = clientIdentityPatchDTO.newIdentificationNumber();
         return (raw != null && !raw.isBlank()) ? raw.trim() : client.getIdentificationNumber();
-    }
-
-    private static String trimToNull(String s) {
-        if (s == null) return null;
-        String t = s.trim();
-        return t.isBlank() ? null : t;
     }
 }

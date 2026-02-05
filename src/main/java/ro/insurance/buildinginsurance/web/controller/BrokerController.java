@@ -51,5 +51,15 @@ public class BrokerController {
         return ResponseEntity.ok(brokerService.getBrokers(pageable));
     }
 
+    // ----------------------  UPDATE  ----------------------
+
+    @PutMapping("/{id}")
+    public ResponseEntity<BrokerResponseDTO> updateBroker(
+            @PathVariable Long id,
+            @Valid @RequestBody BrokerRequestDTO request
+    ) {
+        return ResponseEntity.ok(brokerService.updateBroker(id,request));
+    }
+
 
 }

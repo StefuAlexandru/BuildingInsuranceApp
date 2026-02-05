@@ -30,13 +30,11 @@ public class BrokerService implements IBrokerService {
     public BrokerResponseDTO createBroker(BrokerRequestDTO brokerRequestDTO) {
         log.info("Creating new broker request with code {}", brokerRequestDTO.brokerCode());
 
-        if (brokerRepository.existsByBrokerCodeIgnoreCase(brokerRequestDTO.brokerCode())) {
-            log.warn("Broker code {} already exists", brokerRequestDTO.brokerCode());
-            throw new BusinessException(ErrorCode.BROKER_CODE_ALREADY_EXISTS);
-        }
+        checkBrokerCodeUniqueness(brokerRequestDTO);
 
         Broker broker = brokerMapper.toEntity(brokerRequestDTO);
         Broker saved = brokerRepository.save(broker);
+
         log.info("Created broker with code {}", saved.getBrokerCode());
         return brokerMapper.toResponse(saved);
     }
@@ -91,6 +89,23 @@ public class BrokerService implements IBrokerService {
         return brokers.map(brokerMapper::toResponse);
     }
 
+    // ---------------------  UPDATE  ---------------------
+
+    @Override
+    public BrokerResponseDTO updateBroker(Long id, BrokerRequestDTO brokerRequestDTO) {
+        log.info("Updating broker request with id {}", id);
+
+        Broker broker = findBrokerOrThrow(id);
+        checkBrokerCodeUniqueness(brokerRequestDTO);
+
+        brokerMapper.updateFromDto(brokerRequestDTO, broker);
+        Broker saved = brokerRepository.save(broker);
+
+        log.info("Broker with id {} has been updated", id);
+
+        return brokerMapper.toResponse(saved);
+    }
+
     // ---------------------  HELPERS  ---------------------
 
     private Broker findBrokerOrThrow(Long id){
@@ -98,5 +113,12 @@ public class BrokerService implements IBrokerService {
             log.warn("Broker with id {} not found", id);
             return new BusinessException(ErrorCode.BROKER_NOT_FOUND);
         });
+    }
+
+    private void checkBrokerCodeUniqueness(BrokerRequestDTO brokerRequestDTO) {
+        if (brokerRepository.existsByBrokerCodeIgnoreCase(brokerRequestDTO.brokerCode())) {
+            log.warn("Broker code {} already exists", brokerRequestDTO.brokerCode());
+            throw new BusinessException(ErrorCode.BROKER_CODE_ALREADY_EXISTS);
+        }
     }
 }
