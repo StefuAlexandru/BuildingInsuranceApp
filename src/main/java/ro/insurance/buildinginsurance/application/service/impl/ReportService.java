@@ -1,7 +1,6 @@
 package ro.insurance.buildinginsurance.application.service.impl;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +23,14 @@ import java.util.*;
 public class ReportService implements IReportService {
 
     private final EntityManager entityManager;
+
+    private final static String countryName = "cn.name";
+    private final static String countyName = "co.name";
+    private final static String cityName = "c.name";
+    private final static String brokerName = "br.name";
+    private final static String startDate = "p.startDate";
+    private final static String yearStartDate = "year(" + startDate + ")";
+    private final static String monthStartDate = "month(" + startDate + ")";
 
     @Override
     public ReportResponseDTO getPoliciesReport(ReportRequestDTO request) {
@@ -82,31 +89,31 @@ public class ReportService implements IReportService {
             switch (g) {
                 case COUNTRY -> {
                     select.add("cast(cn.id as string)");
-                    select.add("cn.name");
+                    select.add(countryName);
                     groupBy.add("cn.id");
-                    groupBy.add("cn.name");
-                    orderBy.add("cn.name");
+                    groupBy.add(countryName);
+                    orderBy.add(countryName);
                 }
                 case COUNTY -> {
                     select.add("cast(co.id as string)");
-                    select.add("co.name");
+                    select.add(countyName);
                     groupBy.add("co.id");
-                    groupBy.add("co.name");
-                    orderBy.add("co.name");
+                    groupBy.add(countyName);
+                    orderBy.add(countyName);
                 }
                 case CITY -> {
                     select.add("cast(c.id as string)");
-                    select.add("c.name");
+                    select.add(cityName);
                     groupBy.add("c.id");
-                    groupBy.add("c.name");
-                    orderBy.add("c.name");
+                    groupBy.add(cityName);
+                    orderBy.add(cityName);
                 }
                 case BROKER -> {
                     select.add("cast(br.id as string)");
-                    select.add("br.name");
+                    select.add(brokerName);
                     groupBy.add("br.id");
-                    groupBy.add("br.name");
-                    orderBy.add("br.name");
+                    groupBy.add(brokerName);
+                    orderBy.add(brokerName);
                 }
             }
         }
@@ -117,17 +124,17 @@ public class ReportService implements IReportService {
                 // nothing
             }
             case DAY -> {
-                select.add("p.startDate");
-                groupBy.add("p.startDate");
-                orderBy.add("p.startDate");
+                select.add(startDate);
+                groupBy.add(startDate);
+                orderBy.add(startDate);
             }
             case MONTH -> {
-                select.add("year(p.startDate)");
-                select.add("month(p.startDate)");
-                groupBy.add("year(p.startDate)");
-                groupBy.add("month(p.startDate)");
-                orderBy.add("year(p.startDate)");
-                orderBy.add("month(p.startDate)");
+                select.add(yearStartDate);
+                select.add(monthStartDate);
+                groupBy.add(yearStartDate);
+                groupBy.add(monthStartDate);
+                orderBy.add(yearStartDate);
+                orderBy.add(monthStartDate);
             }
         }
 

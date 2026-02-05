@@ -76,7 +76,7 @@ class PolicyServiceTest {
         PolicyResponseDTO response = aPolicyResponse();
 
         when(policyFacade.resolveCreateContext(request)).thenReturn(ctx);
-        when(policyMapper.toEntity(eq(request), eq(client), eq(building), eq(broker), eq(currency))).thenReturn(entity);
+        when(policyMapper.toEntity(request, client, building, broker, currency)).thenReturn(entity);
 
         when(policyCalculationService.calculatePremium(any()))
                 .thenReturn(new PolicyCalculationResponseDTO(new BigDecimal("130.00"), new BigDecimal("30"), List.of()));
@@ -211,7 +211,7 @@ class PolicyServiceTest {
         policy.setStartDate(LocalDate.of(2026, 1, 1));
         policy.setEndDate(LocalDate.of(2026, 12, 31));
 
-        PolicyCancelRequestDTO req = new PolicyCancelRequestDTO("Client request");
+        PolicyCancelRequestDTO request = new PolicyCancelRequestDTO("Client request");
 
         when(policyRepository.findById(id)).thenReturn(Optional.of(policy));
         when(policyRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
@@ -219,7 +219,7 @@ class PolicyServiceTest {
         PolicyResponseDTO response = mock(PolicyResponseDTO.class);
         when(policyMapper.toResponse(any(Policy.class), any(PolicyCalculationResponseDTO.class))).thenReturn(response);
 
-        PolicyResponseDTO res = policyService.cancelPolicy(id, req);
+        PolicyResponseDTO res = policyService.cancelPolicy(id, request);
         assertSame(response, res);
 
         verify(policyFacade).validateCancelOrThrow(policy);
@@ -255,10 +255,12 @@ class PolicyServiceTest {
 
         when(policyRepository.findById(id)).thenReturn(Optional.of(policy));
 
-        BusinessException ex = assertThrows(BusinessException.class,
-                () -> svcLate.cancelPolicy(id, new PolicyCancelRequestDTO("x")));
+        PolicyCancelRequestDTO request = new PolicyCancelRequestDTO("x");
+
+        BusinessException ex = assertThrows(BusinessException.class, () -> svcLate.cancelPolicy(id, request));
 
         assertHasError(ex, ErrorCode.POLICY_CANCELLATION_DATE_OUT_OF_RANGE);
+
 
         verify(policyFacade).validateCancelOrThrow(policy);
         verify(policyRepository, never()).save(any());
@@ -270,8 +272,9 @@ class PolicyServiceTest {
         Long id = 404L;
         when(policyRepository.findById(id)).thenReturn(Optional.empty());
 
-        BusinessException ex = assertThrows(BusinessException.class,
-                () -> policyService.cancelPolicy(id, new PolicyCancelRequestDTO("x")));
+        PolicyCancelRequestDTO request = new PolicyCancelRequestDTO("x");
+
+        BusinessException ex = assertThrows(BusinessException.class, () -> policyService.cancelPolicy(id, request));
 
         assertHasError(ex, ErrorCode.POLICY_NOT_FOUND);
 
@@ -328,8 +331,7 @@ class PolicyServiceTest {
         Long id = 404L;
         when(policyRepository.findDetailsById(id)).thenReturn(Optional.empty());
 
-        BusinessException ex = assertThrows(BusinessException.class,
-                () -> policyService.getPolicyDetails(id));
+        BusinessException ex = assertThrows(BusinessException.class, () -> policyService.getPolicyDetails(id));
 
         assertHasError(ex, ErrorCode.POLICY_NOT_FOUND);
 
