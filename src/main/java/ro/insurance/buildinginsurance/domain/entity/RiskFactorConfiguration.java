@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ro.insurance.buildinginsurance.domain.enums.BuildingType;
 import ro.insurance.buildinginsurance.domain.enums.RiskFactorLevel;
-import ro.insurance.buildinginsurance.util.ValidityUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
