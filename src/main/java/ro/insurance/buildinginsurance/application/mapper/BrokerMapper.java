@@ -17,6 +17,10 @@ public interface BrokerMapper {
 
     BrokerResponseDTO toResponse(Broker broker);
 
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "active", ignore = true)
+    void updateFromDto(BrokerRequestDTO brokerRequestDTO, @MappingTarget Broker broker);
+
     @AfterMapping
     default void normalize(@MappingTarget Broker broker, BrokerRequestDTO dto) {
         broker.setBrokerCode(StringNormalizer.normalizeUpper(dto.brokerCode()));

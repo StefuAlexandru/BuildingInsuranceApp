@@ -134,6 +134,11 @@ public class ReportService implements IReportService {
         // Aggregates
         select.add("count(p.id)");
         select.add("coalesce(sum(p.finalPremiumAmount * cur.exchangeRateToBase), 0)");
+        // This has to be patched because
+        // If I have one building with 3 active policies then the total insured value will be triple
+        // If I change it with sum(distinct b.insuredValue) then for two buildings with the same
+        // insured value the sum will wrong
+        // I have to send the building id also
         select.add("coalesce(sum(b.insuredValue), 0)");
 
         List<String> where = new ArrayList<>();

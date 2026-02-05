@@ -13,4 +13,6 @@ public interface IBrokerService {
 
     BrokerResponseDTO getBroker(Long id);
     Page<BrokerResponseDTO> getBrokers(Pageable pageable);
+
+    BrokerResponseDTO updateBroker(Long id, BrokerRequestDTO brokerRequestDTO);
 }

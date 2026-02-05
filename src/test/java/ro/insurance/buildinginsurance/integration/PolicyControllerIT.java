@@ -2,6 +2,7 @@ package ro.insurance.buildinginsurance.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -71,6 +73,7 @@ class PolicyControllerIT {
     @Autowired BrokerMapper brokerMapper;
     @Autowired CurrencyMapper currencyMapper;
 
+    private static final String ADMIN = "admin";
     private static final String USER = "broker";
     private static final String PASS = "pass";
     private static final String BASE = "/api/brokers/policies";
@@ -106,52 +109,17 @@ class PolicyControllerIT {
         Currency currency = seedCurrency();
 
         // ---------- CREATE CLIENT ----------
-        var clientRequest = aClientRequestWithAddress(seed.city().getId(), "Str. Gheo", "10A");
-
-        var clientResponse = mockMvc.perform(post("/api/brokers/clients")
-                .with(httpBasic(USER,PASS))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(clientRequest)))
-                .andExpectAll(
-                        status().isCreated(),
-                        jsonPath("$.id").exists()
-                ).andReturn();
-
-        long clientId = objectMapper.readTree(clientResponse.getResponse().getContentAsByteArray()).get("id").asLong();
+        long clientId = seedClientAndGetId(seed);
 
         // ---------- CREATE BUILDING ----------
-        var buildingRequest = aBuildingRequest();
-        BuildingRequestDTO buildingRequestDTO = new BuildingRequestDTO(
-                clientId,
-                seed.city().getId(),
-                buildingRequest.street(),
-                buildingRequest.number(),
-                buildingRequest.constructionYear(),
-                buildingRequest.buildingType(),
-                buildingRequest.floors(),
-                buildingRequest.surfaceArea(),
-                buildingRequest.insuredValue(),
-                buildingRequest.floodZone(),
-                buildingRequest.earthquakeZone()
-        );
-
-        var buildingRes = mockMvc.perform(post("/api/brokers/buildings")
-                        .with(httpBasic(USER, PASS))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(buildingRequestDTO)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").exists())
-                .andReturn();
-
-        long buildingId = objectMapper.readTree(buildingRes.getResponse().getContentAsByteArray())
-                .get("id").asLong();
+        long buildingId = seedBuildingAndGetId(clientId, seed);
 
         PolicyCreateRequestDTO createRequest = aPolicyCreateRequest(
                 clientId,
                 buildingId,
                 broker.getId(),
                 currency.getId(),
-                LocalDate.of(2026, 2, 5),   // > today din FixedClockConfig (2026-02-04)
+                LocalDate.of(2026, 2, 5),   // > today FixedClockConfig (2026-02-04)
                 LocalDate.of(2026, 3, 5)
         );
 
@@ -234,6 +202,240 @@ class PolicyControllerIT {
                 .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
 
         assertEquals(0, expectedCommission.compareTo(active.getBrokerCommissionAmount()));
+    }
+
+    @Test
+    void createDraft_withNoExistingClient_shouldThrow_andNotPersist() throws Exception {
+        Seed seed = seedGeography();
+        Broker broker = seedBroker();
+        Currency currency = seedCurrency();
+
+        long before = policyRepository.count();
+
+        // ---------- CREATE CLIENT ----------
+        long clientId = seedClientAndGetId(seed);
+
+        // ---------- CREATE BUILDING ----------
+        long buildingId = seedBuildingAndGetId(clientId,seed);
+
+        PolicyCreateRequestDTO createRequest = aPolicyCreateRequest(
+                999L, // Not in db
+                buildingId,
+                broker.getId(),
+                currency.getId(),
+                LocalDate.of(2026, 2, 5),   // > today FixedClockConfig (2026-02-04)
+                LocalDate.of(2026, 3, 5)
+        );
+
+        var result = mockMvc.perform(post(BASE)
+                        .with(httpBasic(USER, PASS))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createRequest)))
+                .andExpect(status().isNotFound())
+                .andReturn();
+
+        assertEquals(before, policyRepository.count());
+
+        String body = result.getResponse().getContentAsString().toLowerCase();
+        assertTrue(body.contains("client") || body.contains("not found"));
+    }
+
+    @Test
+    void createDraft_withNoExistingBuilding_shouldThrow_andNotPersist() throws Exception {
+        Seed seed = seedGeography();
+        Broker broker = seedBroker();
+        Currency currency = seedCurrency();
+
+        long before = policyRepository.count();
+
+        // ---------- CREATE CLIENT ----------
+        long clientId = seedClientAndGetId(seed);
+
+        // ---------- DO NOT CREATE BUILDING ----------
+
+        PolicyCreateRequestDTO createRequest = aPolicyCreateRequest(
+                clientId,
+                999L,
+                broker.getId(),
+                currency.getId(),
+                LocalDate.of(2026, 2, 5),   // > today FixedClockConfig (2026-02-04)
+                LocalDate.of(2026, 3, 5)
+        );
+
+        var result = mockMvc.perform(post(BASE)
+                        .with(httpBasic(USER, PASS))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createRequest)))
+                .andExpect(status().isNotFound())
+                .andReturn();
+
+        assertEquals(before, policyRepository.count());
+
+        String body = result.getResponse().getContentAsString().toLowerCase();
+        assertTrue(body.contains("building") || body.contains("not found"));
+    }
+
+    @Test
+    void createPolicy_shouldReturn400_whenPremiumNegative() throws Exception {
+        Seed seed = seedGeography();
+        Broker broker = seedBroker();
+        Currency currency = seedCurrency();
+
+        long clientId = seedClientAndGetId(seed);
+        long buildingId = seedBuildingAndGetId(clientId, seed);
+
+        long before = policyRepository.count();
+
+        PolicyCreateRequestDTO request = aPolicyCreateRequest(
+                clientId,
+                buildingId,
+                broker.getId(),
+                currency.getId(),
+                LocalDate.of(2026, 2, 5),
+                LocalDate.of(2026, 3, 5)
+        );
+
+        ObjectNode payload = objectMapper.valueToTree(request);
+        payload.put("basePremiumAmount", new BigDecimal("-100.00"));
+
+        var result = mockMvc.perform(post(BASE)
+                        .with(httpBasic(USER, PASS))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(payload)))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        assertEquals(before, policyRepository.count());
+
+        String body = result.getResponse().getContentAsString().toLowerCase();
+
+        assertTrue(body.contains("base premium amount should be greater than zero"));
+    }
+
+    @Test
+    void deactivateBroker_thenCreatingPolicyWithThatBrokerIsRejected_existingPoliciesUnaffected() throws Exception {
+        Seed seed = seedGeography();
+        Currency currency = seedCurrency();
+
+        // ---------- CREATE BROKER  ----------
+        long brokerId = seedBrokerAndGetId();
+
+        // ---------- CREATE CLIENT  ----------
+        long clientId = seedClientAndGetId(seed);
+
+        // ---------- CREATE BUILDING  ----------
+        long buildingId = seedBuildingAndGetId(clientId, seed);
+
+        // ---------- CREATE POLICY  ----------
+        PolicyCreateRequestDTO createRequest1 = aPolicyCreateRequest(
+                clientId,
+                buildingId,
+                brokerId,
+                currency.getId(),
+                LocalDate.of(2026, 2, 5),
+                LocalDate.of(2026, 3, 5)
+        );
+
+        var policyResponse1 = mockMvc.perform(post(BASE)
+                        .with(httpBasic(USER, PASS))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createRequest1)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").exists())
+                .andExpect(jsonPath("$.status").value("DRAFT"))
+                .andReturn();
+
+        long policyId1 = objectMapper.readTree(policyResponse1.getResponse().getContentAsByteArray()).get("id").asLong();
+
+        // ---------- DEACTIVATE BROKER  ----------
+        mockMvc.perform(post("/api/admin/brokers/deactivate/{id}", brokerId)
+                        .with(httpBasic(ADMIN, PASS)))
+                .andExpect(status().isOk());
+
+        long before = policyRepository.count();
+
+        PolicyCreateRequestDTO createRequest2 = aPolicyCreateRequest(
+                clientId,
+                buildingId,
+                brokerId,                 // same broker, now deactivated
+                currency.getId(),
+                LocalDate.of(2026, 2, 6),
+                LocalDate.of(2026, 3, 6)
+        );
+
+        mockMvc.perform(post(BASE)
+                        .with(httpBasic(USER, PASS))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createRequest2)))
+                .andExpectAll(
+                        status().isBadRequest(),
+                        content().string(containsString("Broker is not active"))
+                ).andReturn();
+
+        assertEquals(before, policyRepository.count(), "No new policy should be created");
+
+        // Existing policy remains unaffected
+        Policy existing = policyRepository.findById(policyId1).orElseThrow();
+        assertEquals(PolicyStatus.DRAFT, existing.getStatus());
+        assertEquals(brokerId, existing.getBroker().getId());
+    }
+
+    // -------------------  HELPERS  -------------------
+
+    private long seedBuildingAndGetId(long clientId, Seed seed) throws Exception {
+        var buildingRequest = aBuildingRequest();
+        BuildingRequestDTO buildingRequestDTO = new BuildingRequestDTO(
+                clientId,
+                seed.city().getId(),
+                buildingRequest.street(),
+                buildingRequest.number(),
+                buildingRequest.constructionYear(),
+                buildingRequest.buildingType(),
+                buildingRequest.floors(),
+                buildingRequest.surfaceArea(),
+                buildingRequest.insuredValue(),
+                buildingRequest.floodZone(),
+                buildingRequest.earthquakeZone()
+        );
+
+        var buildingResponse = mockMvc.perform(post("/api/brokers/buildings")
+                        .with(httpBasic(USER, PASS))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(buildingRequestDTO)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").exists())
+                .andReturn();
+
+        return objectMapper.readTree(buildingResponse.getResponse().getContentAsByteArray()).get("id").asLong();
+    }
+
+    private long seedClientAndGetId(Seed seed) throws Exception {
+        var clientRequest = aClientRequestWithAddress(seed.city().getId(), "Str. Gheo", "10A");
+
+        var clientResponse = mockMvc.perform(post("/api/brokers/clients")
+                        .with(httpBasic(USER,PASS))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(clientRequest)))
+                .andExpectAll(
+                        status().isCreated(),
+                        jsonPath("$.id").exists()
+                ).andReturn();
+
+        return objectMapper.readTree(clientResponse.getResponse().getContentAsByteArray()).get("id").asLong();
+    }
+
+    private long seedBrokerAndGetId() throws Exception {
+        BrokerRequestDTO brokerRequest = aBrokerRequest();
+
+        var brokerResponse = mockMvc.perform(post("/api/admin/brokers")
+                        .with(httpBasic(ADMIN, PASS))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(brokerRequest)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").exists())
+                .andReturn();
+
+        return objectMapper.readTree(brokerResponse.getResponse().getContentAsByteArray()).get("id").asLong();
     }
 
 }

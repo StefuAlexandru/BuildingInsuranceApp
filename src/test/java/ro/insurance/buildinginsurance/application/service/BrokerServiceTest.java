@@ -226,4 +226,58 @@ class BrokerServiceTest {
         verify(brokerMapper).toResponse(b2);
         verifyNoMoreInteractions(brokerRepository, brokerMapper);
     }
+
+    // --------------------- UPDATE ---------------------
+
+    @Test
+    void updateBroker_shouldUpdateAndReturnResponse_whenUniqueCode() {
+        // Arrange
+        Broker existing = BrokerTestDataFactory.aBrokerWithId(1L);
+
+        BrokerRequestDTO req = new BrokerRequestDTO(
+                "NEW-CODE", "New Name", "new@email.com", "0711111111", existing.getCommissionPct()
+        );
+
+        BrokerResponseDTO resp = mock(BrokerResponseDTO.class);
+
+        when(brokerRepository.findById(1L)).thenReturn(Optional.of(existing));
+        when(brokerRepository.existsByBrokerCodeIgnoreCase("NEW-CODE")).thenReturn(false);
+        when(brokerRepository.save(existing)).thenReturn(existing);
+        when(brokerMapper.toResponse(existing)).thenReturn(resp);
+
+        // Act
+        BrokerResponseDTO result = brokerService.updateBroker(1L, req);
+
+        // Assert
+        assertSame(resp, result);
+
+        verify(brokerRepository).findById(1L);
+        verify(brokerRepository).existsByBrokerCodeIgnoreCase("NEW-CODE");
+        verify(brokerMapper).updateFromDto(req, existing);
+        verify(brokerRepository).save(existing);
+        verify(brokerMapper).toResponse(existing);
+        verifyNoMoreInteractions(brokerRepository, brokerMapper);
+    }
+
+    @Test
+    void updateBroker_shouldThrow_whenBrokerCodeAlreadyExists() {
+        // Arrange
+        Broker existing = BrokerTestDataFactory.aBrokerWithId(1L);
+
+        BrokerRequestDTO req = new BrokerRequestDTO(
+                "DUP-CODE", "New Name", "new@email.com", "0711111111", existing.getCommissionPct()
+        );
+
+        when(brokerRepository.findById(1L)).thenReturn(Optional.of(existing));
+        when(brokerRepository.existsByBrokerCodeIgnoreCase("DUP-CODE")).thenReturn(true);
+
+        // Act + Assert
+        assertThrows(BusinessException.class, () -> brokerService.updateBroker(1L, req));
+
+        verify(brokerRepository).findById(1L);
+        verify(brokerRepository).existsByBrokerCodeIgnoreCase("DUP-CODE");
+        verifyNoMoreInteractions(brokerRepository);
+        verifyNoInteractions(brokerMapper);
+    }
+
 }
