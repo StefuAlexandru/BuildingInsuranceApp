@@ -39,6 +39,10 @@ class FeeConfigurationControllerIT {
     @Autowired
     FeeConfigurationRepository feeConfigurationRepository;
 
+    private static final String USER = "admin";
+    private static final String PASS = "pass";
+    private static final String BASE = "/api/admin/fees";
+
     ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
@@ -54,8 +58,8 @@ class FeeConfigurationControllerIT {
         );
 
 
-        var createResult = mockMvc.perform(post("/api/admin/fees")
-                        .with(httpBasic("admin", "pass"))
+        var createResult = mockMvc.perform(post(BASE)
+                        .with(httpBasic(USER,PASS))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isCreated())
@@ -80,8 +84,8 @@ class FeeConfigurationControllerIT {
         );
 
 
-        mockMvc.perform(put("/api/admin/fees/{id}", id)
-                        .with(httpBasic("admin", "pass"))
+        mockMvc.perform(put(BASE + "/{id}", id)
+                        .with(httpBasic(USER,PASS))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(updateBody))
                 .andExpect(status().isOk())

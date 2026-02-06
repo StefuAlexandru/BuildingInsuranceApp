@@ -40,6 +40,8 @@ class BuildingControllerTest {
     @InjectMocks
     private BuildingController buildingController;
 
+    private static final String BASE = "/api/brokers/buildings";
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach
@@ -118,7 +120,7 @@ class BuildingControllerTest {
         when(buildingService.registerNewBuilding(any(BuildingRequestDTO.class))).thenReturn(buildingResponseDTO);
 
         // Act + Assert
-        mockMvc.perform(post("/api/brokers/buildings")
+        mockMvc.perform(post(BASE)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpectAll(
@@ -146,7 +148,7 @@ class BuildingControllerTest {
         );
 
         // Act + Assert
-        mockMvc.perform(post("/api/brokers/buildings")
+        mockMvc.perform(post(BASE)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isBadRequest());
@@ -163,7 +165,7 @@ class BuildingControllerTest {
         when(buildingService.getBuildingById(1L)).thenReturn(buildingResponseDTO);
 
         // Act + Assert
-        mockMvc.perform(get("/api/brokers/buildings/{buildingId}", 1L))
+        mockMvc.perform(get(BASE + "/{buildingId}", 1L))
                 .andExpectAll(
                         status().isOk(),
                         jsonPath("$.id").value(buildingResponseDTO.id().intValue()),
@@ -184,7 +186,7 @@ class BuildingControllerTest {
         when(buildingService.getBuildingDetailsById(buildingId)).thenReturn(buildingDetailsResponseDTO);
 
         // Act + Assert
-        mockMvc.perform(get("/api/brokers/buildings/{buildingId}/details", buildingId))
+        mockMvc.perform(get(BASE + "/{buildingId}/details", buildingId))
                 .andExpectAll(
                         status().isOk(),
                         jsonPath("$.id").value(buildingDetailsResponseDTO.id().intValue()),
@@ -217,7 +219,7 @@ class BuildingControllerTest {
         ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
 
         // Act + Assert
-        mockMvc.perform(get("/api/brokers/buildings")
+        mockMvc.perform(get(BASE)
                         .param("clientId", clientId.toString()))
                 .andExpectAll(
                         status().isOk(),
@@ -249,7 +251,7 @@ class BuildingControllerTest {
         when(buildingService.getBuildingsByClientId(eq(clientId), any(Pageable.class))).thenReturn(page);
 
         // Act + Assert
-        mockMvc.perform(get("/api/brokers/buildings")
+        mockMvc.perform(get(BASE)
                         .param("clientId", clientId.toString())
                         .param("page", "1")
                         .param("size", "5")
@@ -287,7 +289,7 @@ class BuildingControllerTest {
         when(buildingService.updateBuilding(eq(buildingId), any(BuildingUpdateRequestDTO.class))).thenReturn(buildingResponseDTO);
 
         // Act + Assert
-        mockMvc.perform(put("/api/brokers/buildings/{buildingId}", buildingId)
+        mockMvc.perform(put(BASE + "/{buildingId}", buildingId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpectAll(
@@ -319,7 +321,7 @@ class BuildingControllerTest {
         );
 
         // Act + Assert
-        mockMvc.perform(put("/api/brokers/buildings/{buildingId}", 1L)
+        mockMvc.perform(put(BASE + "/{buildingId}", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isBadRequest());
@@ -343,7 +345,7 @@ class BuildingControllerTest {
         when(buildingService.patchBuilding(eq(buildingId), any(BuildingPatchDTO.class))).thenReturn(buildingResponseDTO);
 
         // Act + Assert
-        mockMvc.perform(patch("/api/brokers/buildings/{buildingId}", buildingId)
+        mockMvc.perform(patch(BASE + "/{buildingId}", buildingId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpectAll(
@@ -365,7 +367,7 @@ class BuildingControllerTest {
         doNothing().when(buildingService).deleteBuilding(buildingId);
 
         // Act + Assert
-        mockMvc.perform(delete("/api/brokers/buildings/{buildingId}", buildingId))
+        mockMvc.perform(delete(BASE + "/{buildingId}", buildingId))
                 .andExpect(status().isNoContent());
 
         verify(buildingService).deleteBuilding(buildingId);

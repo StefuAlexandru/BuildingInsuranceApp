@@ -27,6 +27,7 @@ import static org.mockito.Mockito.*;
 import static ro.insurance.buildinginsurance.util.CityTestDataFactory.*;
 import static ro.insurance.buildinginsurance.util.CountyTestDataFactory.aCounty;
 import static ro.insurance.buildinginsurance.util.CountyTestDataFactory.aCountyDTO;
+import static ro.insurance.buildinginsurance.util.ExceptionAssertions.assertHasError;
 
 @ExtendWith(MockitoExtension.class)
 class CityServiceTest {
@@ -111,10 +112,7 @@ class CityServiceTest {
                 BusinessException ex = assertThrows(BusinessException.class, () -> cityService.registerCity(cityRequestDTO));
 
                 // Assert
-                assertAll(
-                        () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.CITY_ALREADY_EXIST.name().equals(e.getCode()))),
-                        () -> assertEquals(1, ex.getErrors().size())
-                );
+                assertHasError(ex,ErrorCode.CITY_ALREADY_EXIST);
 
                 verify(cityRepository).existsByNameIgnoreCaseAndCountyId("Adjud", 1L);
                 verifyNoMoreInteractions(cityRepository);
@@ -133,10 +131,7 @@ class CityServiceTest {
                 BusinessException ex = assertThrows(BusinessException.class, () -> cityService.registerCity(cityRequestDTO));
 
                 // Assert
-                assertAll(
-                        () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.COUNTY_NOT_FOUND.name().equals(e.getCode()))),
-                        () -> assertEquals(1, ex.getErrors().size())
-                );
+                assertHasError(ex,ErrorCode.COUNTY_NOT_FOUND);
 
                 verify(cityRepository).existsByNameIgnoreCaseAndCountyId(cityRequestDTO.name(), cityRequestDTO.countyId());
                 verify(countyRepository).findById(cityRequestDTO.countyId());
@@ -176,10 +171,7 @@ class CityServiceTest {
                 BusinessException ex = assertThrows(BusinessException.class, () -> cityService.getCityById(1L));
 
                 // Assert
-                assertAll(
-                        () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.CITY_NOT_FOUND.name().equals(e.getCode()))),
-                        () -> assertEquals(1, ex.getErrors().size())
-                );
+                assertHasError(ex,ErrorCode.CITY_NOT_FOUND);
 
                 verify(cityRepository).findById(1L);
                 verifyNoMoreInteractions(cityRepository);
@@ -258,10 +250,7 @@ class CityServiceTest {
                 BusinessException ex = assertThrows(BusinessException.class, () -> cityService.updateCity(1L, cityRequestDTO));
 
                 // Assert
-                assertAll(
-                        () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.CITY_NOT_FOUND.name().equals(e.getCode()))),
-                        () -> assertEquals(1, ex.getErrors().size())
-                );
+                assertHasError(ex,ErrorCode.CITY_NOT_FOUND);
 
                 verify(cityRepository).findById(1L);
                 verifyNoMoreInteractions(cityRepository);
@@ -281,10 +270,7 @@ class CityServiceTest {
                 BusinessException ex = assertThrows(BusinessException.class, () -> cityService.updateCity(1L, cityRequestDTO));
 
                 // Assert
-                assertAll(
-                        () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.COUNTY_NOT_FOUND.name().equals(e.getCode()))),
-                        () -> assertEquals(1, ex.getErrors().size())
-                );
+                assertHasError(ex,ErrorCode.COUNTY_NOT_FOUND);
 
                 verify(cityRepository).findById(1L);
                 verify(countyRepository).findById(1L);
@@ -316,10 +302,7 @@ class CityServiceTest {
                 BusinessException ex = assertThrows(BusinessException.class, () -> cityService.deleteCity(1L));
 
                 // Assert
-                assertAll(
-                        () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.CITY_NOT_FOUND.name().equals(e.getCode()))),
-                        () -> assertEquals(1, ex.getErrors().size())
-                );
+                assertHasError(ex,ErrorCode.CITY_NOT_FOUND);
 
                 verify(cityRepository).deleteById(1L);
                 verifyNoMoreInteractions(cityRepository);
@@ -335,10 +318,7 @@ class CityServiceTest {
                 BusinessException ex = assertThrows(BusinessException.class, () -> cityService.deleteCity(1L));
 
                 // Assert
-                assertAll(
-                        () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.CITY_HAS_DEPENDENCIES.name().equals(e.getCode()))),
-                        () -> assertEquals(1, ex.getErrors().size())
-                );
+                assertHasError(ex,ErrorCode.CITY_HAS_DEPENDENCIES);
 
                 verify(cityRepository).deleteById(1L);
                 verifyNoMoreInteractions(cityRepository);

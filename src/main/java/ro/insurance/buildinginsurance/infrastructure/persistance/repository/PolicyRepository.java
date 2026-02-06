@@ -9,8 +9,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import ro.insurance.buildinginsurance.domain.entity.Broker;
 import ro.insurance.buildinginsurance.domain.entity.Policy;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface PolicyRepository extends JpaRepository<Policy,Long>, JpaSpecificationExecutor<Policy> {
@@ -31,13 +33,16 @@ public interface PolicyRepository extends JpaRepository<Policy,Long>, JpaSpecifi
     Page<Policy> findAll(@NonNull Specification<Policy> specification, @NonNull Pageable pageable);
 
     @EntityGraph(attributePaths = {
-            "client",
-            "building",
-            "building.city",
-            "building.city.county",
-            "building.city.county.country",
-            "currency"
+            "client","building","building.city","building.city.county",
+            "building.city.county.country","currency"
     })
-    Optional<Policy> findDetailsById(Long id);
+    Optional<Policy> findDetailsByIdAndBrokerId(Long id, Long brokerId);
 
+    @Query(value = """
+        SELECT p.*
+        FROM policies p
+        WHERE p.id = :id
+          AND p.broker_id = :brokerId
+        """, nativeQuery = true)
+    Optional<Policy> findByIdAndBrokerId(@Param("id") Long id, @Param("brokerId") Long brokerId);
 }

@@ -13,6 +13,7 @@ import ro.insurance.buildinginsurance.domain.enums.ErrorCode;
 import ro.insurance.buildinginsurance.domain.enums.PolicyStatus;
 import ro.insurance.buildinginsurance.infrastructure.persistance.repository.*;
 import ro.insurance.buildinginsurance.web.dto.policyDto.PolicyCreateRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.policyDto.PolicyPatchRequestDTO;
 import ro.insurance.buildinginsurance.web.error.BusinessException;
 
 import java.math.BigDecimal;
@@ -270,7 +271,7 @@ class PolicyFacadeTest {
         BusinessException ex = assertThrows(BusinessException.class,
                 () -> policyFacade.validateActivateOrThrow(policy));
 
-        assertHasError(ex, ErrorCode.POLICY_NOT_ACTIVATABLE);
+        assertHasError(ex, ErrorCode.POLICY_NOT_DRAFT);
     }
 
     @Test
@@ -393,5 +394,234 @@ class PolicyFacadeTest {
         policy.setCancelledAt(null);
 
         assertDoesNotThrow(() -> policyFacade.validateCancelOrThrow(policy));
+    }
+
+    // ---------------- validatePatchOrThrow ----------------
+
+    @Test
+    void validatePatchOrThrow_whenStatusNotDraft_shouldThrow() {
+        Policy policy = aDraftPolicyWithAllMandatoryFields(10L);
+        policy.setStatus(PolicyStatus.ACTIVE);
+
+        PolicyPatchRequestDTO request = new PolicyPatchRequestDTO(
+                null, null, null, null, null
+        );
+
+        BusinessException ex = assertThrows(BusinessException.class,
+                () -> policyFacade.validatePatchOrThrow(policy, request));
+
+        assertHasError(ex, ErrorCode.POLICY_NOT_DRAFT);
+
+        verifyNoInteractions(buildingRepository, currencyRepository);
+    }
+
+    @Test
+    void validatePatchOrThrow_whenNoFieldsProvided_shouldUseExistingBuildingCurrency_andValidateDates() {
+        Policy policy = aDraftPolicyWithAllMandatoryFields(10L);
+        policy.setStatus(PolicyStatus.DRAFT);
+        policy.setStartDate(LocalDate.of(2026, 2, 10));
+        policy.setEndDate(LocalDate.of(2026, 3, 10));
+
+        PolicyPatchRequestDTO request = new PolicyPatchRequestDTO(
+                null, null, null, null, null
+        );
+
+        PolicyFacade.PolicyPatchContext ctx = policyFacade.validatePatchOrThrow(policy, request);
+
+        assertAll(
+                () -> assertSame(policy.getBuilding(), ctx.building()),
+                () -> assertSame(policy.getCurrency(), ctx.currency())
+        );
+
+        verifyNoInteractions(buildingRepository, currencyRepository);
+    }
+
+    @Test
+    void validatePatchOrThrow_whenBuildingIdProvided_shouldLoadBuilding_andValidateOwnership_andReturnContext() {
+        Policy policy = aDraftPolicyWithAllMandatoryFields(10L);
+        policy.setStatus(PolicyStatus.DRAFT);
+        policy.setStartDate(LocalDate.of(2026, 2, 10));
+        policy.setEndDate(LocalDate.of(2026, 3, 10));
+
+        Long newBuildingId = 77L;
+        Building newBuilding = aBuildingWithId(newBuildingId);
+
+        when(buildingRepository.findById(newBuildingId)).thenReturn(Optional.of(newBuilding));
+        when(buildingRepository.existsByIdAndClientId(newBuildingId, policy.getClient().getId())).thenReturn(true);
+
+        PolicyPatchRequestDTO req = new PolicyPatchRequestDTO(
+                newBuildingId, null, null, null, null
+        );
+
+        PolicyFacade.PolicyPatchContext ctx = policyFacade.validatePatchOrThrow(policy, req);
+
+        assertSame(newBuilding, ctx.building());
+        assertSame(policy.getCurrency(), ctx.currency());
+
+        verify(buildingRepository).findById(newBuildingId);
+        verify(buildingRepository).existsByIdAndClientId(newBuildingId, policy.getClient().getId());
+        verifyNoInteractions(currencyRepository);
+    }
+
+    @Test
+    void validatePatchOrThrow_whenBuildingNotFound_shouldThrow_andStop() {
+        Policy policy = aDraftPolicyWithAllMandatoryFields(10L);
+        policy.setStatus(PolicyStatus.DRAFT);
+
+        Long newBuildingId = 77L;
+
+        when(buildingRepository.findById(newBuildingId)).thenReturn(Optional.empty());
+
+        PolicyPatchRequestDTO req = new PolicyPatchRequestDTO(
+                newBuildingId, null, null, null, null
+        );
+
+        BusinessException ex = assertThrows(BusinessException.class,
+                () -> policyFacade.validatePatchOrThrow(policy, req));
+
+        assertHasError(ex, ErrorCode.BUILDING_NOT_FOUND);
+
+        verify(buildingRepository).findById(newBuildingId);
+        verify(buildingRepository, never()).existsByIdAndClientId(anyLong(), anyLong());
+        verifyNoInteractions(currencyRepository);
+    }
+
+    @Test
+    void validatePatchOrThrow_whenBuildingNotOwned_shouldThrow() {
+        Policy policy = aDraftPolicyWithAllMandatoryFields(10L);
+        policy.setStatus(PolicyStatus.DRAFT);
+
+        Long newBuildingId = 77L;
+        Building newBuilding = aBuildingWithId(newBuildingId);
+
+        when(buildingRepository.findById(newBuildingId)).thenReturn(Optional.of(newBuilding));
+        when(buildingRepository.existsByIdAndClientId(newBuildingId, policy.getClient().getId())).thenReturn(false);
+
+        PolicyPatchRequestDTO req = new PolicyPatchRequestDTO(
+                newBuildingId, null, null, null, null
+        );
+
+        BusinessException ex = assertThrows(BusinessException.class,
+                () -> policyFacade.validatePatchOrThrow(policy, req));
+
+        assertHasError(ex, ErrorCode.BUILDING_NOT_OWNED_BY_CLIENT);
+
+        verify(buildingRepository).findById(newBuildingId);
+        verify(buildingRepository).existsByIdAndClientId(newBuildingId, policy.getClient().getId());
+        verifyNoInteractions(currencyRepository);
+    }
+
+    @Test
+    void validatePatchOrThrow_whenCurrencyIdProvidedButBasePremiumMissing_shouldThrow_andNotLoadCurrency() {
+        Policy policy = aDraftPolicyWithAllMandatoryFields(10L);
+        policy.setStatus(PolicyStatus.DRAFT);
+
+        Long newCurrencyId = 55L;
+
+        PolicyPatchRequestDTO req = new PolicyPatchRequestDTO(
+                null, newCurrencyId, null, null, null // basePremiumAmount missing
+        );
+
+        BusinessException ex = assertThrows(BusinessException.class,
+                () -> policyFacade.validatePatchOrThrow(policy, req));
+
+        assertHasError(ex, ErrorCode.BASE_PREMIUM_REQUIRED_WHEN_CHANGING_CURRENCY);
+
+        verifyNoInteractions(currencyRepository);
+        verifyNoInteractions(buildingRepository);
+    }
+
+    @Test
+    void validatePatchOrThrow_whenCurrencyNotFound_shouldThrow() {
+        Policy policy = aDraftPolicyWithAllMandatoryFields(10L);
+        policy.setStatus(PolicyStatus.DRAFT);
+
+        Long newCurrencyId = 55L;
+
+        when(currencyRepository.findById(newCurrencyId)).thenReturn(Optional.empty());
+
+        PolicyPatchRequestDTO req = new PolicyPatchRequestDTO(
+                null, newCurrencyId, null, null, new BigDecimal("100.00")
+        );
+
+        BusinessException ex = assertThrows(BusinessException.class,
+                () -> policyFacade.validatePatchOrThrow(policy, req));
+
+        assertHasError(ex, ErrorCode.CURRENCY_NOT_FOUND);
+
+        verify(currencyRepository).findById(newCurrencyId);
+        verifyNoInteractions(buildingRepository);
+    }
+
+    @Test
+    void validatePatchOrThrow_whenCurrencyInactive_shouldThrow() {
+        Policy policy = aDraftPolicyWithAllMandatoryFields(10L);
+        policy.setStatus(PolicyStatus.DRAFT);
+
+        Long newCurrencyId = 55L;
+        Currency inactive = aCurrencyWithId(newCurrencyId);
+        inactive.setActive(false);
+
+        when(currencyRepository.findById(newCurrencyId)).thenReturn(Optional.of(inactive));
+
+        PolicyPatchRequestDTO req = new PolicyPatchRequestDTO(
+                null, newCurrencyId, null, null, new BigDecimal("100.00")
+        );
+
+        BusinessException ex = assertThrows(BusinessException.class,
+                () -> policyFacade.validatePatchOrThrow(policy, req));
+
+        assertHasError(ex, ErrorCode.CURRENCY_IS_NOT_ACTIVE);
+
+        verify(currencyRepository).findById(newCurrencyId);
+        verifyNoInteractions(buildingRepository);
+    }
+
+    @Test
+    void validatePatchOrThrow_whenCurrencyIdProvided_shouldReturnContextWithNewCurrency() {
+        Policy policy = aDraftPolicyWithAllMandatoryFields(10L);
+        policy.setStatus(PolicyStatus.DRAFT);
+        policy.setStartDate(LocalDate.of(2026, 2, 10));
+        policy.setEndDate(LocalDate.of(2026, 3, 10));
+
+        Long newCurrencyId = 55L;
+        Currency currency = aCurrencyWithId(newCurrencyId);
+        currency.setActive(true);
+
+        when(currencyRepository.findById(newCurrencyId)).thenReturn(Optional.of(currency));
+
+        PolicyPatchRequestDTO req = new PolicyPatchRequestDTO(
+                null, newCurrencyId, null, null, new BigDecimal("100.00")
+        );
+
+        PolicyFacade.PolicyPatchContext ctx = policyFacade.validatePatchOrThrow(policy, req);
+
+        assertSame(policy.getBuilding(), ctx.building());
+        assertSame(currency, ctx.currency());
+
+        verify(currencyRepository).findById(newCurrencyId);
+        verifyNoInteractions(buildingRepository);
+    }
+
+    @Test
+    void validatePatchOrThrow_whenDatesInvalid_shouldThrow_invalidDates() {
+        Policy policy = aDraftPolicyWithAllMandatoryFields(10L);
+        policy.setStatus(PolicyStatus.DRAFT);
+        policy.setStartDate(LocalDate.of(2026, 2, 10));
+        policy.setEndDate(LocalDate.of(2026, 2, 20));
+
+        // startDate after endDate
+        PolicyPatchRequestDTO req = new PolicyPatchRequestDTO(
+                null, null,
+                LocalDate.of(2026, 3, 1),
+                null,
+                null
+        );
+
+        BusinessException ex = assertThrows(BusinessException.class, () -> policyFacade.validatePatchOrThrow(policy, req));
+
+        assertHasError(ex, ErrorCode.INVALID_DATES);
+
+        verifyNoInteractions(buildingRepository, currencyRepository);
     }
 }

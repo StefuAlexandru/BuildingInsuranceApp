@@ -27,6 +27,7 @@ import static org.mockito.Mockito.*;
 import static ro.insurance.buildinginsurance.util.CityTestDataFactory.aCity;
 import static ro.insurance.buildinginsurance.util.CityTestDataFactory.aCityWithId;
 import static ro.insurance.buildinginsurance.util.ClientTestDataFactory.*;
+import static ro.insurance.buildinginsurance.util.ExceptionAssertions.assertHasError;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -91,10 +92,7 @@ class ClientServiceTest {
         // Act + Assert
         BusinessException ex = assertThrows(BusinessException.class, () -> clientService.createClient(clientRequestDTO));
 
-        assertAll(
-                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.CLIENT_ALREADY_EXIST.name().equals(e.getCode()))),
-                () -> assertEquals(1, ex.getErrors().size())
-        );
+        assertHasError(ex,ErrorCode.CLIENT_ALREADY_EXIST);
 
         verify(clientRepository).existsByIdentificationNumber(clientRequestDTO.identificationNumber().trim());
         verify(clientRepository,never()).save(any());
@@ -111,10 +109,7 @@ class ClientServiceTest {
         // Act + Assert
         BusinessException ex = assertThrows(BusinessException.class, () -> clientService.createClient(clientRequestDTO));
 
-        assertAll(
-                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.ADDRESS_INCOMPLETE.name().equals(e.getCode()))),
-                () -> assertEquals(1, ex.getErrors().size())
-        );
+        assertHasError(ex,ErrorCode.ADDRESS_INCOMPLETE);
 
         verify(clientRepository).existsByIdentificationNumber(clientRequestDTO.identificationNumber().trim());
         verify(clientRepository, never()).save(any());
@@ -131,10 +126,7 @@ class ClientServiceTest {
         // Act + Assert
         BusinessException ex = assertThrows(BusinessException.class, () -> clientService.createClient(clientRequestDTO));
 
-        assertAll(
-                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.ADDRESS_INCOMPLETE.name().equals(e.getCode()))),
-                () -> assertEquals(1, ex.getErrors().size())
-        );
+        assertHasError(ex,ErrorCode.ADDRESS_INCOMPLETE);
 
         verify(clientRepository).existsByIdentificationNumber(clientRequestDTO.identificationNumber().trim());
         verify(clientRepository, never()).save(any());
@@ -151,10 +143,7 @@ class ClientServiceTest {
         // Act + Assert
         BusinessException ex = assertThrows(BusinessException.class, () -> clientService.createClient(clientRequestDTO));
 
-        assertAll(
-                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.ADDRESS_INCOMPLETE.name().equals(e.getCode()))),
-                () -> assertEquals(1, ex.getErrors().size())
-        );
+        assertHasError(ex,ErrorCode.ADDRESS_INCOMPLETE);
 
         verify(clientRepository).existsByIdentificationNumber(clientRequestDTO.identificationNumber().trim());
         verify(clientRepository, never()).save(any());
@@ -200,10 +189,7 @@ class ClientServiceTest {
         // Act + Assert
         BusinessException ex = assertThrows(BusinessException.class, () -> clientService.createClient(clientRequestDTO));
 
-        assertAll(
-                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.CITY_NOT_FOUND.name().equals(e.getCode()))),
-                () -> assertEquals(1, ex.getErrors().size())
-        );
+        assertHasError(ex,ErrorCode.CITY_NOT_FOUND);
 
         verify(cityRepository).findById(clientRequestDTO.addressCityId());
         verify(clientRepository, never()).save(any());
@@ -256,10 +242,7 @@ class ClientServiceTest {
         // Act
         BusinessException ex = assertThrows(BusinessException.class, () -> clientService.updateClient(clientId, clientUpdateRequestDTO));
 
-        assertAll(
-                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.CLIENT_NOT_FOUND.name().equals(e.getCode()))),
-                () -> assertEquals(1, ex.getErrors().size())
-        );
+        assertHasError(ex,ErrorCode.CLIENT_NOT_FOUND);
 
         verify(clientRepository).findById(clientId);
         verify(clientRepository, never()).save(any());
@@ -306,10 +289,7 @@ class ClientServiceTest {
         // Act + Assert
         BusinessException ex = assertThrows(BusinessException.class, () -> clientService.updateClient(clientId, clientUpdateRequestDTO));
 
-        assertAll(
-                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.ADDRESS_INCOMPLETE.name().equals(e.getCode()))),
-                () -> assertEquals(1, ex.getErrors().size())
-        );
+        assertHasError(ex,ErrorCode.ADDRESS_INCOMPLETE);
 
         verify(clientRepository).findById(clientId);
         verifyNoInteractions(cityRepository, clientMapper, clientIdentityFacade);
@@ -328,10 +308,7 @@ class ClientServiceTest {
         // Act + Assert
         BusinessException ex = assertThrows(BusinessException.class, () -> clientService.updateClient(clientId, clientUpdateRequestDTO));
 
-        assertAll(
-                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.CITY_NOT_FOUND.name().equals(e.getCode()))),
-                () -> assertEquals(1, ex.getErrors().size())
-        );
+        assertHasError(ex,ErrorCode.CITY_NOT_FOUND);
 
         verify(clientRepository).findById(clientId);
         verify(cityRepository).findById(clientUpdateRequestDTO.addressCityId());
@@ -375,10 +352,7 @@ class ClientServiceTest {
         // Act + Assert
         BusinessException ex = assertThrows(BusinessException.class, () -> clientService.getClientById(id));
 
-        assertAll(
-                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.CLIENT_NOT_FOUND.name().equals(e.getCode()))),
-                () -> assertEquals(1, ex.getErrors().size())
-        );
+        assertHasError(ex,ErrorCode.CLIENT_NOT_FOUND);
 
         verify(clientRepository).findById(id);
         verifyNoInteractions(clientMapper, cityRepository, clientIdentityFacade);
@@ -415,11 +389,7 @@ class ClientServiceTest {
         // Act + Assert
         BusinessException ex = assertThrows(BusinessException.class, () -> clientService.getClientByNameAndIdentificationNumber(" X ", " Y "));
 
-        assertAll(
-                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.CLIENT_NOT_FOUND.name().equals(e.getCode()))),
-                () -> assertEquals(1, ex.getErrors().size())
-        );
-
+        assertHasError(ex,ErrorCode.CLIENT_NOT_FOUND);
 
         verify(clientRepository).findByNameIgnoreCaseAndIdentificationNumber("X", "Y");
         verifyNoInteractions(clientMapper, cityRepository, clientIdentityFacade);
@@ -513,10 +483,7 @@ class ClientServiceTest {
         // Act + Assert
         BusinessException ex = assertThrows(BusinessException.class, () -> clientService.getClientDetailsById(clientId));
 
-        assertAll(
-                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.CLIENT_NOT_FOUND.name().equals(e.getCode()))),
-                () -> assertEquals(1, ex.getErrors().size())
-        );
+        assertHasError(ex,ErrorCode.CLIENT_NOT_FOUND);
 
         verify(clientRepository).findWithBuildingsById(clientId);
         verifyNoInteractions(clientMapper, cityRepository, clientIdentityFacade);
@@ -580,10 +547,7 @@ class ClientServiceTest {
         // Act + Assert
         BusinessException ex = assertThrows(BusinessException.class, () -> clientService.deleteClient(id));
 
-        assertAll(
-                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.CLIENT_NOT_FOUND.name().equals(e.getCode()))),
-                () -> assertEquals(1, ex.getErrors().size())
-        );
+        assertHasError(ex,ErrorCode.CLIENT_NOT_FOUND);
 
         verify(clientRepository).deleteById(id);
         verifyNoInteractions(cityRepository, clientMapper, clientIdentityFacade);
@@ -600,10 +564,7 @@ class ClientServiceTest {
         // Act + Assert
         BusinessException ex = assertThrows(BusinessException.class, () -> clientService.deleteClient(id));
 
-        assertAll(
-                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.CLIENT_HAS_DEPENDENCIES.name().equals(e.getCode()))),
-                () -> assertEquals(1, ex.getErrors().size())
-        );
+        assertHasError(ex,ErrorCode.CLIENT_HAS_DEPENDENCIES);
 
         verify(clientRepository).deleteById(id);
         verifyNoInteractions(cityRepository, clientMapper, clientIdentityFacade);

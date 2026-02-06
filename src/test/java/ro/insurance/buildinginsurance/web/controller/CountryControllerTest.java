@@ -36,6 +36,8 @@ class CountryControllerTest {
     @InjectMocks
     private CountryController countryController;
 
+    private static final String BASE = "/api/geography/countries";
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach
@@ -66,7 +68,7 @@ class CountryControllerTest {
         when(countryService.registerCountry(any(CountryRequestDTO.class))).thenReturn(countryResponseDTO);
 
         // Act + Assert
-        mockMvc.perform(post("/api/geography/countries")
+        mockMvc.perform(post(BASE)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpectAll(
@@ -83,7 +85,7 @@ class CountryControllerTest {
     void registerCountry_shouldReturn400WhenInvalid() throws Exception {
         String body = createCountryRequestBody("   ");
 
-        mockMvc.perform(post("/api/geography/countries")
+        mockMvc.perform(post(BASE)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isBadRequest());
@@ -100,7 +102,7 @@ class CountryControllerTest {
         when(countryService.getCountryById(1L)).thenReturn(countryResponseDTO);
 
         // Act + Assert
-        mockMvc.perform(get("/api/geography/countries/{countryId}", 1L))
+        mockMvc.perform(get(BASE + "/{countryId}", 1L))
                 .andExpectAll(
                         status().isOk(),
                         jsonPath("$.id").value(countryResponseDTO.id().intValue()),
@@ -123,7 +125,7 @@ class CountryControllerTest {
         when(countryService.getCountryByPartialName(eq(""), any(Pageable.class))).thenReturn(page);
 
         // Act + Assert
-        mockMvc.perform(get("/api/geography/countries")
+        mockMvc.perform(get(BASE)
                         .param("page", "0")
                         .param("size", "5")
                         .param("sort", "name,asc"))
@@ -151,7 +153,7 @@ class CountryControllerTest {
         when(countryService.getCountryByPartialName(eq("rom"), any(Pageable.class))).thenReturn(page);
 
         // Act + Assert
-        mockMvc.perform(get("/api/geography/countries")
+        mockMvc.perform(get(BASE)
                         .param("name", "rom")
                         .param("page", "0")
                         .param("size", "5")
@@ -179,7 +181,7 @@ class CountryControllerTest {
         when(countryService.updateCountry(eq(1L), any(CountryRequestDTO.class))).thenReturn(countryResponseDTO);
 
         // Act + Assert
-        mockMvc.perform(put("/api/geography/countries/{countryId}", 1L)
+        mockMvc.perform(put(BASE + "/{countryId}", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpectAll(
@@ -196,7 +198,7 @@ class CountryControllerTest {
     void updateCountry_shouldReturn400WhenInvalid() throws Exception {
         String body = createCountryRequestBody("   ");
 
-        mockMvc.perform(put("/api/geography/countries/{countryId}", 1L)
+        mockMvc.perform(put(BASE + "/{countryId}", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isBadRequest());
@@ -210,7 +212,7 @@ class CountryControllerTest {
     void deleteCountry_shouldReturn204() throws Exception {
         doNothing().when(countryService).deleteCountry(1L);
 
-        mockMvc.perform(delete("/api/geography/countries/{countryId}", 1L))
+        mockMvc.perform(delete(BASE + "/{countryId}", 1L))
                 .andExpect(status().isNoContent());
 
         verify(countryService).deleteCountry(1L);

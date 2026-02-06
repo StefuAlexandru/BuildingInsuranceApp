@@ -9,8 +9,10 @@ import ro.insurance.buildinginsurance.domain.enums.ErrorCode;
 import ro.insurance.buildinginsurance.domain.enums.PolicyStatus;
 import ro.insurance.buildinginsurance.infrastructure.persistance.repository.*;
 import ro.insurance.buildinginsurance.web.dto.policyDto.PolicyCreateRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.policyDto.PolicyPatchRequestDTO;
 import ro.insurance.buildinginsurance.web.error.BusinessException;
 
+import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDate;
 
@@ -42,10 +44,7 @@ public class PolicyFacade {
     }
 
     public void validateActivateOrThrow(Policy policy){
-        if (policy.getStatus() != PolicyStatus.DRAFT) {
-            log.warn("Policy {} cannot be activated because status is {}", policy.getId(), policy.getStatus());
-            throw new BusinessException(ErrorCode.POLICY_NOT_ACTIVATABLE);
-        }
+        validatePolicyStatus(policy);
 
         LocalDate today = LocalDate.now(clock);
         if (policy.getStartDate().isBefore(today)) {
@@ -74,6 +73,47 @@ public class PolicyFacade {
         }
     }
 
+    public PolicyPatchContext validatePatchOrThrow(Policy policy, PolicyPatchRequestDTO request){
+        Long buildingId = request.buildingId();
+        Long currencyId = request.currencyId();
+        BigDecimal basePremiumAmount = request.basePremiumAmount();
+
+        Building building = policy.getBuilding();
+        Currency currency = policy.getCurrency();
+
+        validatePolicyStatus(policy);
+
+        if(buildingId != null){
+            building = getBuildingOrThrow(buildingId);
+            validateBuildingOwnership(building.getId(),policy.getClient().getId());
+        }
+
+        if (currencyId != null) {
+            if(basePremiumAmount == null){
+                log.warn("Patch failed: currencyId provided but basePremiumAmount missing. policyId={}", policy.getId());
+                throw new BusinessException(ErrorCode.BASE_PREMIUM_REQUIRED_WHEN_CHANGING_CURRENCY);
+            }
+            currency = getCurrencyOrThrow(currencyId);
+            validateCurrencyActive(currency, currencyId);
+        }
+
+        LocalDate startDate = request.startDate() != null ? request.startDate() : policy.getStartDate();
+        LocalDate endDate =  request.endDate() != null ? request.endDate() : policy.getEndDate();
+
+        validateDates(startDate, endDate);
+
+        return new PolicyPatchContext(building,currency);
+    }
+
+    // --------------------  HELPERS  --------------------
+
+    private void validatePolicyStatus(Policy policy) {
+        if (policy.getStatus() != PolicyStatus.DRAFT) {
+            log.warn("Policy {} cannot be modified because status is {}", policy.getId(), policy.getStatus());
+            throw new BusinessException(ErrorCode.POLICY_NOT_DRAFT);
+        }
+    }
+
     private void validateBrokerActive(Broker broker, Long brokerId) {
         if (!broker.isActive()) {
             log.warn("Broker with id {} is not active", brokerId);
@@ -84,7 +124,7 @@ public class PolicyFacade {
     private Client getClientOrThrow(Long clientId) {
         return clientRepository.findById(clientId)
                 .orElseThrow(() -> {
-                    log.warn("Client with id {} does not exist for creating a draft policy", clientId);
+                    log.warn("Client with id {} does not exist for creating/modifying a draft policy", clientId);
                     return new BusinessException(ErrorCode.CLIENT_NOT_FOUND);
                 });
     }
@@ -92,7 +132,7 @@ public class PolicyFacade {
     private Building getBuildingOrThrow(Long buildingId) {
         return buildingRepository.findById(buildingId)
                 .orElseThrow(() -> {
-                    log.warn("Building with id {} does not exist for creating a draft policy", buildingId);
+                    log.warn("Building with id {} does not exist for creating/modifying a draft policy", buildingId);
                     return new BusinessException(ErrorCode.BUILDING_NOT_FOUND);
                 });
     }
@@ -107,7 +147,7 @@ public class PolicyFacade {
     private Broker getBrokerOrThrow(Long brokerId) {
         return brokerRepository.findById(brokerId)
                 .orElseThrow(() -> {
-                    log.warn("Broker with id {} does not exist for creating a draft policy", brokerId);
+                    log.warn("Broker with id {} does not exist for creating/modifying a draft policy", brokerId);
                     return new BusinessException(ErrorCode.BROKER_NOT_FOUND);
                 });
     }
@@ -115,24 +155,25 @@ public class PolicyFacade {
     private Currency getCurrencyOrThrow(Long currencyId) {
         return currencyRepository.findById(currencyId)
                 .orElseThrow(() -> {
-                    log.warn("Currency with id {} does not exist for creating a draft policy", currencyId);
+                    log.warn("Currency with id {} does not exist for creating/modifying a draft policy", currencyId);
                     return new BusinessException(ErrorCode.CURRENCY_NOT_FOUND);
                 });
     }
 
     private void validateCurrencyActive(Currency currency, Long currencyId) {
         if (!currency.isActive()) {
-            log.warn("Currency with id {} is not active for creating a draft policy", currencyId);
+            log.warn("Currency with id {} is not active for creating/modifying a draft policy", currencyId);
             throw new BusinessException(ErrorCode.CURRENCY_IS_NOT_ACTIVE);
         }
     }
 
     private void validateDates(LocalDate startDate, LocalDate endDate) {
         if (startDate.isAfter(endDate)) {
-            log.warn("Invalid dates for creating draft policy. Start date {} is after end date {}", startDate, endDate);
+            log.warn("Invalid dates for creating/modifying draft policy. Start date {} is after end date {}", startDate, endDate);
             throw new BusinessException(ErrorCode.INVALID_DATES);
         }
     }
 
     public record PolicyCreateContext(Client client,Broker broker,Building building,Currency currency) {}
+    public record PolicyPatchContext(Building building,Currency currency) {}
 }

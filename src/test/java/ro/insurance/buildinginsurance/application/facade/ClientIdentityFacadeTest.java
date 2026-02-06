@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static ro.insurance.buildinginsurance.util.ClientTestDataFactory.aClientIdentityPatchDTOCustom;
 import static ro.insurance.buildinginsurance.util.ClientTestDataFactory.aClientIndividual;
+import static ro.insurance.buildinginsurance.util.ExceptionAssertions.assertHasError;
 
 @ExtendWith(MockitoExtension.class)
 class ClientIdentityFacadeTest {
@@ -40,10 +41,7 @@ class ClientIdentityFacadeTest {
         // Act + Assert
         BusinessException ex = assertThrows(BusinessException.class, () -> facade.patchIdentity(1L, dto, "   "));
 
-        assertAll(
-                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.CHANGED_BY_REQUIRED.name().equals(e.getCode()))),
-                () -> assertEquals(1, ex.getErrors().size())
-        );
+        assertHasError(ex,ErrorCode.CHANGED_BY_REQUIRED);
 
         verifyNoInteractions(clientRepository, historyService);
     }
@@ -58,10 +56,7 @@ class ClientIdentityFacadeTest {
         // Act + Assert
         BusinessException ex = assertThrows(BusinessException.class, () -> facade.patchIdentity(1L, clientIdentityPatchDTO, "alex"));
 
-        assertAll(
-                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.CLIENT_NOT_FOUND.name().equals(e.getCode()))),
-                () -> assertEquals(1, ex.getErrors().size())
-        );
+        assertHasError(ex,ErrorCode.CLIENT_NOT_FOUND);
 
         verify(clientRepository).findById(1L);
         verifyNoInteractions(historyService);
@@ -79,10 +74,7 @@ class ClientIdentityFacadeTest {
         // Act + Assert
         BusinessException ex = assertThrows(BusinessException.class, () -> facade.patchIdentity(1L, dto, "alex"));
 
-        assertAll(
-                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.NO_CHANGES.name().equals(e.getCode()))),
-                () -> assertEquals(1, ex.getErrors().size())
-        );
+        assertHasError(ex,ErrorCode.NO_CHANGES);
 
         verify(clientRepository).findById(1L);
         verify(clientRepository, never()).save(any());
@@ -101,10 +93,7 @@ class ClientIdentityFacadeTest {
         // Act + Assert
         BusinessException ex = assertThrows(BusinessException.class, () -> facade.patchIdentity(1L, dto, "alex"));
 
-        assertAll(
-                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.ID_NUMBER_REQUIRED_WHEN_TYPE_CHANGES.name().equals(e.getCode()))),
-                () -> assertEquals(1, ex.getErrors().size())
-        );
+        assertHasError(ex,ErrorCode.ID_NUMBER_REQUIRED_WHEN_TYPE_CHANGES);
 
         verify(clientRepository).findById(1L);
         verifyNoInteractions(historyService);
@@ -124,10 +113,7 @@ class ClientIdentityFacadeTest {
         // Act + Assert
         BusinessException ex = assertThrows(BusinessException.class, () -> facade.patchIdentity(1L, dto, "alex"));
 
-        assertAll(
-                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.CLIENT_ALREADY_EXIST.name().equals(e.getCode()))),
-                () -> assertEquals(1, ex.getErrors().size())
-        );
+        assertHasError(ex,ErrorCode.CLIENT_ALREADY_EXIST);
 
         verify(clientRepository).findById(1L);
         verify(clientRepository).existsByIdentificationNumberAndIdNot("ID2", 1L);
@@ -171,10 +157,7 @@ class ClientIdentityFacadeTest {
         // Act + Assert
         BusinessException ex = assertThrows(BusinessException.class, () -> facade.patchIdentity(1L, dto, null));
 
-        assertAll(
-                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.CHANGED_BY_REQUIRED.name().equals(e.getCode()))),
-                () -> assertEquals(1, ex.getErrors().size())
-        );
+        assertHasError(ex,ErrorCode.CHANGED_BY_REQUIRED);
 
         verifyNoInteractions(clientRepository, historyService);
     }
@@ -190,10 +173,7 @@ class ClientIdentityFacadeTest {
         // Act + Assert
         BusinessException ex = assertThrows(BusinessException.class, () -> facade.patchIdentity(1L, dto, "alex"));
 
-        assertAll(
-                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.NO_CHANGES.name().equals(e.getCode()))),
-                () -> assertEquals(1, ex.getErrors().size())
-        );
+        assertHasError(ex,ErrorCode.NO_CHANGES);
 
         verify(clientRepository).findById(1L);
         verify(clientRepository, never()).save(any());
@@ -239,10 +219,7 @@ class ClientIdentityFacadeTest {
         // Act + Assert
         BusinessException ex = assertThrows(BusinessException.class, () -> facade.patchIdentity(1L, dto, "alex"));
 
-        assertAll(
-                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.ID_NUMBER_REQUIRED_WHEN_TYPE_CHANGES.name().equals(e.getCode()))),
-                () -> assertEquals(1, ex.getErrors().size())
-        );
+        assertHasError(ex,ErrorCode.ID_NUMBER_REQUIRED_WHEN_TYPE_CHANGES);
 
         verify(clientRepository).findById(1L);
         verify(clientRepository, never()).save(any());

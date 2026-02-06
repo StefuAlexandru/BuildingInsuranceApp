@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ro.insurance.buildinginsurance.domain.entity.Broker;
 
+import java.util.Optional;
+
 public interface BrokerRepository extends JpaRepository<Broker, Long> {
     @Query(value = """
             SELECT EXISTS(
@@ -14,4 +16,8 @@ public interface BrokerRepository extends JpaRepository<Broker, Long> {
             )
             """, nativeQuery = true)
     boolean existsByBrokerCodeIgnoreCase(@Param("brokerCode") String brokerCode);
+
+    @Query(value = "SELECT * FROM brokers b WHERE LOWER(b.email)=LOWER(:email) LIMIT 1", nativeQuery = true)
+    Optional<Broker> findByEmailIgnoreCase(@Param("email") String email);
+
 }

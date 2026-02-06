@@ -36,7 +36,7 @@ public class PolicyCalculationService implements IPolicyCalculationService {
 
 
     @Override
-    public PolicyCalculationResponseDTO calculatePremium(PolicyCalculationRequestDTO policyCalculationRequestDTO) {
+        public PolicyCalculationResponseDTO calculatePremium(PolicyCalculationRequestDTO policyCalculationRequestDTO) {
         LocalDate date = policyCalculationRequestDTO.now() == null? LocalDate.now() : policyCalculationRequestDTO.now();
 
         List<FeeConfiguration> activeFees = feeConfigurationRepository.findAllActiveOn(date);
@@ -67,13 +67,11 @@ public class PolicyCalculationService implements IPolicyCalculationService {
             throw new BusinessException(ErrorCode.INVALID_FINAL_PREMIUM);
         }
 
-        Currency currency = currencyRepository.findById(policyCalculationRequestDTO.currencyId())
+        currencyRepository.findById(policyCalculationRequestDTO.currencyId())
                 .orElseThrow(() -> {
                     log.warn("Currency with id {} not found for policy calculation", policyCalculationRequestDTO.currencyId());
                     return new BusinessException(ErrorCode.CURRENCY_NOT_FOUND);}
                 );
-
-        finalPremium = convertFromBase(finalPremium,currency);
 
         finalPremium = finalPremium.setScale(2, RoundingMode.HALF_UP);
 
@@ -87,12 +85,5 @@ public class PolicyCalculationService implements IPolicyCalculationService {
             case CITY,COUNTY,COUNTRY -> riskFactorConfiguration.getLevel().name() + " : " + riskFactorConfiguration.getReferenceId();
             case BUILDING_TYPE -> riskFactorConfiguration.getLevel().name() + " : " + riskFactorConfiguration.getBuildingType().name();
         };
-    }
-
-    private BigDecimal convertFromBase(BigDecimal amountRon, Currency currency) {
-        if ("RON".equalsIgnoreCase(currency.getCode())) return amountRon;
-
-        BigDecimal rate = currency.getExchangeRateToBase();
-        return amountRon.divide(rate, 6, RoundingMode.HALF_UP);
     }
 }

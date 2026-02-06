@@ -36,13 +36,17 @@ class CurrencyControllerIT {
 
     ObjectMapper objectMapper = new ObjectMapper();
 
+    private static final String USER = "admin";
+    private static final String PASS = "pass";
+    private static final String BASE = "/api/admin/currencies";
+
     @Test
     void createThenDeactivateCurrency_shouldPersistStatusChange() throws Exception {
         // -------- CREATE ----------
         CurrencyRequestDTO request = aCurrencyRequest();
 
-        var createResult = mockMvc.perform(post("/api/admin/currencies")
-                        .with(httpBasic("admin", "pass"))
+        var createResult = mockMvc.perform(post(BASE)
+                        .with(httpBasic(USER,PASS))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -55,16 +59,16 @@ class CurrencyControllerIT {
         long id = created.get("id").asLong();
 
         // -------- DEACTIVATE ----------
-        mockMvc.perform(post("/api/admin/currencies/{id}/deactivate", id)
-                        .with(httpBasic("admin", "pass")))
+        mockMvc.perform(post(BASE + "/{id}/deactivate", id)
+                        .with(httpBasic(USER,PASS)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value((int) id))
                 .andExpect(jsonPath("$.code", is("RON")))
                 .andExpect(jsonPath("$.isActive", is(false)));
 
         // -------- ACTIVATE ----------
-        mockMvc.perform(post("/api/admin/currencies/{id}/activate", id)
-                        .with(httpBasic("admin", "pass")))
+        mockMvc.perform(post(BASE + "/{id}/activate", id)
+                        .with(httpBasic(USER,PASS)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value((int) id))
                 .andExpect(jsonPath("$.code", is("RON")))

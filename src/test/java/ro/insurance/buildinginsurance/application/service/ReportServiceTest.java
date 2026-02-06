@@ -19,6 +19,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import static ro.insurance.buildinginsurance.util.ExceptionAssertions.assertHasError;
 import static ro.insurance.buildinginsurance.util.ReportTestDataFactory.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -131,7 +132,7 @@ class ReportServiceTest {
         ReportRequestDTO req = aReportReq_invalid_fromAfterTo();
 
         BusinessException ex = assertThrows(BusinessException.class, () -> reportService.getPoliciesReport(req));
-        assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.REPORT_INVALID_REQUEST.name().equals(e.getCode())));
+        assertHasError(ex,ErrorCode.REPORT_INVALID_REQUEST);
 
         verifyNoInteractions(entityManager);
     }

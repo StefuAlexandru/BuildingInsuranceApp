@@ -58,6 +58,10 @@ class ClientControllerIT {
 
     ObjectMapper objectMapper = new ObjectMapper();
 
+    private static final String USER = "broker@email.com";
+    private static final String PASS = "pass";
+    private static final String BASE = "/api/brokers/clients";
+
     private record Seed(Country country, County county, City city, Client client) {}
     private record GeoSeed(Country country, County county, City city) {}
 
@@ -85,8 +89,8 @@ class ClientControllerIT {
     void createClient_success_withoutAddress_trimsFields() throws Exception {
         String body = createClientRequestBody("   John Doe   ", ClientType.INDIVIDUAL, "   CNP123   ", "jonx@x.com", "0783728349", null, null, null);
 
-        var result = mockMvc.perform(post("/api/brokers/clients")
-                        .with(httpBasic("broker", "pass"))
+        var result = mockMvc.perform(post(BASE)
+                        .with(httpBasic(USER,PASS))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isCreated())
@@ -112,8 +116,8 @@ class ClientControllerIT {
 
         String body = createClientRequestBody("   John Doe   ", ClientType.INDIVIDUAL, "   CNP123   ", "jonx@x.com", "0783728349", geo.city.getId(), "Str. test", "10A");
 
-        var result = mockMvc.perform(post("/api/brokers/clients")
-                        .with(httpBasic("broker", "pass"))
+        var result = mockMvc.perform(post(BASE)
+                        .with(httpBasic(USER,PASS))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isCreated())
@@ -138,8 +142,8 @@ class ClientControllerIT {
     void createClient_shouldReturn400_whenInvalid_email_phone_required() throws Exception {
         String body = createClientRequestBody("  ", ClientType.INDIVIDUAL, "   CNP123   ", "  bad -email", "abc", null, null, null);
 
-        mockMvc.perform(post("/api/brokers/clients")
-                        .with(httpBasic("broker", "pass"))
+        mockMvc.perform(post(BASE)
+                        .with(httpBasic(USER,PASS))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpectAll(
@@ -163,8 +167,8 @@ class ClientControllerIT {
     void getClientById_success() throws Exception {
         Seed s = seedClientAndCity();
 
-        mockMvc.perform(get("/api/brokers/clients/{id}", s.client.getId())
-                        .with(httpBasic("broker", "pass")))
+        mockMvc.perform(get(BASE + "/{id}", s.client.getId())
+                        .with(httpBasic(USER,PASS)))
                 .andExpectAll(
                         status().isOk(),
                         jsonPath("$.id").value(s.client.getId().intValue()),
@@ -192,8 +196,8 @@ class ClientControllerIT {
 
         String body = createClientUpdateRequestBody("   John Doe   ", "jonUpdated@xa.ro", "0777777777", s.city.getId(), "   Str. test   ", "  10A  ");
 
-        mockMvc.perform(put("/api/brokers/clients/{id}", s.client.getId())
-                        .with(httpBasic("broker", "pass"))
+        mockMvc.perform(put(BASE + "/{id}", s.client.getId())
+                        .with(httpBasic(USER,PASS))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpectAll(
@@ -237,8 +241,8 @@ class ClientControllerIT {
             }
             """;
 
-        mockMvc.perform(patch("/api/brokers/clients/{id}/identity", s.client.getId())
-                        .with(httpBasic("broker", "pass"))
+        mockMvc.perform(patch(BASE + "/{id}/identity", s.client.getId())
+                        .with(httpBasic(USER,PASS))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpectAll(
@@ -265,7 +269,7 @@ class ClientControllerIT {
         assertThat(typeRow.getOldValue()).isEqualTo(oldType);
         assertThat(typeRow.getNewValue()).isEqualTo("COMPANY");
         assertThat(typeRow.getReason()).isEqualTo("correction");
-        assertThat(typeRow.getChangedBy()).isEqualTo("broker");
+        assertThat(typeRow.getChangedBy()).isEqualTo(USER);
 
         var idRow = rows.stream()
                 .filter(r -> r.getField() == ClientChangeHistory.Field.IDENTIFICATION_NUMBER)
@@ -274,7 +278,7 @@ class ClientControllerIT {
         assertThat(idRow.getOldValue()).isEqualTo(oldIdNo);
         assertThat(idRow.getNewValue()).isEqualTo("CUI999");
         assertThat(idRow.getReason()).isEqualTo("correction");
-        assertThat(idRow.getChangedBy()).isEqualTo("broker");
+        assertThat(idRow.getChangedBy()).isEqualTo(USER);
     }
 
     // ----------------------  DELETE  ----------------------
@@ -283,12 +287,12 @@ class ClientControllerIT {
     void deleteClient_success_thenGet_returnsNotFound() throws Exception {
         Seed s = seedClientAndCity();
 
-        mockMvc.perform(delete("/api/brokers/clients/{id}", s.client.getId())
-                        .with(httpBasic("broker", "pass")))
+        mockMvc.perform(delete(BASE + "/{id}", s.client.getId())
+                        .with(httpBasic(USER,PASS)))
                 .andExpect(status().is2xxSuccessful());
 
-        mockMvc.perform(get("/api/brokers/clients/{id}", s.client.getId())
-                        .with(httpBasic("broker", "pass")))
+        mockMvc.perform(get(BASE + "/{id}", s.client.getId())
+                        .with(httpBasic(USER,PASS)))
                 .andExpect(status().isNotFound());
     }
 }

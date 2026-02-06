@@ -24,6 +24,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static ro.insurance.buildinginsurance.util.ExceptionAssertions.assertHasError;
 import static ro.insurance.buildinginsurance.util.RiskFactorConfigurationTestDataFactory.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -180,7 +181,7 @@ class RiskFactorConfigurationServiceTest {
         BusinessException ex = assertThrows(BusinessException.class, () -> riskFactorConfigurationService.updateRiskFactorConfiguration(id, dto));
 
         // Assert
-        assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.RISK_FACTOR_CONFIGURATION_NOT_FOUND.name().equals(e.getCode())));
+        assertHasError(ex,ErrorCode.RISK_FACTOR_CONFIGURATION_NOT_FOUND);
 
         verify(riskFactorConfigurationRepository).findById(id);
         verifyNoInteractions(riskFactorConfigurationFacade, riskFactorConfigurationMapper);

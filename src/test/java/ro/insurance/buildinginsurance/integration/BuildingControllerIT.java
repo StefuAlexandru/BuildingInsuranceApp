@@ -67,6 +67,10 @@ class BuildingControllerIT {
 
     ObjectMapper objectMapper = new ObjectMapper();
 
+    private static final String USER = "broker@email.com";
+    private static final String PASS = "pass";
+    private static final String BASE = "/api/brokers/buildings";
+
     // ----------------------  HELPERS  ----------------------
 
     private record Seed(Country country, County county, City city, Client client) {}
@@ -102,8 +106,8 @@ class BuildingControllerIT {
                 base.earthquakeZone()
         );
 
-        var result = mockMvc.perform(post("/api/brokers/buildings")
-                        .with(httpBasic("broker", "pass"))
+        var result = mockMvc.perform(post(BASE)
+                        .with(httpBasic(USER, PASS))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isCreated())
@@ -133,8 +137,8 @@ class BuildingControllerIT {
 
         Long buildingId = createBuilding(seed.client.getId(), seed.city.getId());
 
-        mockMvc.perform(get("/api/brokers/buildings/{id}", buildingId)
-                        .with(httpBasic("broker", "pass")))
+        mockMvc.perform(get(BASE + "/{id}", buildingId)
+                        .with(httpBasic(USER, PASS)))
                 .andExpectAll(
                         status().isOk(),
                         jsonPath("$.id").value(buildingId.intValue()),
@@ -148,8 +152,8 @@ class BuildingControllerIT {
 
         Long buildingId = createBuilding(seed.client.getId(), seed.city.getId());
 
-        mockMvc.perform(get("/api/brokers/buildings")
-                        .with(httpBasic("broker", "pass"))
+        mockMvc.perform(get(BASE)
+                        .with(httpBasic(USER, PASS))
                         .queryParam("clientId", String.valueOf(seed.client.getId()))
                         .queryParam("page", "0")
                         .queryParam("size", "5"))
@@ -183,8 +187,8 @@ class BuildingControllerIT {
                 baseUpd.earthquakeZone()
         );
 
-        mockMvc.perform(put("/api/brokers/buildings/{id}", buildingId)
-                        .with(httpBasic("broker", "pass"))
+        mockMvc.perform(put(BASE + "/{id}", buildingId)
+                        .with(httpBasic(USER, PASS))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(upd)))
                 .andExpectAll(
@@ -204,12 +208,12 @@ class BuildingControllerIT {
 
         Long buildingId = createBuilding(seed.client().getId(), seed.city().getId());
 
-        mockMvc.perform(delete("/api/brokers/buildings/{id}", buildingId)
-                        .with(httpBasic("broker","pass")))
+        mockMvc.perform(delete(BASE + "/{id}", buildingId)
+                        .with(httpBasic(USER,PASS)))
                 .andExpect(status().isNoContent());
 
-        mockMvc.perform(get("/api/brokers/buildings/{id}", buildingId)
-                        .with(httpBasic("broker","pass")))
+        mockMvc.perform(get(BASE + "/{id}", buildingId)
+                        .with(httpBasic(USER,PASS)))
                 .andExpect(status().isNotFound());
     }
 
