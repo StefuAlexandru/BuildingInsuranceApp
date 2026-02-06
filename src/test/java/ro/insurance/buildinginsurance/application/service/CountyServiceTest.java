@@ -26,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static ro.insurance.buildinginsurance.util.CountyTestDataFactory.*;
 import static ro.insurance.buildinginsurance.util.CountryTestDataFactory.*;
+import static ro.insurance.buildinginsurance.util.ExceptionAssertions.assertHasError;
 
 @ExtendWith(MockitoExtension.class)
 class CountyServiceTest {
@@ -114,10 +115,7 @@ class CountyServiceTest {
         BusinessException ex = assertThrows(BusinessException.class, () -> countyService.registerCounty(countyRequestDTO));
 
         // Assert
-        assertAll(
-                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.COUNTY_ALREADY_EXIST.name().equals(e.getCode()))),
-                () -> assertEquals(1, ex.getErrors().size())
-        );
+        assertHasError(ex,ErrorCode.COUNTY_ALREADY_EXIST);
 
         verify(countyRepository).existsByNameIgnoreCaseAndCountryId(trimmed, countyRequestDTO.countryId());
         verifyNoMoreInteractions(countyRepository);
@@ -137,10 +135,7 @@ class CountyServiceTest {
         BusinessException ex = assertThrows(BusinessException.class, () -> countyService.registerCounty(countyRequestDTO));
 
         // Assert
-        assertAll(
-                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.COUNTRY_NOT_FOUND.name().equals(e.getCode()))),
-                () -> assertEquals(1, ex.getErrors().size())
-        );
+        assertHasError(ex,ErrorCode.COUNTRY_NOT_FOUND);
 
         verify(countyRepository).existsByNameIgnoreCaseAndCountryId(trimmed, countyRequestDTO.countryId());
         verify(countryRepository).findById(countyRequestDTO.countryId());
@@ -180,10 +175,7 @@ class CountyServiceTest {
         BusinessException ex = assertThrows(BusinessException.class, () -> countyService.getCountyById(1L));
 
         // Assert
-        assertAll(
-                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.COUNTY_NOT_FOUND.name().equals(e.getCode()))),
-                () -> assertEquals(1, ex.getErrors().size())
-        );
+        assertHasError(ex,ErrorCode.COUNTY_NOT_FOUND);
 
         verify(countyRepository).findById(1L);
         verifyNoMoreInteractions(countyRepository);
@@ -292,10 +284,7 @@ class CountyServiceTest {
         BusinessException ex = assertThrows(BusinessException.class, () -> countyService.updateCounty(1L, countyRequestDTO));
 
         // Assert
-        assertAll(
-                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.COUNTY_NOT_FOUND.name().equals(e.getCode()))),
-                () -> assertEquals(1, ex.getErrors().size())
-        );
+        assertHasError(ex,ErrorCode.COUNTY_NOT_FOUND);
 
         verify(countyRepository).findById(1L);
         verifyNoMoreInteractions(countyRepository);
@@ -317,10 +306,7 @@ class CountyServiceTest {
         BusinessException ex = assertThrows(BusinessException.class, () -> countyService.updateCounty(1L, countyRequestDTO));
 
         // Assert
-        assertAll(
-                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.COUNTY_ALREADY_EXIST.name().equals(e.getCode()))),
-                () -> assertEquals(1, ex.getErrors().size())
-        );
+        assertHasError(ex,ErrorCode.COUNTY_ALREADY_EXIST);
 
         verify(countyRepository).findById(1L);
         verify(countyRepository).existsByNameIgnoreCaseAndCountryId(trimmed, countyRequestDTO.countryId());
@@ -343,10 +329,7 @@ class CountyServiceTest {
         BusinessException ex = assertThrows(BusinessException.class, () -> countyService.updateCounty(1L, countyRequestDTO));
 
         // Assert
-        assertAll(
-                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.COUNTRY_NOT_FOUND.name().equals(e.getCode()))),
-                () -> assertEquals(1, ex.getErrors().size())
-        );
+        assertHasError(ex,ErrorCode.COUNTRY_NOT_FOUND);
 
         verify(countyRepository).findById(1L);
         verify(countyRepository).existsByNameIgnoreCaseAndCountryId("Iasi", 2L);
@@ -374,10 +357,7 @@ class CountyServiceTest {
 
         BusinessException ex = assertThrows(BusinessException.class, () -> countyService.deleteCounty(1L));
 
-        assertAll(
-                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.COUNTY_NOT_FOUND.name().equals(e.getCode()))),
-                () -> assertEquals(1, ex.getErrors().size())
-        );
+        assertHasError(ex,ErrorCode.COUNTY_NOT_FOUND);
 
         verify(countyRepository).deleteById(1L);
         verifyNoMoreInteractions(countyRepository);
@@ -390,10 +370,7 @@ class CountyServiceTest {
 
         BusinessException ex = assertThrows(BusinessException.class, () -> countyService.deleteCounty(1L));
 
-        assertAll(
-                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.COUNTY_HAS_DEPENDENCIES.name().equals(e.getCode()))),
-                () -> assertEquals(1, ex.getErrors().size())
-        );
+        assertHasError(ex,ErrorCode.COUNTY_HAS_DEPENDENCIES);
 
         verify(countyRepository).deleteById(1L);
         verifyNoMoreInteractions(countyRepository);

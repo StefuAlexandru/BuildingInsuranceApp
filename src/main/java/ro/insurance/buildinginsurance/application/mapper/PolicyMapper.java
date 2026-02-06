@@ -29,12 +29,22 @@ public interface PolicyMapper {
     @Mapping(target = "currency", source = "currency")
     Policy toEntity(PolicyCreateRequestDTO request, Client client, Building building, Broker broker, Currency currency);
 
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "client", ignore = true)
-    @Mapping(target = "building", ignore = true)
-    @Mapping(target = "broker", source = "broker")
+    @Mapping(target = "broker", ignore = true)
+    @Mapping(target = "status", ignore = true)
+    @Mapping(target = "policyNumber", ignore = true)
+    @Mapping(target = "finalPremiumAmount", ignore = true)
+    @Mapping(target = "brokerCommissionPct", ignore = true)
+    @Mapping(target = "brokerCommissionAmount", ignore = true)
+    @Mapping(target = "activatedAt", ignore = true)
+    @Mapping(target = "cancelledAt", ignore = true)
+    @Mapping(target = "cancellationReason", ignore = true)
+    @Mapping(target = "building", source = "building")
     @Mapping(target = "currency", source = "currency")
-    void updateFromDTO(PolicyPatchRequestDTO request, Broker broker, Currency currency, @MappingTarget Policy policy);
+    void patchDraftFromDto(PolicyPatchRequestDTO request, Building building, Currency currency, @MappingTarget Policy policy);
+
 
     @Mapping(target = "clientId", source = "policy.client.id")
     @Mapping(target = "buildingId", source = "policy.building.id")

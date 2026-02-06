@@ -43,6 +43,8 @@ class ClientControllerTest {
     @InjectMocks
     private ClientController clientController;
 
+    private static final String BASE = "/api/brokers/clients";
+
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(clientController)
@@ -71,7 +73,7 @@ class ClientControllerTest {
         when(clientService.createClient(any(ClientRequestDTO.class))).thenReturn(clientResponseDTO);
 
         // Act + Assert
-        mockMvc.perform(post("/api/brokers/clients")
+        mockMvc.perform(post(BASE)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpectAll(
@@ -100,7 +102,7 @@ class ClientControllerTest {
         String body = createClientRequestBody("Gheo", ClientType.INDIVIDUAL, "1960101123456", "bad-email", "abc", 1L, "Str", "10A");
 
         // Act + Assert
-        mockMvc.perform(post("/api/brokers/clients")
+        mockMvc.perform(post(BASE)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isBadRequest());
@@ -120,8 +122,8 @@ class ClientControllerTest {
         ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
 
         // Act + Assert
-        mockMvc.perform(post("/api/brokers/clients/search")
-                        .contentType("application/json")
+        mockMvc.perform(post(BASE + "/search")
+                        .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                         {
                           "name": "ghe",
@@ -157,11 +159,11 @@ class ClientControllerTest {
         when(clientService.searchClients(isNull(), eq("1960101123456"), any(Pageable.class))).thenReturn(page);
 
         // Act + Assert
-        mockMvc.perform(post("/api/brokers/clients/search")
+        mockMvc.perform(post(BASE + "/search")
                         .param("page", "0")
                         .param("size", "10")
                         .param("sort", "name,asc")
-                        .contentType("application/json")
+                        .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                         {
                           "name": null,
@@ -187,8 +189,8 @@ class ClientControllerTest {
         when(clientService.getClientByNameAndIdentificationNumber("Gheo", "1960101123456")).thenReturn(clientResponseDTO);
 
         // Act + Assert
-        mockMvc.perform(post("/api/brokers/clients/lookup")
-                        .contentType("application/json")
+        mockMvc.perform(post(BASE + "/lookup")
+                        .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                         {
                           "name": "Gheo",
@@ -217,7 +219,7 @@ class ClientControllerTest {
         when(clientService.getClientById(1L)).thenReturn(clientResponseDTO);
 
         // Act + Assert
-        mockMvc.perform(get("/api/brokers/clients/{clientId}", 1L))
+        mockMvc.perform(get(BASE + "/{clientId}", 1L))
                 .andExpectAll(
                         status().isOk(),
                         jsonPath("$.id").value(clientResponseDTO.id().intValue()),
@@ -236,7 +238,7 @@ class ClientControllerTest {
         when(clientService.getAllClients(any(Pageable.class))).thenReturn(new PageImpl<>(List.of(dto), PageRequest.of(0, 5), 1));
 
         // Act
-        var actions = mockMvc.perform(get("/api/brokers/clients")
+        var actions = mockMvc.perform(get(BASE)
                         .param("page", "0")
                         .param("size", "5")
                         .param("sort", "name,asc")
@@ -262,7 +264,7 @@ class ClientControllerTest {
         when(clientService.getClientDetailsById(clientId)).thenReturn(dto);
 
         // Act + Assert
-        mockMvc.perform(get("/api/brokers/clients/{clientId}/details", clientId))
+        mockMvc.perform(get(BASE + "/{clientId}/details", clientId))
                 .andExpectAll(
                         status().isOk(),
                         jsonPath("$.id").value(dto.id().intValue()),
@@ -295,7 +297,7 @@ class ClientControllerTest {
         when(clientService.updateClient(eq(clientId), any(ClientUpdateRequestDTO.class))).thenReturn(clientResponseDTO);
 
         // Act + Assert
-        mockMvc.perform(put("/api/brokers/clients/{clientId}", clientId)
+        mockMvc.perform(put(BASE + "/{clientId}", clientId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpectAll(
@@ -327,7 +329,7 @@ class ClientControllerTest {
 
         when(clientService.patchIdentity(eq(clientId), any(), eq("broker"))).thenReturn(clientResponseDTO);
 
-        mockMvc.perform(patch("/api/brokers/clients/{clientId}/identity", clientId)
+        mockMvc.perform(patch(BASE + "/{clientId}/identity", clientId)
                         .principal(auth)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
@@ -350,7 +352,7 @@ class ClientControllerTest {
         Long clientId = 99L;
         doNothing().when(clientService).deleteClient(clientId);
 
-        mockMvc.perform(delete("/api/brokers/clients/{clientId}", clientId))
+        mockMvc.perform(delete(BASE + "/{clientId}", clientId))
                 .andExpect(status().isNoContent());
 
         verify(clientService).deleteClient(clientId);

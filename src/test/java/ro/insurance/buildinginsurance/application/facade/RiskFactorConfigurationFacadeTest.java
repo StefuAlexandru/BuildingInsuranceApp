@@ -17,6 +17,7 @@ import ro.insurance.buildinginsurance.web.error.BusinessException;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import static ro.insurance.buildinginsurance.util.ExceptionAssertions.assertHasError;
 import static ro.insurance.buildinginsurance.util.RiskFactorConfigurationTestDataFactory.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -83,7 +84,7 @@ class RiskFactorConfigurationFacadeTest {
         BusinessException ex = assertThrows(BusinessException.class, () -> facade.validateCreateOrThrow(request));
 
         // Assert
-        assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.INVALID_RISK_FACTOR_SCOPE.name().equals(e.getCode())));
+        assertHasError(ex,ErrorCode.INVALID_RISK_FACTOR_SCOPE);
 
         verifyNoInteractions(cityRepository, countyRepository, countryRepository, riskFactorConfigurationRepository);
     }
@@ -94,7 +95,7 @@ class RiskFactorConfigurationFacadeTest {
 
         BusinessException ex = assertThrows(BusinessException.class, () -> facade.validateCreateOrThrow(request));
 
-        assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.INVALID_RISK_FACTOR_SCOPE.name().equals(e.getCode())));
+        assertHasError(ex,ErrorCode.INVALID_RISK_FACTOR_SCOPE);
 
         verifyNoInteractions(cityRepository, countyRepository, countryRepository, riskFactorConfigurationRepository);
     }
@@ -105,7 +106,7 @@ class RiskFactorConfigurationFacadeTest {
 
         BusinessException ex = assertThrows(BusinessException.class, () -> facade.validateCreateOrThrow(request));
 
-        assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.INVALID_DATES.name().equals(e.getCode())));
+        assertHasError(ex,ErrorCode.INVALID_DATES);
 
         verifyNoInteractions(cityRepository, countyRepository, countryRepository, riskFactorConfigurationRepository);
     }
@@ -116,7 +117,7 @@ class RiskFactorConfigurationFacadeTest {
 
         BusinessException ex = assertThrows(BusinessException.class, () -> facade.validateCreateOrThrow(request));
 
-        assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.INVALID_RISK_FACTOR_SCOPE.name().equals(e.getCode())));
+        assertHasError(ex,ErrorCode.INVALID_RISK_FACTOR_SCOPE);
 
         verifyNoInteractions(cityRepository, countyRepository, countryRepository, riskFactorConfigurationRepository);
     }
@@ -127,7 +128,7 @@ class RiskFactorConfigurationFacadeTest {
 
         BusinessException ex = assertThrows(BusinessException.class, () -> facade.validateCreateOrThrow(request));
 
-        assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.INVALID_RISK_FACTOR_SCOPE.name().equals(e.getCode())));
+        assertHasError(ex,ErrorCode.INVALID_RISK_FACTOR_SCOPE);
 
         verifyNoInteractions(cityRepository, countyRepository, countryRepository, riskFactorConfigurationRepository);
     }
@@ -140,7 +141,7 @@ class RiskFactorConfigurationFacadeTest {
 
         BusinessException ex = assertThrows(BusinessException.class, () -> facade.validateCreateOrThrow(request));
 
-        assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.CITY_NOT_FOUND.name().equals(e.getCode())));
+        assertHasError(ex,ErrorCode.CITY_NOT_FOUND);
 
         verify(cityRepository).existsById(request.referenceId());
         verifyNoInteractions(countyRepository, countryRepository, riskFactorConfigurationRepository);
@@ -155,7 +156,7 @@ class RiskFactorConfigurationFacadeTest {
 
         BusinessException ex = assertThrows(BusinessException.class, () -> facade.validateCreateOrThrow(request));
 
-        assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.COUNTY_NOT_FOUND.name().equals(e.getCode())));
+        assertHasError(ex,ErrorCode.COUNTY_NOT_FOUND);
 
         verify(countyRepository).existsById(request.referenceId());
         verifyNoInteractions(cityRepository, countryRepository, riskFactorConfigurationRepository);
@@ -170,7 +171,7 @@ class RiskFactorConfigurationFacadeTest {
 
         BusinessException ex = assertThrows(BusinessException.class, () -> facade.validateCreateOrThrow(request));
 
-        assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.COUNTRY_NOT_FOUND.name().equals(e.getCode())));
+        assertHasError(ex,ErrorCode.COUNTRY_NOT_FOUND);
 
         verify(countryRepository).existsById(request.referenceId());
         verifyNoInteractions(cityRepository, countyRepository, riskFactorConfigurationRepository);
@@ -192,7 +193,7 @@ class RiskFactorConfigurationFacadeTest {
 
         BusinessException ex = assertThrows(BusinessException.class, () -> facade.validateCreateOrThrow(request));
 
-        assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.RISK_FACTOR_CONFIGURATION_OVERLAP.name().equals(e.getCode())));
+        assertHasError(ex,ErrorCode.RISK_FACTOR_CONFIGURATION_OVERLAP);
 
         verify(cityRepository).existsById(request.referenceId());
         verify(riskFactorConfigurationRepository).existsOverlappingIntervalForCreate(
@@ -230,7 +231,7 @@ class RiskFactorConfigurationFacadeTest {
 
         BusinessException ex = assertThrows(BusinessException.class, () -> facade.validateCreateOrThrow(request));
 
-        assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.DUPLICATE_RISK_FACTOR_CONFIG.name().equals(e.getCode())));
+        assertHasError(ex,ErrorCode.DUPLICATE_RISK_FACTOR_CONFIG);
 
         InOrder inOrder = inOrder(cityRepository, riskFactorConfigurationRepository);
         inOrder.verify(cityRepository).existsById(request.referenceId());
@@ -302,7 +303,7 @@ class RiskFactorConfigurationFacadeTest {
 
         BusinessException ex = assertThrows(BusinessException.class, () -> facade.validateUpdateOrThrow(id, request));
 
-        assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.RISK_FACTOR_CONFIGURATION_OVERLAP.name().equals(e.getCode())));
+        assertHasError(ex,ErrorCode.RISK_FACTOR_CONFIGURATION_OVERLAP);
 
         verify(cityRepository).existsById(request.referenceId());
         verify(riskFactorConfigurationRepository).existsOverlappingIntervalForUpdate(
@@ -344,7 +345,7 @@ class RiskFactorConfigurationFacadeTest {
 
         BusinessException ex = assertThrows(BusinessException.class, () -> facade.validateUpdateOrThrow(id, request));
 
-        assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.DUPLICATE_RISK_FACTOR_CONFIG.name().equals(e.getCode())));
+        assertHasError(ex,ErrorCode.DUPLICATE_RISK_FACTOR_CONFIG);
 
         InOrder inOrder = inOrder(cityRepository, riskFactorConfigurationRepository);
         inOrder.verify(cityRepository).existsById(request.referenceId());

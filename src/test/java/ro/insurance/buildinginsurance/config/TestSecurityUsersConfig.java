@@ -19,7 +19,7 @@ public class TestSecurityUsersConfig {
                 .roles("ADMIN")
                 .build();
 
-        UserDetails broker = User.withUsername("broker")
+        UserDetails broker = User.withUsername("broker@email.com")
                 .password("{noop}pass")
                 .roles("BROKER")
                 .build();

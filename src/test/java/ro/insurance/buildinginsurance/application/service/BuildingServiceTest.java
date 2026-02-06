@@ -28,6 +28,7 @@ import static org.mockito.Mockito.*;
 import static ro.insurance.buildinginsurance.util.BuildingTestDataFactory.*;
 import static ro.insurance.buildinginsurance.util.CityTestDataFactory.aCityWithId;
 import static ro.insurance.buildinginsurance.util.ClientTestDataFactory.aClient;
+import static ro.insurance.buildinginsurance.util.ExceptionAssertions.assertHasError;
 
 @ExtendWith(MockitoExtension.class)
 class BuildingServiceTest {
@@ -81,10 +82,7 @@ class BuildingServiceTest {
         // Act + Assert
         BusinessException ex = assertThrows(BusinessException.class, () -> buildingService.registerNewBuilding(buildingRequestDTO));
 
-        assertAll(
-                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.CLIENT_NOT_FOUND.name().equals(e.getCode()))),
-                () -> assertEquals(1, ex.getErrors().size())
-        );
+        assertHasError(ex,ErrorCode.CLIENT_NOT_FOUND);
 
         verify(clientRepository).findById(buildingRequestDTO.clientId());
         verifyNoInteractions(cityRepository, buildingRepository, buildingMapper);
@@ -102,10 +100,7 @@ class BuildingServiceTest {
         // Act + Assert
         BusinessException ex = assertThrows(BusinessException.class, () -> buildingService.registerNewBuilding(buildingRequestDTO));
 
-        assertAll(
-                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.CITY_NOT_FOUND.name().equals(e.getCode()))),
-                () -> assertEquals(1, ex.getErrors().size())
-        );
+        assertHasError(ex,ErrorCode.CITY_NOT_FOUND);
 
         verify(clientRepository).findById(buildingRequestDTO.clientId());
         verify(cityRepository).findById(buildingRequestDTO.cityId());
@@ -142,10 +137,7 @@ class BuildingServiceTest {
         // Act + Assert
         BusinessException ex = assertThrows(BusinessException.class, () -> buildingService.getBuildingById(1L));
 
-        assertAll(
-                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.BUILDING_NOT_FOUND.name().equals(e.getCode()))),
-                () -> assertEquals(1, ex.getErrors().size())
-        );
+        assertHasError(ex,ErrorCode.BUILDING_NOT_FOUND);
 
         verify(buildingRepository).findById(1L);
         verifyNoInteractions(buildingMapper, clientRepository, cityRepository);
@@ -192,10 +184,7 @@ class BuildingServiceTest {
         // Act + Assert
         BusinessException ex = assertThrows(BusinessException.class, () -> buildingService.getBuildingsByClientId(clientId, pageable));
 
-        assertAll(
-                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.CLIENT_NOT_FOUND.name().equals(e.getCode()))),
-                () -> assertEquals(1, ex.getErrors().size())
-        );
+        assertHasError(ex,ErrorCode.CLIENT_NOT_FOUND);
 
         verify(clientRepository).findById(clientId);
         verifyNoInteractions(buildingRepository, buildingMapper, cityRepository);
@@ -230,10 +219,7 @@ class BuildingServiceTest {
         // Act + Assert
         BusinessException ex = assertThrows(BusinessException.class, () -> buildingService.getBuildingDetailsById(1L));
 
-        assertAll(
-                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.BUILDING_NOT_FOUND.name().equals(e.getCode()))),
-                () -> assertEquals(1, ex.getErrors().size())
-        );
+        assertHasError(ex,ErrorCode.BUILDING_NOT_FOUND);
 
         verify(buildingRepository).findDetailsById(1L);
         verifyNoInteractions(buildingMapper, clientRepository, cityRepository);
@@ -284,10 +270,7 @@ class BuildingServiceTest {
         // Act + Assert
         BusinessException ex = assertThrows(BusinessException.class, () -> buildingService.updateBuilding(1L, buildingUpdateRequestDTO));
 
-        assertAll(
-                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.CITY_NOT_FOUND.name().equals(e.getCode()))),
-                () -> assertEquals(1, ex.getErrors().size())
-        );
+        assertHasError(ex,ErrorCode.CITY_NOT_FOUND);
 
         verify(buildingRepository).findById(1L);
         verify(cityRepository).findById(buildingUpdateRequestDTO.cityId());
@@ -376,10 +359,7 @@ class BuildingServiceTest {
         // Act + Assert
         BusinessException ex = assertThrows(BusinessException.class, () -> buildingService.deleteBuilding(1L));
 
-        assertAll(
-                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.BUILDING_NOT_FOUND.name().equals(e.getCode()))),
-                () -> assertEquals(1, ex.getErrors().size())
-        );
+        assertHasError(ex,ErrorCode.BUILDING_NOT_FOUND);
 
         verify(buildingRepository).deleteById(1L);
         verifyNoInteractions(clientRepository, cityRepository, buildingMapper);
@@ -393,10 +373,7 @@ class BuildingServiceTest {
         // Act + Assert
         BusinessException ex = assertThrows(BusinessException.class, () -> buildingService.deleteBuilding(1L));
 
-        assertAll(
-                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.BUILDING_HAS_DEPENDENCIES.name().equals(e.getCode()))),
-                () -> assertEquals(1, ex.getErrors().size())
-        );
+        assertHasError(ex,ErrorCode.BUILDING_HAS_DEPENDENCIES);
 
         verify(buildingRepository).deleteById(1L);
         verifyNoInteractions(clientRepository, cityRepository, buildingMapper);

@@ -21,6 +21,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static ro.insurance.buildinginsurance.util.ExceptionAssertions.assertHasError;
 import static ro.insurance.buildinginsurance.util.FeeConfigurationTestDataFactory.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -96,7 +97,7 @@ class FeeConfigurationServiceTest {
 
         BusinessException ex = assertThrows(BusinessException.class, () -> feeConfigurationService.registerFee(request));
 
-        assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.INVALID_DATES.name().equals(e.getCode())));
+        assertHasError(ex,ErrorCode.INVALID_DATES);
         verifyNoInteractions(feeConfigurationRepository, feeConfigurationMapper);
     }
 
@@ -109,7 +110,7 @@ class FeeConfigurationServiceTest {
 
         BusinessException ex = assertThrows(BusinessException.class, () -> feeConfigurationService.registerFee(request));
 
-        assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.FEE_CONFIGURATION_ALREADY_EXISTS.name().equals(e.getCode())));
+        assertHasError(ex,ErrorCode.FEE_CONFIGURATION_ALREADY_EXISTS);
 
         verify(feeConfigurationRepository).existsByNameAndFeeTypeAndEffectiveFromIgnoreCase(name, request.feeType().name(), request.effectiveFrom());
         verifyNoInteractions(feeConfigurationMapper);
@@ -124,7 +125,7 @@ class FeeConfigurationServiceTest {
 
         BusinessException ex = assertThrows(BusinessException.class, () -> feeConfigurationService.registerFee(request));
 
-        assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.FEE_CONFIGURATION_OVERLAP.name().equals(e.getCode())));
+        assertHasError(ex,ErrorCode.FEE_CONFIGURATION_OVERLAP);
 
         verify(feeConfigurationRepository).existsOverlappingIntervalForCreate(request.feeType().name(), name, request.effectiveFrom(), request.effectiveTo());
         verifyNoInteractions(feeConfigurationMapper);
@@ -153,7 +154,7 @@ class FeeConfigurationServiceTest {
 
         BusinessException ex = assertThrows(BusinessException.class, () -> feeConfigurationService.getFeeById(1L));
 
-        assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.FEE_CONFIGURATION_NOT_FOUND.name().equals(e.getCode())));
+        assertHasError(ex,ErrorCode.FEE_CONFIGURATION_NOT_FOUND);
         verify(feeConfigurationRepository).findById(1L);
         verifyNoInteractions(feeConfigurationMapper);
     }
@@ -232,7 +233,7 @@ class FeeConfigurationServiceTest {
 
         BusinessException ex = assertThrows(BusinessException.class, () -> feeConfigurationService.updateFee(1L, request));
 
-        assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.FEE_CONFIGURATION_NOT_FOUND.name().equals(e.getCode())));
+        assertHasError(ex,ErrorCode.FEE_CONFIGURATION_NOT_FOUND);
         verify(feeConfigurationRepository).findById(1L);
         verifyNoInteractions(feeConfigurationMapper);
     }
@@ -268,7 +269,7 @@ class FeeConfigurationServiceTest {
 
         BusinessException ex = assertThrows(BusinessException.class, () -> feeConfigurationService.updateFee(1L, request));
 
-        assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.FEE_CONFIGURATION_OVERLAP.name().equals(e.getCode())));
+        assertHasError(ex,ErrorCode.FEE_CONFIGURATION_OVERLAP);
 
         verify(feeConfigurationRepository).findById(1L);
         verify(feeConfigurationRepository).existsOverlappingIntervalForUpdate(1L, request.feeType().name(), name, request.effectiveFrom(), request.effectiveTo());
@@ -287,7 +288,7 @@ class FeeConfigurationServiceTest {
 
         BusinessException ex = assertThrows(BusinessException.class, () -> feeConfigurationService.updateFee(1L, request));
 
-        assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.FEE_CONFIGURATION_ALREADY_EXISTS.name().equals(e.getCode())));
+        assertHasError(ex,ErrorCode.FEE_CONFIGURATION_ALREADY_EXISTS);
 
         verify(feeConfigurationRepository).findById(1L);
         verify(feeConfigurationRepository).existsByNameAndFeeTypeAndEffectiveFromIgnoreCaseAndIdNot(name, request.feeType().name(), request.effectiveFrom(), 1L);

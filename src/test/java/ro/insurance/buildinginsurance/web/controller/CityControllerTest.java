@@ -39,6 +39,8 @@ class CityControllerTest {
     @InjectMocks
     private CityController cityController;
 
+    private static final String BASE = "/api/geography/cities";
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach
@@ -70,7 +72,7 @@ class CityControllerTest {
         when(cityService.registerCity(any(CityRequestDTO.class))).thenReturn(responseDTO);
 
         // Act + Assert
-        mockMvc.perform(post("/api/geography/cities")
+        mockMvc.perform(post(BASE)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpectAll(
@@ -92,7 +94,7 @@ class CityControllerTest {
     void registerCity_shouldReturn400WhenInvalid() throws Exception {
         String body = createCityRequestBody("   ", null);
 
-        mockMvc.perform(post("/api/geography/cities")
+        mockMvc.perform(post(BASE)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isBadRequest());
@@ -109,7 +111,7 @@ class CityControllerTest {
         when(cityService.getCityById(1L)).thenReturn(responseDTO);
 
         // Act + Assert
-        mockMvc.perform(get("/api/geography/cities/{cityId}", 1L))
+        mockMvc.perform(get(BASE + "/{cityId}", 1L))
                 .andExpectAll(
                         status().isOk(),
                         jsonPath("$.id").value(responseDTO.id().intValue()),
@@ -133,7 +135,7 @@ class CityControllerTest {
         when(cityService.getCityByPartialName(eq(""), any(Pageable.class))).thenReturn(page);
 
         // Act + Assert
-        mockMvc.perform(get("/api/geography/cities")
+        mockMvc.perform(get(BASE)
                         .param("page", "0")
                         .param("size", "5")
                         .param("sort", "name,asc"))
@@ -162,7 +164,7 @@ class CityControllerTest {
         when(cityService.getCityByPartialName(eq("adj"), any(Pageable.class))).thenReturn(page);
 
         // Act + Assert
-        mockMvc.perform(get("/api/geography/cities")
+        mockMvc.perform(get(BASE)
                         .param("name", "adj")
                         .param("page", "0")
                         .param("size", "5")
@@ -192,7 +194,7 @@ class CityControllerTest {
         when(cityService.updateCity(eq(1L), any(CityRequestDTO.class))).thenReturn(cityResponseDTO);
 
         // Act + Assert
-        mockMvc.perform(put("/api/geography/cities/{cityId}", 1L)
+        mockMvc.perform(put(BASE + "/{cityId}", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpectAll(
@@ -210,7 +212,7 @@ class CityControllerTest {
     void updateCity_shouldReturn400WhenInvalid() throws Exception {
         String body = createCityRequestBody("   ", null);
 
-        mockMvc.perform(put("/api/geography/cities/{cityId}", 1L)
+        mockMvc.perform(put(BASE + "/{cityId}", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isBadRequest());
@@ -224,7 +226,7 @@ class CityControllerTest {
     void deleteCity_shouldReturn204() throws Exception {
         doNothing().when(cityService).deleteCity(1L);
 
-        mockMvc.perform(delete("/api/geography/cities/{cityId}", 1L))
+        mockMvc.perform(delete(BASE + "/{cityId}", 1L))
                 .andExpect(status().isNoContent());
 
         verify(cityService).deleteCity(1L);

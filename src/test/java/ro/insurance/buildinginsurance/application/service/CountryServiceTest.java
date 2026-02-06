@@ -23,6 +23,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static ro.insurance.buildinginsurance.util.CountryTestDataFactory.*;
+import static ro.insurance.buildinginsurance.util.ExceptionAssertions.assertHasError;
 
 @ExtendWith(MockitoExtension.class)
 class CountryServiceTest {
@@ -105,10 +106,7 @@ class CountryServiceTest {
         BusinessException ex = assertThrows(BusinessException.class, () -> countryService.registerCountry(countryRequestDTO));
 
         // Assert
-        assertAll(
-                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.COUNTRY_ALREADY_EXIST.name().equals(e.getCode()))),
-                () -> assertEquals(1, ex.getErrors().size())
-        );
+        assertHasError(ex,ErrorCode.COUNTRY_ALREADY_EXIST);
 
         verify(countryRepository).existsByNameIgnoreCase(trimmedName);
         verifyNoMoreInteractions(countryRepository);
@@ -146,10 +144,7 @@ class CountryServiceTest {
         BusinessException ex = assertThrows(BusinessException.class, () -> countryService.getCountryById(1L));
 
         // Assert
-        assertAll(
-                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.COUNTRY_NOT_FOUND.name().equals(e.getCode()))),
-                () -> assertEquals(1, ex.getErrors().size())
-        );
+        assertHasError(ex,ErrorCode.COUNTRY_NOT_FOUND);
 
         verify(countryRepository).findById(1L);
         verifyNoMoreInteractions(countryRepository);
@@ -256,10 +251,7 @@ class CountryServiceTest {
                 () -> countryService.updateCountry(1L, countryRequestDTO));
 
         // Assert
-        assertAll(
-                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.COUNTRY_NOT_FOUND.name().equals(e.getCode()))),
-                () -> assertEquals(1, ex.getErrors().size())
-        );
+        assertHasError(ex,ErrorCode.COUNTRY_NOT_FOUND);
 
         verify(countryRepository).findById(1L);
         verifyNoMoreInteractions(countryRepository);
@@ -282,10 +274,7 @@ class CountryServiceTest {
                 () -> countryService.updateCountry(1L, countryRequestDTO));
 
         // Assert
-        assertAll(
-                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.COUNTRY_ALREADY_EXIST.name().equals(e.getCode()))),
-                () -> assertEquals(1, ex.getErrors().size())
-        );
+        assertHasError(ex,ErrorCode.COUNTRY_ALREADY_EXIST);
 
         verify(countryRepository).findById(1L);
         verify(countryRepository).existsByNameIgnoreCase(trimmedName);
@@ -317,10 +306,7 @@ class CountryServiceTest {
         BusinessException ex = assertThrows(BusinessException.class, () -> countryService.deleteCountry(1L));
 
         // Assert
-        assertAll(
-                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.COUNTRY_NOT_FOUND.name().equals(e.getCode()))),
-                () -> assertEquals(1, ex.getErrors().size())
-        );
+        assertHasError(ex,ErrorCode.COUNTRY_NOT_FOUND);
 
         verify(countryRepository).deleteById(1L);
         verifyNoMoreInteractions(countryRepository);
@@ -336,10 +322,7 @@ class CountryServiceTest {
         BusinessException ex = assertThrows(BusinessException.class, () -> countryService.deleteCountry(1L));
 
         // Assert
-        assertAll(
-                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.COUNTRY_HAS_DEPENDENCIES.name().equals(e.getCode()))),
-                () -> assertEquals(1, ex.getErrors().size())
-        );
+        assertHasError(ex,ErrorCode.COUNTRY_HAS_DEPENDENCIES);
 
         verify(countryRepository).deleteById(1L);
         verifyNoMoreInteractions(countryRepository);

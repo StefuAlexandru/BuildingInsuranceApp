@@ -22,6 +22,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static ro.insurance.buildinginsurance.util.CurrencyTestDataFactory.*;
+import static ro.insurance.buildinginsurance.util.ExceptionAssertions.assertHasError;
 
 @ExtendWith(MockitoExtension.class)
 class CurrencyServiceTest {
@@ -103,10 +104,7 @@ class CurrencyServiceTest {
         BusinessException ex = assertThrows(BusinessException.class, () -> currencyService.registerCurrency(request));
 
         // Assert
-        assertAll(
-                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.CURRENCY_CODE_ALREADY_EXISTS.name().equals(e.getCode()))),
-                () -> assertEquals(1, ex.getErrors().size())
-        );
+        assertHasError(ex,ErrorCode.CURRENCY_CODE_ALREADY_EXISTS);
 
         verify(currencyRepository).existsByCodeIgnoreCase("RON");
         verifyNoMoreInteractions(currencyRepository);
@@ -205,10 +203,7 @@ class CurrencyServiceTest {
         BusinessException ex = assertThrows(BusinessException.class, () -> currencyService.activate(99L));
 
         // Assert
-        assertAll(
-                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.CURRENCY_NOT_FOUND.name().equals(e.getCode()))),
-                () -> assertEquals(1, ex.getErrors().size())
-        );
+        assertHasError(ex,ErrorCode.CURRENCY_NOT_FOUND);
 
         verify(currencyRepository).findById(99L);
         verifyNoMoreInteractions(currencyRepository);
@@ -250,10 +245,7 @@ class CurrencyServiceTest {
         BusinessException ex = assertThrows(BusinessException.class, () -> currencyService.deactivate(10L));
 
         // Assert
-        assertAll(
-                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.CURRENCY_IN_USE_BY_ACTIVE_POLICIES.name().equals(e.getCode()))),
-                () -> assertEquals(1, ex.getErrors().size())
-        );
+        assertHasError(ex,ErrorCode.CURRENCY_IN_USE_BY_ACTIVE_POLICIES);
 
         verify(currencyRepository).findById(10L);
         verify(policyRepository).existsActivePolicyByCurrencyCode("EUR");
@@ -296,10 +288,7 @@ class CurrencyServiceTest {
         BusinessException ex = assertThrows(BusinessException.class, () -> currencyService.deactivate(99L));
 
         // Assert
-        assertAll(
-                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.CURRENCY_NOT_FOUND.name().equals(e.getCode()))),
-                () -> assertEquals(1, ex.getErrors().size())
-        );
+        assertHasError(ex,ErrorCode.CURRENCY_NOT_FOUND);
 
         verify(currencyRepository).findById(99L);
         verifyNoMoreInteractions(currencyRepository);

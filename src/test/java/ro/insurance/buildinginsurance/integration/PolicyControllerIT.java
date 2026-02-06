@@ -74,7 +74,7 @@ class PolicyControllerIT {
     @Autowired CurrencyMapper currencyMapper;
 
     private static final String ADMIN = "admin";
-    private static final String USER = "broker";
+    private static final String USER = "broker@email.com";
     private static final String PASS = "pass";
     private static final String BASE = "/api/brokers/policies";
 
@@ -114,13 +114,16 @@ class PolicyControllerIT {
         // ---------- CREATE BUILDING ----------
         long buildingId = seedBuildingAndGetId(clientId, seed);
 
+        LocalDate start = LocalDate.now().plusDays(1);
+        LocalDate end = start.plusMonths(1);
+
         PolicyCreateRequestDTO createRequest = aPolicyCreateRequest(
                 clientId,
                 buildingId,
                 broker.getId(),
                 currency.getId(),
-                LocalDate.of(2026, 2, 5),   // > today FixedClockConfig (2026-02-04)
-                LocalDate.of(2026, 3, 5)
+                start,
+                end
         );
 
         // ---------- CREATE DRAFT ----------
@@ -139,8 +142,8 @@ class PolicyControllerIT {
                         jsonPath("$.brokerId").value(broker.getId().intValue()),
                         jsonPath("$.currencyId").value(currency.getId().intValue()),
 
-                        jsonPath("$.startDate").value("2026-02-05"),
-                        jsonPath("$.endDate").value("2026-03-05"),
+                        jsonPath("$.startDate").value(start.toString()),
+                        jsonPath("$.endDate").value(end.toString()),
                         jsonPath("$.basePremiumAmount").value(createRequest.basePremiumAmount().doubleValue()),
 
                         jsonPath("$.calculationResponse.finalPremium").exists(),
@@ -165,8 +168,8 @@ class PolicyControllerIT {
         assertEquals(broker.getId(), draft.getBroker().getId());
         assertEquals(currency.getId(), draft.getCurrency().getId());
 
-        assertEquals(LocalDate.of(2026, 2, 5), draft.getStartDate());
-        assertEquals(LocalDate.of(2026, 3, 5), draft.getEndDate());
+        assertEquals(start, draft.getStartDate());
+        assertEquals(end, draft.getEndDate());
         assertEquals(0, createRequest.basePremiumAmount().compareTo(draft.getBasePremiumAmount()));
 
         assertNotNull(draft.getFinalPremiumAmount());
@@ -218,13 +221,16 @@ class PolicyControllerIT {
         // ---------- CREATE BUILDING ----------
         long buildingId = seedBuildingAndGetId(clientId,seed);
 
+        LocalDate start = LocalDate.now().plusDays(1);
+        LocalDate end = start.plusMonths(1);
+
         PolicyCreateRequestDTO createRequest = aPolicyCreateRequest(
                 999L, // Not in db
                 buildingId,
                 broker.getId(),
                 currency.getId(),
-                LocalDate.of(2026, 2, 5),   // > today FixedClockConfig (2026-02-04)
-                LocalDate.of(2026, 3, 5)
+                start,
+                end
         );
 
         var result = mockMvc.perform(post(BASE)
@@ -253,13 +259,16 @@ class PolicyControllerIT {
 
         // ---------- DO NOT CREATE BUILDING ----------
 
+        LocalDate start = LocalDate.now().plusDays(1);
+        LocalDate end = start.plusMonths(1);
+
         PolicyCreateRequestDTO createRequest = aPolicyCreateRequest(
                 clientId,
                 999L,
                 broker.getId(),
                 currency.getId(),
-                LocalDate.of(2026, 2, 5),   // > today FixedClockConfig (2026-02-04)
-                LocalDate.of(2026, 3, 5)
+                start,
+                end
         );
 
         var result = mockMvc.perform(post(BASE)
@@ -286,13 +295,16 @@ class PolicyControllerIT {
 
         long before = policyRepository.count();
 
+        LocalDate start = LocalDate.now().plusDays(1);
+        LocalDate end = start.plusMonths(1);
+
         PolicyCreateRequestDTO request = aPolicyCreateRequest(
                 clientId,
                 buildingId,
                 broker.getId(),
                 currency.getId(),
-                LocalDate.of(2026, 2, 5),
-                LocalDate.of(2026, 3, 5)
+                start,
+                end
         );
 
         ObjectNode payload = objectMapper.valueToTree(request);
@@ -327,13 +339,15 @@ class PolicyControllerIT {
         long buildingId = seedBuildingAndGetId(clientId, seed);
 
         // ---------- CREATE POLICY  ----------
+        LocalDate start = LocalDate.now().plusDays(1);
+        LocalDate end = start.plusMonths(1);
         PolicyCreateRequestDTO createRequest1 = aPolicyCreateRequest(
                 clientId,
                 buildingId,
                 brokerId,
                 currency.getId(),
-                LocalDate.of(2026, 2, 5),
-                LocalDate.of(2026, 3, 5)
+                start,
+                end
         );
 
         var policyResponse1 = mockMvc.perform(post(BASE)

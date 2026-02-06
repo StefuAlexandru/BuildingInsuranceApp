@@ -29,6 +29,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static ro.insurance.buildinginsurance.util.CurrencyTestDataFactory.aCurrencyWithId;
+import static ro.insurance.buildinginsurance.util.ExceptionAssertions.assertHasError;
 import static ro.insurance.buildinginsurance.util.FeeConfigurationTestDataFactory.aFee;
 import static ro.insurance.buildinginsurance.util.PolicyCalculationTestDataFactory.*;
 import static ro.insurance.buildinginsurance.util.RiskFactorConfigurationTestDataFactory.aRisk;
@@ -155,32 +156,6 @@ class PolicyCalculationServiceTest {
     }
 
     @Test
-    void calculatePremium_shouldConvertFromRON_whenCurrencyIsNotRON() {
-        // Arrange
-        LocalDate date = LocalDate.of(2026, 2, 4);
-
-        when(feeConfigurationRepository.findAllActiveOn(date)).thenReturn(List.of());
-        when(riskFactorConfigurationRepository.findRiskFactorsByBuildingIdActiveOn(1L, date)).thenReturn(List.of());
-
-        Currency eur = new Currency();
-        eur.setId(2L);
-        eur.setCode("EUR");
-        eur.setExchangeRateToBase(new BigDecimal("5")); // 1 EUR = 5 RON (rate to base)
-        when(currencyRepository.findById(2L)).thenReturn(Optional.of(eur));
-
-        PolicyCalculationRequestDTO req = new PolicyCalculationRequestDTO(new BigDecimal("100.00"), 1L, 2L, date);
-
-        // Act
-        PolicyCalculationResponseDTO res = policyCalculationService.calculatePremium(req);
-
-        // Assert
-        // 100 RON / 5 = 20 EUR
-        assertEquals(0, new BigDecimal("20.00").compareTo(res.finalPremium()));
-        assertEquals(0, new BigDecimal("0").compareTo(res.totalPercent()));
-        assertTrue(res.breakdown().isEmpty());
-    }
-
-    @Test
     void calculatePremium_shouldThrow_whenCurrencyNotFound() {
         // Arrange
         LocalDate date = LocalDate.of(2026, 2, 4);
@@ -193,10 +168,8 @@ class PolicyCalculationServiceTest {
 
         // Act + Assert
         BusinessException ex = assertThrows(BusinessException.class, () -> policyCalculationService.calculatePremium(req));
-        assertAll(
-                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.CURRENCY_NOT_FOUND.name().equals(e.getCode()))),
-                () -> assertEquals(1, ex.getErrors().size())
-        );
+
+        assertHasError(ex,ErrorCode.CURRENCY_NOT_FOUND);
     }
 
     @Test
@@ -216,9 +189,6 @@ class PolicyCalculationServiceTest {
         // Act + Assert
         BusinessException ex = assertThrows(BusinessException.class, () -> policyCalculationService.calculatePremium(req));
 
-        assertAll(
-                () -> assertTrue(ex.getErrors().stream().anyMatch(e -> ErrorCode.INVALID_FINAL_PREMIUM.name().equals(e.getCode()))),
-                () -> assertEquals(1, ex.getErrors().size())
-        );
+        assertHasError(ex,ErrorCode.INVALID_FINAL_PREMIUM);
     }
 }

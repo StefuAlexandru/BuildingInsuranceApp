@@ -12,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import ro.insurance.buildinginsurance.application.mapper.BrokerMapper;
 import ro.insurance.buildinginsurance.application.service.impl.BrokerService;
 import ro.insurance.buildinginsurance.domain.entity.Broker;
+import ro.insurance.buildinginsurance.domain.enums.ErrorCode;
 import ro.insurance.buildinginsurance.infrastructure.persistance.repository.BrokerRepository;
 import ro.insurance.buildinginsurance.util.BrokerTestDataFactory;
 import ro.insurance.buildinginsurance.web.dto.brokerDto.BrokerRequestDTO;
@@ -24,6 +25,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import static ro.insurance.buildinginsurance.util.ExceptionAssertions.assertHasError;
 
 @ExtendWith(MockitoExtension.class)
 class BrokerServiceTest {
@@ -164,7 +166,7 @@ class BrokerServiceTest {
         BrokerResponseDTO result = brokerService.deactivateBroker(1L);
 
         assertSame(resp, result);
-        assertFalse(broker.isActive(), "Broker should be deactivated");
+        assertFalse(broker.isActive());
 
         verify(brokerRepository).findById(1L);
         verify(brokerRepository).save(broker);

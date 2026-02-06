@@ -49,6 +49,10 @@ class RiskFactorConfigurationControllerIT {
     @Autowired CountyRepository countyRepository;
     @Autowired CountryRepository countryRepository;
 
+    private static final String USER = "admin";
+    private static final String PASS = "pass";
+    private static final String BASE = "/api/admin/risk-factors";
+
     ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
@@ -78,8 +82,8 @@ class RiskFactorConfigurationControllerIT {
                 LocalDate.of(2026, 12, 31)
         );
 
-        var createResult = mockMvc.perform(post("/api/admin/risk-factors")
-                        .with(httpBasic("admin", "pass"))
+        var createResult = mockMvc.perform(post(BASE)
+                        .with(httpBasic(USER,PASS))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isCreated())
@@ -117,8 +121,8 @@ class RiskFactorConfigurationControllerIT {
                 null
         );
 
-        mockMvc.perform(put("/api/admin/risk-factors/{id}", id)
-                        .with(httpBasic("admin", "pass"))
+        mockMvc.perform(put(BASE + "/{id}", id)
+                        .with(httpBasic(USER,PASS))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(updateBody))
                 .andExpect(status().isOk())

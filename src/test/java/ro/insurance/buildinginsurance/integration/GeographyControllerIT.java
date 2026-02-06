@@ -48,6 +48,9 @@ class GeographyControllerIT {
     @Autowired CountyMapper countyMapper;
     @Autowired CityMapper cityMapper;
 
+    private static final String USER = "broker@email.com";
+    private static final String PASS = "pass";
+
     private void seedGeo() {
         CountryRequestDTO countryRequestDTO = aCountryRequest();
         CountyRequestDTO countyRequestDTO = aCountyRequest();
@@ -68,7 +71,7 @@ class GeographyControllerIT {
         seedGeo();
 
         mockMvc.perform(get(uri)
-                        .with(httpBasic("broker", "pass"))
+                        .with(httpBasic(USER,PASS))
                         .queryParam("page", "0")
                         .queryParam("size", "5"))
                 .andExpectAll(

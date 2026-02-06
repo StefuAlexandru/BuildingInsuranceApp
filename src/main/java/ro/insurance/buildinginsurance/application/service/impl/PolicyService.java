@@ -11,6 +11,7 @@ import ro.insurance.buildinginsurance.application.facade.PolicyFacade;
 import ro.insurance.buildinginsurance.application.mapper.PolicyMapper;
 import ro.insurance.buildinginsurance.application.service.IPolicyCalculationService;
 import ro.insurance.buildinginsurance.application.service.IPolicyService;
+import ro.insurance.buildinginsurance.domain.entity.Broker;
 import ro.insurance.buildinginsurance.domain.entity.Policy;
 import ro.insurance.buildinginsurance.domain.enums.ErrorCode;
 import ro.insurance.buildinginsurance.domain.enums.PolicyStatus;
@@ -37,6 +38,7 @@ import static ro.insurance.buildinginsurance.infrastructure.persistance.spec.Pol
 public class PolicyService implements IPolicyService {
 
     private final PolicyRepository policyRepository;
+    private final BrokerRepository brokerRepository;
     private final PolicyMapper policyMapper;
     private final PolicyFacade policyFacade;
     private final IPolicyCalculationService policyCalculationService;
@@ -79,21 +81,22 @@ public class PolicyService implements IPolicyService {
     // --------------------- PATCH ---------------------
 
     @Override
-    public PolicyResponseDTO activatePolicy(Long id) {
+    public PolicyResponseDTO activatePolicy(Long id, String brokerName) {
         log.info("Policy activate requested. policyId={}", id);
+        Long brokerId = getCurrentBrokerIdOrThrow(brokerName);
 
-        Policy policy = getPolicyOrThrow(id);
+        Policy policy = getPolicyForBrokerOrThrow(id,brokerId);
 
         policyFacade.validateActivateOrThrow(policy);
 
-        PolicyCalculationRequestDTO calcReq = new PolicyCalculationRequestDTO(
+        PolicyCalculationRequestDTO calculationRequest = new PolicyCalculationRequestDTO(
                 policy.getBasePremiumAmount(),
                 policy.getBuilding().getId(),
                 policy.getCurrency().getId(),
                 LocalDate.now(clock)
         );
 
-        PolicyCalculationResponseDTO calculationResponse = policyCalculationService.calculatePremium(calcReq);
+        PolicyCalculationResponseDTO calculationResponse = policyCalculationService.calculatePremium(calculationRequest);
         log.info("Premium calculated. policyId={} finalPremium={}", id, calculationResponse.finalPremium());
 
         policy.setFinalPremiumAmount(calculationResponse.finalPremium());
@@ -116,15 +119,17 @@ public class PolicyService implements IPolicyService {
     }
 
     @Override
-    public PolicyResponseDTO cancelPolicy(Long id, PolicyCancelRequestDTO request) {
+    public PolicyResponseDTO cancelPolicy(Long id, PolicyCancelRequestDTO request, String brokerName) {
         log.info("Policy cancel requested. policyId={} reason='{}'", id, request.cancellationReason());
+        Long brokerId = getCurrentBrokerIdOrThrow(brokerName);
 
-        Policy policy = getPolicyOrThrow(id);
+
+        Policy policy = getPolicyForBrokerOrThrow(id,brokerId);
         policyFacade.validateCancelOrThrow(policy);
 
         OffsetDateTime cancelledAt = OffsetDateTime.now(clock);
 
-        // you can cancel even before startDate, but NOT after coverage ended
+        // Can cancel even before startDate, but NOT after coverage ended
         OffsetDateTime endExclusive = policy.getEndDate()
                 .plusDays(1)
                 .atStartOfDay(ZoneOffset.UTC)
@@ -156,10 +161,9 @@ public class PolicyService implements IPolicyService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<PolicyListItemDTO> listPolicies(PolicyListFilterDTO filter, Pageable pageable) {
-        log.info("Policies list requested. clientId={} brokerId={} status={} startDate={} endDate={} page={} pageSize={} sort={}",
+    public Page<PolicyListItemDTO> listPolicies(PolicyListFilterDTO filter, Pageable pageable,String brokerName) {
+        log.info("Policies list requested. clientId={} status={} startDate={} endDate={} page={} pageSize={} sort={}",
                 filter.clientId(),
-                filter.brokerId(),
                 filter.status(),
                 filter.startDate(),
                 filter.endDate(),
@@ -167,10 +171,11 @@ public class PolicyService implements IPolicyService {
                 pageable.getPageSize(),
                 pageable.getSort()
         );
+        Long brokerId = getCurrentBrokerIdOrThrow(brokerName);
 
         Specification<Policy> spec =
-                hasClientId(filter.clientId())
-                        .and(hasBrokerId(filter.brokerId()))
+                hasBrokerId(brokerId)
+                        .and(hasClientId(filter.clientId()))
                         .and(hasStatus(filter.status()))
                         .and(startDateFrom(filter.startDate()))
                         .and(endDateTo(filter.endDate()));
@@ -188,24 +193,71 @@ public class PolicyService implements IPolicyService {
 
     @Override
     @Transactional(readOnly = true)
-    public PolicyDetailsResponseDTO getPolicyDetails(Long id) {
+    public PolicyDetailsResponseDTO getPolicyDetails(Long id,String brokerName) {
         log.info("Policy details requested. policyId={}", id);
-        Policy policy = getPolicyDetailsOrThrow(id);
+        Long brokerId = getCurrentBrokerIdOrThrow(brokerName);
+        Policy policy = getPolicyDetailsForBrokerOrThrow(id,brokerId);
         return policyMapper.toDetailsResponse(policy);
+    }
+
+    // --------------------- PATCH ---------------------
+
+    @Override
+    public PolicyResponseDTO patchDraftPolicy(Long id,PolicyPatchRequestDTO policyPatchRequestDTO,String brokerName) {
+        log.info("Policy patch request for id {} with: buildingId = {} currencyId = {} startDate = {} endDate = {} basePremiumAmount = {}",
+                id,
+                policyPatchRequestDTO.buildingId(),
+                policyPatchRequestDTO.currencyId(),
+                policyPatchRequestDTO.startDate(),
+                policyPatchRequestDTO.endDate(),
+                policyPatchRequestDTO.basePremiumAmount()
+        );
+        Long brokerId = getCurrentBrokerIdOrThrow(brokerName);
+
+        Policy policy = getPolicyForBrokerOrThrow(id,brokerId);
+
+        var ppc = policyFacade.validatePatchOrThrow(policy,policyPatchRequestDTO);
+        policyMapper.patchDraftFromDto(policyPatchRequestDTO,ppc.building(),ppc.currency(),policy);
+
+        PolicyCalculationRequestDTO calculationRequest = new PolicyCalculationRequestDTO(
+                policy.getBasePremiumAmount(),
+                policy.getBuilding().getId(),
+                policy.getCurrency().getId(),
+                policy.getStartDate()
+        );
+
+        PolicyCalculationResponseDTO calculationResponse = policyCalculationService.calculatePremium(calculationRequest);
+        log.info("Premium recalculated for : policyId={} finalPremium={}", id, calculationResponse.finalPremium());
+
+        policy.setFinalPremiumAmount(calculationResponse.finalPremium());
+
+        Policy saved = policyRepository.save(policy);
+        log.info("Policy patched successfully. policyId={}", id);
+        return policyMapper.toResponse(saved,calculationResponse);
     }
 
     // --------------------- HELPERS ---------------------
 
-    private Policy getPolicyOrThrow(Long id){
-        return policyRepository.findById(id)
+    private Long getCurrentBrokerIdOrThrow(String email) {
+        return brokerRepository.findByEmailIgnoreCase(email)
+                .map(Broker::getId)
                 .orElseThrow(() -> {
-                    log.warn("Policy with id {} not found for status change", id);
+                    log.warn("Broker not found for email={}", email);
+                    return new BusinessException(ErrorCode.BROKER_NOT_FOUND);
+                });
+    }
+
+
+    private Policy getPolicyForBrokerOrThrow(Long id,Long brokerId) {
+        return policyRepository.findByIdAndBrokerId(id,brokerId)
+                .orElseThrow(() -> {
+                    log.warn("Policy with id {} not found", id);
                     return new BusinessException(ErrorCode.POLICY_NOT_FOUND);
                 });
     }
 
-    private Policy getPolicyDetailsOrThrow(Long id){
-        return policyRepository.findDetailsById(id)
+    private Policy getPolicyDetailsForBrokerOrThrow(Long id,Long brokerId) {
+        return policyRepository.findDetailsByIdAndBrokerId(id,brokerId)
                 .orElseThrow(() -> {
                     log.warn("Policy with id {} not found for fetching details", id);
                     return new BusinessException(ErrorCode.POLICY_NOT_FOUND);
