@@ -9,10 +9,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import ro.insurance.buildinginsurance.domain.entity.Broker;
 import ro.insurance.buildinginsurance.domain.entity.Policy;
 
-import java.util.List;
 import java.util.Optional;
 
 public interface PolicyRepository extends JpaRepository<Policy,Long>, JpaSpecificationExecutor<Policy> {

@@ -517,8 +517,10 @@ class PolicyServiceTest {
 
         when(brokerRepository.findByEmailIgnoreCase(brokerEmail)).thenReturn(Optional.empty());
 
+        PolicyPatchRequestDTO request =  new PolicyPatchRequestDTO(null, null, null, null, null);
+
         BusinessException ex = assertThrows(BusinessException.class,
-                () -> policyService.patchDraftPolicy(policyId, new PolicyPatchRequestDTO(null, null, null, null, null), brokerEmail));
+                () -> policyService.patchDraftPolicy(policyId,request, brokerEmail));
 
         assertHasError(ex, ErrorCode.BROKER_NOT_FOUND);
 
@@ -536,8 +538,10 @@ class PolicyServiceTest {
         when(brokerRepository.findByEmailIgnoreCase(brokerEmail)).thenReturn(Optional.of(broker));
         when(policyRepository.findByIdAndBrokerId(policyId, brokerId)).thenReturn(Optional.empty());
 
+        PolicyPatchRequestDTO request =  new PolicyPatchRequestDTO(null, null, null, null, null);
+
         BusinessException ex = assertThrows(BusinessException.class,
-                () -> policyService.patchDraftPolicy(policyId, new PolicyPatchRequestDTO(null, null, null, null, null), brokerEmail));
+                () -> policyService.patchDraftPolicy(policyId, request, brokerEmail));
 
         assertHasError(ex, ErrorCode.POLICY_NOT_FOUND);
 
