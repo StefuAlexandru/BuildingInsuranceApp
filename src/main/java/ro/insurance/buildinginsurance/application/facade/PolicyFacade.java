@@ -27,12 +27,10 @@ public class PolicyFacade {
     private final CurrencyRepository currencyRepository;
     private final Clock clock;
 
-
     public PolicyCreateContext resolveCreateContext(PolicyCreateRequestDTO request,Broker broker) {
         Client client = getClientOrThrow(request.clientId());
         Building building = getBuildingOrThrow(request.buildingId());
         validateBuildingOwnership(request.buildingId(), request.clientId());
-        validateBrokerActive(broker);
         Currency currency = getCurrencyOrThrow(request.currencyId());
 
         validateCurrencyActive(currency, request.currencyId());
@@ -56,7 +54,6 @@ public class PolicyFacade {
             throw new BusinessException(ErrorCode.POLICY_INVALID_STATE);
         }
 
-        validateBrokerActive(policy.getBroker());
         validateCurrencyActive(policy.getCurrency(), policy.getCurrency().getId());
     }
 
@@ -109,13 +106,6 @@ public class PolicyFacade {
         if (policy.getStatus() != PolicyStatus.DRAFT) {
             log.warn("Policy {} cannot be modified because status is {}", policy.getId(), policy.getStatus());
             throw new BusinessException(ErrorCode.POLICY_NOT_DRAFT);
-        }
-    }
-
-    private void validateBrokerActive(Broker broker) {
-        if (!broker.isActive()) {
-            log.warn("Broker with id {} is not active", broker.getId());
-            throw new BusinessException(ErrorCode.BROKER_IS_NOT_ACTIVE);
         }
     }
 

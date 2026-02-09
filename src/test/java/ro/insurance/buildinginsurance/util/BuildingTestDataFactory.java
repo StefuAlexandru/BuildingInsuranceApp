@@ -1,5 +1,6 @@
 package ro.insurance.buildinginsurance.util;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import ro.insurance.buildinginsurance.domain.entity.City;
 import ro.insurance.buildinginsurance.domain.entity.Client;
 import ro.insurance.buildinginsurance.domain.enums.BuildingType;
@@ -7,6 +8,8 @@ import ro.insurance.buildinginsurance.domain.entity.Building;
 import ro.insurance.buildinginsurance.web.dto.building_dto.*;
 
 import java.math.BigDecimal;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import static ro.insurance.buildinginsurance.util.CityTestDataFactory.*;
 import static ro.insurance.buildinginsurance.util.ClientTestDataFactory.aClient;
@@ -15,6 +18,62 @@ import static ro.insurance.buildinginsurance.util.ClientTestDataFactory.aClientD
 public class BuildingTestDataFactory {
 
     private BuildingTestDataFactory() {}
+
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+
+    // -------------------  BUILDERS  -------------------
+
+    public static String createBuildingRequestBody(Long clientId, Long cityId, String street, String number,
+                                             Integer constructionYear, String buildingType, Integer floors,
+                                             double surfaceArea, double insuredValue, Boolean floodZone, Boolean earthquakeZone) throws Exception {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("clientId", clientId);
+        body.put("cityId", cityId);
+        body.put("street", street);
+        body.put("number", number);
+        body.put("constructionYear", constructionYear);
+        body.put("buildingType", buildingType);
+        body.put("floors", floors);
+        body.put("surfaceArea", surfaceArea);
+        body.put("insuredValue", insuredValue);
+        body.put("floodZone", floodZone);
+        body.put("earthquakeZone", earthquakeZone);
+        return objectMapper.writeValueAsString(body);
+    }
+
+    public static String createBuildingUpdateRequestBody(Long cityId, String street, String number,
+                                                   Integer constructionYear, String buildingType, Integer floors,
+                                                   double surfaceArea, double insuredValue, Boolean floodZone, Boolean earthquakeZone) throws Exception {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("cityId", cityId);
+        body.put("street", street);
+        body.put("number", number);
+        body.put("constructionYear", constructionYear);
+        body.put("buildingType", buildingType);
+        body.put("floors", floors);
+        body.put("surfaceArea", surfaceArea);
+        body.put("insuredValue", insuredValue);
+        body.put("floodZone", floodZone);
+        body.put("earthquakeZone", earthquakeZone);
+        return objectMapper.writeValueAsString(body);
+    }
+
+    public static String createBuildingPatchBody(Long cityId, String street, String number, Integer constructionYear,
+                                           String buildingType, Integer floors, Double surfaceArea, Double insuredValue,
+                                           Boolean floodZone, Boolean earthquakeZone) throws Exception {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("cityId", cityId);
+        body.put("street", street);
+        body.put("number", number);
+        body.put("constructionYear", constructionYear);
+        body.put("buildingType", buildingType);
+        body.put("floors", floors);
+        body.put("surfaceArea", surfaceArea);
+        body.put("insuredValue", insuredValue);
+        body.put("floodZone", floodZone);
+        body.put("earthquakeZone", earthquakeZone);
+        return objectMapper.writeValueAsString(body);
+    }
 
     // -------------------  DTOS  -------------------
 

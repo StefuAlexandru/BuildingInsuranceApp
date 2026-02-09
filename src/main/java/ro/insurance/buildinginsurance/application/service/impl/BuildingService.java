@@ -3,22 +3,18 @@ package ro.insurance.buildinginsurance.application.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ro.insurance.buildinginsurance.domain.entity.Building;
-import ro.insurance.buildinginsurance.domain.entity.City;
-import ro.insurance.buildinginsurance.domain.entity.Client;
+import ro.insurance.buildinginsurance.application.mapper.BuildingMapper;
+import ro.insurance.buildinginsurance.application.security.CurrentBrokerProvider;
+import ro.insurance.buildinginsurance.application.service.IBuildingService;
+import ro.insurance.buildinginsurance.domain.entity.*;
 import ro.insurance.buildinginsurance.domain.enums.ErrorCode;
+import ro.insurance.buildinginsurance.infrastructure.persistance.repository.*;
 import ro.insurance.buildinginsurance.web.dto.building_dto.*;
 import ro.insurance.buildinginsurance.web.error.BusinessException;
-import ro.insurance.buildinginsurance.application.mapper.BuildingMapper;
-import ro.insurance.buildinginsurance.infrastructure.persistance.repository.BuildingRepository;
-import ro.insurance.buildinginsurance.infrastructure.persistance.repository.CityRepository;
-import ro.insurance.buildinginsurance.infrastructure.persistance.repository.ClientRepository;
-import ro.insurance.buildinginsurance.application.service.IBuildingService;
 
 @Slf4j
 @Service
@@ -30,19 +26,25 @@ public class BuildingService implements IBuildingService {
     private final ClientRepository clientRepository;
     private final CityRepository cityRepository;
     private final BuildingMapper buildingMapper;
+    private final CurrentBrokerProvider currentBrokerProvider;
 
     // ---------------------  CREATE  ---------------------
 
     @Override
-    public BuildingResponseDTO registerNewBuilding(BuildingRequestDTO buildingRequestDTO) {
-        log.info("Register building : clientId={},cityId={}",buildingRequestDTO.clientId(),buildingRequestDTO.cityId());
-        Client client = findClientOrThrow(buildingRequestDTO.clientId());
-        City city = findCityOrThrow(buildingRequestDTO.cityId());
+    public BuildingResponseDTO registerNewBuilding(BuildingRequestDTO dto, String brokerEmail) {
+        Broker broker = currentBrokerProvider.getActiveOrThrow(brokerEmail);
 
-        Building building = buildingMapper.toEntity(buildingRequestDTO, client, city);
+        log.info("Register building: brokerId={}, clientId={}, cityId={}",
+                broker.getId(), dto.clientId(), dto.cityId());
+
+        Client client = findClientOrThrow(dto.clientId());
+        City city = findCityOrThrow(dto.cityId());
+
+        Building building = buildingMapper.toEntity(dto, client, city);
         Building saved = buildingRepository.save(building);
 
-        log.info("Building registered: id={}, clientId={}, cityId={}", saved.getId(), client.getId(), city.getId());
+        log.info("Building registered: id={}, brokerId={}, clientId={}, cityId={}",
+                saved.getId(), broker.getId(), client.getId(), city.getId());
 
         return buildingMapper.toResponse(saved);
     }
@@ -51,15 +53,21 @@ public class BuildingService implements IBuildingService {
 
     @Override
     @Transactional(readOnly = true)
-    public BuildingResponseDTO getBuildingById(Long buildingId) {
-        log.info("Get building by id: {}", buildingId);
+    public BuildingResponseDTO getBuildingById(Long buildingId, String brokerEmail) {
+        Broker broker = currentBrokerProvider.getActiveOrThrow(brokerEmail);
+        log.info("Get building by id: brokerId={}, buildingId={}", broker.getId(), buildingId);
+
         return buildingMapper.toResponse(findBuildingOrThrow(buildingId));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<BuildingResponseDTO> getBuildingsByClientId(Long clientId, Pageable pageable) {
-        log.info("Get buildings by clientId={}, page={}, sort={}, sort={}", clientId,pageable.getPageNumber(),pageable.getPageSize(),pageable.getSort());
+    public Page<BuildingResponseDTO> getBuildingsByClientId(Long clientId, Pageable pageable, String brokerEmail) {
+        Broker broker = currentBrokerProvider.getActiveOrThrow(brokerEmail);
+
+        log.info("Get buildings by clientId: brokerId={}, clientId={}, page={}, size={}, sort={}",
+                broker.getId(), clientId, pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
+
         findClientOrThrow(clientId);
 
         return buildingRepository.findByClientId(clientId, pageable)
@@ -68,11 +76,13 @@ public class BuildingService implements IBuildingService {
 
     @Override
     @Transactional(readOnly = true)
-    public BuildingDetailsResponseDTO getBuildingDetailsById(Long buildingId) {
-        log.info("Get building details by id: {}", buildingId);
+    public BuildingDetailsResponseDTO getBuildingDetailsById(Long buildingId, String brokerEmail) {
+        Broker broker = currentBrokerProvider.getActiveOrThrow(brokerEmail);
+        log.info("Get building details by id: brokerId={}, buildingId={}", broker.getId(), buildingId);
+
         Building building = buildingRepository.findDetailsById(buildingId)
                 .orElseThrow(() -> {
-                    log.warn("Building not found for fetching details : id={}", buildingId);
+                    log.warn("Building not found for fetching details: id={}", buildingId);
                     return new BusinessException(ErrorCode.BUILDING_NOT_FOUND);
                 });
 
@@ -82,14 +92,17 @@ public class BuildingService implements IBuildingService {
     // ---------------------  UPDATE  ---------------------
 
     @Override
-    public BuildingDetailsResponseDTO updateBuilding(Long buildingId, BuildingUpdateRequestDTO buildingUpdateRequestDTO) {
-        log.info("Update building: id={}, newCityId={}",buildingId,buildingUpdateRequestDTO.cityId());
+    public BuildingDetailsResponseDTO updateBuilding(Long buildingId, BuildingUpdateRequestDTO dto, String brokerEmail) {
+        Broker broker = currentBrokerProvider.getActiveOrThrow(brokerEmail);
+
+        log.info("Update building: brokerId={}, buildingId={}, newCityId={}", broker.getId(), buildingId, dto.cityId());
+
         Building building = findBuildingOrThrow(buildingId);
-        City city = findCityOrThrow(buildingUpdateRequestDTO.cityId());
+        City city = findCityOrThrow(dto.cityId());
 
         Long oldCityId = building.getCity() != null ? building.getCity().getId() : null;
 
-        buildingMapper.updateFromDto(buildingUpdateRequestDTO, city, building);
+        buildingMapper.updateFromDto(dto, city, building);
 
         Building saved = buildingRepository.save(building);
 
@@ -101,10 +114,13 @@ public class BuildingService implements IBuildingService {
     // ---------------------  PATCH  ---------------------
 
     @Override
-    public BuildingResponseDTO patchBuilding(Long buildingId, BuildingPatchDTO dto) {
-        log.info("Patch building: id={}, cityId={}", buildingId, dto.cityId());
-        Building building = findBuildingOrThrow(buildingId);
+    public BuildingResponseDTO patchBuilding(Long buildingId, BuildingPatchDTO dto, String brokerEmail) {
+        Broker broker = currentBrokerProvider.getActiveOrThrow(brokerEmail);
 
+        log.info("Patch building: brokerId={}, buildingId={}, cityId={}",
+                broker.getId(), buildingId, dto.cityId());
+
+        Building building = findBuildingOrThrow(buildingId);
         City city = (dto.cityId() == null) ? null : findCityOrThrow(dto.cityId());
 
         buildingMapper.patchFromDto(dto, city, building);
@@ -119,20 +135,20 @@ public class BuildingService implements IBuildingService {
     // ---------------------  DELETE  ---------------------
 
     @Override
-    public void deleteBuilding(Long buildingId) {
-        log.warn("Delete building requested: id={}", buildingId);
+    public void deleteBuilding(Long buildingId, String brokerEmail) {
+        Broker broker = currentBrokerProvider.getActiveOrThrow(brokerEmail);
+        log.warn("Delete building requested: brokerId={}, buildingId={}", broker.getId(), buildingId);
+
+        Building building = findBuildingOrThrow(buildingId);
+
         try {
-            buildingRepository.deleteById(buildingId);
+            buildingRepository.delete(building);
             log.info("Building deleted: id={}", buildingId);
-        } catch (EmptyResultDataAccessException e) {
-            log.warn("Delete building failed - not found: id={}", buildingId);
-            throw new BusinessException(ErrorCode.BUILDING_NOT_FOUND);
         } catch (DataIntegrityViolationException e) {
             log.warn("Delete building failed - has dependencies: id={}", buildingId);
             throw new BusinessException(ErrorCode.BUILDING_HAS_DEPENDENCIES);
         }
     }
-
 
     // ------------------------ HELPERS ------------------------
 

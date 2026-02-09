@@ -200,23 +200,6 @@ class PolicyFacadeTest {
     }
 
     @Test
-    void resolveCreateContext_whenBrokerInactive_shouldThrow_andStopBeforeCurrencyLoad() {
-        PolicyCreateRequestDTO request = aPolicyCreateRequest();
-        Long brokerId = 1L;
-        Broker broker = aBrokerWithId(brokerId);
-        broker.setActive(false);
-
-        when(clientRepository.findById(request.clientId())).thenReturn(Optional.of(aClientWithId(request.clientId())));
-        when(buildingRepository.findById(request.buildingId())).thenReturn(Optional.of(aBuildingWithId(request.buildingId())));
-        when(buildingRepository.existsByIdAndClientId(request.buildingId(), request.clientId())).thenReturn(true);
-
-        BusinessException ex = assertThrows(BusinessException.class, () -> policyFacade.resolveCreateContext(request,broker));
-        assertHasError(ex, ErrorCode.BROKER_IS_NOT_ACTIVE);
-
-        verify(currencyRepository, never()).findById(anyLong());
-    }
-
-    @Test
     void resolveCreateContext_whenStartEqualsEnd_shouldNotThrow() {
         LocalDate date = LocalDate.of(2026, 2, 10);
         PolicyCreateRequestDTO request = new PolicyCreateRequestDTO(
@@ -275,21 +258,6 @@ class PolicyFacadeTest {
         policy.getCurrency().setActive(true);
 
         assertDoesNotThrow(() -> policyFacade.validateActivateOrThrow(policy));
-    }
-
-    @Test
-    void validateActivateOrThrow_whenBrokerInactive_shouldThrow() {
-        LocalDate today = stubClockUtcAndGetToday();
-
-        Policy policy = aDraftPolicyWithAllMandatoryFields(10L);
-        policy.setStartDate(today.plusDays(1));
-        policy.getBroker().setActive(false);
-        policy.getCurrency().setActive(true);
-
-        BusinessException ex = assertThrows(BusinessException.class,
-                () -> policyFacade.validateActivateOrThrow(policy));
-
-        assertHasError(ex, ErrorCode.BROKER_IS_NOT_ACTIVE);
     }
 
     @Test

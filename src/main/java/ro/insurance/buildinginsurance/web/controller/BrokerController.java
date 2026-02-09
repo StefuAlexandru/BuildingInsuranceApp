@@ -27,23 +27,23 @@ public class BrokerController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @PostMapping("/activate/{id}")
-    public ResponseEntity<BrokerResponseDTO> activateBroker(@PathVariable Long id) {
-        BrokerResponseDTO response = brokerService.activateBroker(id);
+    @PostMapping("/activate/{brokerId}")
+    public ResponseEntity<BrokerResponseDTO> activateBroker(@PathVariable Long brokerId) {
+        BrokerResponseDTO response = brokerService.activateBroker(brokerId);
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/deactivate/{id}")
-    public ResponseEntity<BrokerResponseDTO> deactivateBroker(@PathVariable Long id) {
-        BrokerResponseDTO response = brokerService.deactivateBroker(id);
+    @PostMapping("/deactivate/{brokerId}")
+    public ResponseEntity<BrokerResponseDTO> deactivateBroker(@PathVariable Long brokerId) {
+        BrokerResponseDTO response = brokerService.deactivateBroker(brokerId);
         return ResponseEntity.ok(response);
     }
 
     // ----------------------  GET  ----------------------
 
-    @GetMapping("/{id}")
-    public ResponseEntity<BrokerResponseDTO> getBroker(@PathVariable Long id) {
-        return ResponseEntity.ok(brokerService.getBroker(id));
+    @GetMapping("/{brokerId}")
+    public ResponseEntity<BrokerResponseDTO> getBroker(@PathVariable Long brokerId) {
+        return ResponseEntity.ok(brokerService.getBroker(brokerId));
     }
 
     @GetMapping
@@ -53,12 +53,12 @@ public class BrokerController {
 
     // ----------------------  UPDATE  ----------------------
 
-    @PutMapping("/{id}")
+    @PutMapping("/{brokerId}")
     public ResponseEntity<BrokerResponseDTO> updateBroker(
-            @PathVariable Long id,
+            @PathVariable Long brokerId,
             @Valid @RequestBody BrokerRequestDTO request
     ) {
-        return ResponseEntity.ok(brokerService.updateBroker(id,request));
+        return ResponseEntity.ok(brokerService.updateBroker(brokerId,request));
     }
 
 
