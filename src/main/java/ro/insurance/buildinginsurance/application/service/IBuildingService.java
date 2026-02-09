@@ -5,15 +5,15 @@ import org.springframework.data.domain.Pageable;
 import ro.insurance.buildinginsurance.web.dto.building_dto.*;
 
 public interface IBuildingService {
-    BuildingResponseDTO registerNewBuilding(BuildingRequestDTO dto, String brokerEmail);
+    BuildingResponseDTO registerNewBuilding(BuildingRequestDTO dto);
 
-    BuildingResponseDTO getBuildingById(Long buildingId, String brokerEmail);
-    Page<BuildingResponseDTO> getBuildingsByClientId(Long clientId, Pageable pageable, String brokerEmail);
-    BuildingDetailsResponseDTO getBuildingDetailsById(Long buildingId, String brokerEmail);
+    BuildingResponseDTO getBuildingById(Long buildingId);
+    Page<BuildingResponseDTO> getBuildingsByClientId(Long clientId, Pageable pageable);
+    BuildingDetailsResponseDTO getBuildingDetailsById(Long buildingId);
 
-    BuildingDetailsResponseDTO updateBuilding(Long buildingId, BuildingUpdateRequestDTO dto, String brokerEmail);
+    BuildingDetailsResponseDTO updateBuilding(Long buildingId, BuildingUpdateRequestDTO dto);
 
-    BuildingResponseDTO patchBuilding(Long buildingId, BuildingPatchDTO dto, String brokerEmail);
+    BuildingResponseDTO patchBuilding(Long buildingId, BuildingPatchDTO dto);
 
-    void deleteBuilding(Long buildingId, String brokerEmail);
+    void deleteBuilding(Long buildingId);
 }

@@ -2,11 +2,14 @@ package ro.insurance.buildinginsurance.application.security;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import ro.insurance.buildinginsurance.domain.entity.Broker;
 import ro.insurance.buildinginsurance.domain.enums.ErrorCode;
 import ro.insurance.buildinginsurance.infrastructure.persistance.repository.BrokerRepository;
 import ro.insurance.buildinginsurance.web.error.BusinessException;
+
+import java.util.Objects;
 
 @Slf4j
 @Component

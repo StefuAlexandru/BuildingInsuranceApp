@@ -17,7 +17,6 @@ import ro.insurance.buildinginsurance.application.mapper.CountryMapper;
 import ro.insurance.buildinginsurance.application.mapper.CountyMapper;
 import ro.insurance.buildinginsurance.domain.entity.*;
 import ro.insurance.buildinginsurance.infrastructure.persistance.repository.*;
-import ro.insurance.buildinginsurance.web.dto.broker_dto.BrokerRequestDTO;
 import ro.insurance.buildinginsurance.web.dto.building_dto.BuildingRequestDTO;
 import ro.insurance.buildinginsurance.web.dto.building_dto.BuildingUpdateRequestDTO;
 import ro.insurance.buildinginsurance.web.dto.city_dto.CityRequestDTO;
@@ -31,7 +30,6 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import static ro.insurance.buildinginsurance.util.BrokerTestDataFactory.aBrokerRequest;
 import static ro.insurance.buildinginsurance.util.BuildingTestDataFactory.*;
 import static ro.insurance.buildinginsurance.util.CityTestDataFactory.*;
 import static ro.insurance.buildinginsurance.util.ClientTestDataFactory.*;
@@ -77,7 +75,7 @@ class BuildingControllerIT {
 
     private record Seed(Country country, County county, City city, Client client) {}
 
-    private Seed seedClientAndCity() throws Exception {
+    private Seed seedClientAndCity() {
         CountryRequestDTO countryRequestDTO = aCountryRequest();
         CountyRequestDTO countyRequestDTO = aCountyRequest();
         CityRequestDTO cityRequestDTO = aCityRequest();
@@ -88,21 +86,7 @@ class BuildingControllerIT {
         City city = cityRepository.save(cityMapper.toEntity(cityRequestDTO, county));
         Client client = clientRepository.save(clientMapper.toEntity(clientRequestDTO, city));
 
-        seedBroker();
-
         return new Seed(country, county, city, client);
-    }
-
-    private void seedBroker() throws Exception {
-        BrokerRequestDTO brokerRequest = aBrokerRequest();
-
-        mockMvc.perform(post("/api/admin/brokers")
-                        .with(httpBasic("admin", "pass"))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(brokerRequest)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").exists())
-                .andReturn();
     }
 
     private Long createBuilding(Long clientId, Long cityId) throws Exception {
@@ -153,7 +137,7 @@ class BuildingControllerIT {
 
         Long buildingId = createBuilding(seed.client.getId(), seed.city.getId());
 
-        mockMvc.perform(get(BASE + "/{buildingId}", buildingId)
+        mockMvc.perform(get(BASE + "/{id}", buildingId)
                         .with(httpBasic(USER, PASS)))
                 .andExpectAll(
                         status().isOk(),
@@ -203,7 +187,7 @@ class BuildingControllerIT {
                 baseUpd.earthquakeZone()
         );
 
-        mockMvc.perform(put(BASE + "/{buildingId}", buildingId)
+        mockMvc.perform(put(BASE + "/{id}", buildingId)
                         .with(httpBasic(USER, PASS))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(upd)))
@@ -224,11 +208,11 @@ class BuildingControllerIT {
 
         Long buildingId = createBuilding(seed.client().getId(), seed.city().getId());
 
-        mockMvc.perform(delete(BASE + "/{buildingId}", buildingId)
+        mockMvc.perform(delete(BASE + "/{id}", buildingId)
                         .with(httpBasic(USER,PASS)))
                 .andExpect(status().isNoContent());
 
-        mockMvc.perform(get(BASE + "/{buildingId}", buildingId)
+        mockMvc.perform(get(BASE + "/{id}", buildingId)
                         .with(httpBasic(USER,PASS)))
                 .andExpect(status().isNotFound());
     }
