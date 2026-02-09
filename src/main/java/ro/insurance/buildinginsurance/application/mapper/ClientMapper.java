@@ -3,10 +3,10 @@ package ro.insurance.buildinginsurance.application.mapper;
 import org.mapstruct.*;
 import ro.insurance.buildinginsurance.domain.entity.City;
 import ro.insurance.buildinginsurance.domain.entity.Client;
-import ro.insurance.buildinginsurance.web.dto.clientDto.ClientDetailsResponseDTO;
-import ro.insurance.buildinginsurance.web.dto.clientDto.ClientRequestDTO;
-import ro.insurance.buildinginsurance.web.dto.clientDto.ClientResponseDTO;
-import ro.insurance.buildinginsurance.web.dto.clientDto.ClientUpdateRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.client_dto.ClientDetailsResponseDTO;
+import ro.insurance.buildinginsurance.web.dto.client_dto.ClientRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.client_dto.ClientResponseDTO;
+import ro.insurance.buildinginsurance.web.dto.client_dto.ClientUpdateRequestDTO;
 
 import static ro.insurance.buildinginsurance.util.StringNormalizer.trimToNull;
 

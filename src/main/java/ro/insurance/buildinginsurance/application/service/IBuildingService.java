@@ -2,7 +2,7 @@ package ro.insurance.buildinginsurance.application.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import ro.insurance.buildinginsurance.web.dto.buildingDto.*;
+import ro.insurance.buildinginsurance.web.dto.building_dto.*;
 
 public interface IBuildingService {
     BuildingResponseDTO registerNewBuilding(BuildingRequestDTO dto);

@@ -4,9 +4,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import ro.insurance.buildinginsurance.web.dto.cityDto.CityDTO;
-import ro.insurance.buildinginsurance.web.dto.cityDto.CityRequestDTO;
-import ro.insurance.buildinginsurance.web.dto.cityDto.CityResponseDTO;
+import ro.insurance.buildinginsurance.web.dto.city_dto.CityDTO;
+import ro.insurance.buildinginsurance.web.dto.city_dto.CityRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.city_dto.CityResponseDTO;
 import ro.insurance.buildinginsurance.domain.entity.City;
 import ro.insurance.buildinginsurance.domain.entity.County;
 

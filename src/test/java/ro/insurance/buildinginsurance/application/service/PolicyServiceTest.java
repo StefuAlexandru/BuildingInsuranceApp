@@ -15,9 +15,9 @@ import ro.insurance.buildinginsurance.domain.enums.PolicyStatus;
 import ro.insurance.buildinginsurance.infrastructure.persistance.repository.BrokerRepository;
 import ro.insurance.buildinginsurance.infrastructure.persistance.repository.PolicyRepository;
 import ro.insurance.buildinginsurance.util.PolicyNumberGenerator;
-import ro.insurance.buildinginsurance.web.dto.policyCalculationDto.PolicyCalculationRequestDTO;
-import ro.insurance.buildinginsurance.web.dto.policyCalculationDto.PolicyCalculationResponseDTO;
-import ro.insurance.buildinginsurance.web.dto.policyDto.*;
+import ro.insurance.buildinginsurance.web.dto.policy_calculation_dto.PolicyCalculationRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.policy_calculation_dto.PolicyCalculationResponseDTO;
+import ro.insurance.buildinginsurance.web.dto.policy_dto.*;
 import ro.insurance.buildinginsurance.web.error.BusinessException;
 
 import java.math.BigDecimal;
@@ -64,9 +64,11 @@ class PolicyServiceTest {
     void createDraftPolicy_shouldResolveContext_map_calculate_setFields_save_andReturnResponse() {
         PolicyCreateRequestDTO request = aPolicyCreateRequest();
 
+        Long brokerId = 1L;
+
         Client client = aClientWithId(request.clientId());
         Building building = aBuildingWithId(request.buildingId());
-        Broker broker = aBrokerWithId(request.brokerId());
+        Broker broker = aBrokerWithId(brokerId);
         Currency currency = aCurrencyWithId(request.currencyId());
 
         var ctx = new PolicyFacade.PolicyCreateContext(client, broker, building, currency);
@@ -74,18 +76,15 @@ class PolicyServiceTest {
         Policy entity = aPolicyEntityDraft();
         PolicyResponseDTO response = aPolicyResponse();
 
-        when(policyFacade.resolveCreateContext(request)).thenReturn(ctx);
+        when(policyFacade.resolveCreateContext(request,broker)).thenReturn(ctx);
         when(policyMapper.toEntity(request, client, building, broker, currency)).thenReturn(entity);
-
-        when(policyCalculationService.calculatePremium(any()))
-                .thenReturn(new PolicyCalculationResponseDTO(new BigDecimal("130.00"), new BigDecimal("30"), List.of()));
-
+        when(brokerRepository.findByEmailIgnoreCase(broker.getEmail())).thenReturn(Optional.of(broker));
+        when(policyCalculationService.calculatePremium(any())).thenReturn(new PolicyCalculationResponseDTO(new BigDecimal("130.00"), new BigDecimal("30"), List.of()));
         when(policyNumberGenerator.generatePolicyNumber()).thenReturn("POL-20260202-AAAAAAAAAA");
-
         when(policyRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
         when(policyMapper.toResponse(any(Policy.class), any(PolicyCalculationResponseDTO.class))).thenReturn(response);
 
-        PolicyResponseDTO res = policyService.createDraftPolicy(request);
+        PolicyResponseDTO res = policyService.createDraftPolicy(request,broker.getEmail());
 
         assertSame(response, res);
 
@@ -111,20 +110,22 @@ class PolicyServiceTest {
     @Test
     void createDraftPolicy_whenCalculationThrows_shouldPropagate_andNotSave() {
         PolicyCreateRequestDTO request = aPolicyCreateRequest();
+        Long brokerId = 1L;
 
         Client client = aClientWithId(request.clientId());
         Building building = aBuildingWithId(request.buildingId());
-        Broker broker = aBrokerWithId(request.brokerId());
+        Broker broker = aBrokerWithId(brokerId);
         Currency currency = aCurrencyWithId(request.currencyId());
         var ctx = new PolicyFacade.PolicyCreateContext(client, broker, building, currency);
 
-        when(policyFacade.resolveCreateContext(any())).thenReturn(ctx);
+        when(brokerRepository.findByEmailIgnoreCase(broker.getEmail())).thenReturn(Optional.of(broker));
+        when(policyFacade.resolveCreateContext(any(),any())).thenReturn(ctx);
         when(policyMapper.toEntity(any(), any(), any(), any(), any())).thenReturn(aPolicyEntityDraft());
 
-        when(policyCalculationService.calculatePremium(any()))
-                .thenThrow(new RuntimeException("boom"));
+        when(policyCalculationService.calculatePremium(any())).thenThrow(new RuntimeException("boom"));
 
-        assertThrows(RuntimeException.class, () -> policyService.createDraftPolicy(request));
+        String brokerEmail = broker.getEmail();
+        assertThrows(RuntimeException.class, () -> policyService.createDraftPolicy(request,brokerEmail));
 
         verify(policyCalculationService).calculatePremium(any());
         verify(policyRepository, never()).save(any());

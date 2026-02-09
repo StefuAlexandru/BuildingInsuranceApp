@@ -1,9 +1,9 @@
 package ro.insurance.buildinginsurance.application.mapper;
 
 import org.mapstruct.*;
-import ro.insurance.buildinginsurance.web.dto.cityDto.CityDTO;
-import ro.insurance.buildinginsurance.web.dto.cityDto.CityRequestDTO;
-import ro.insurance.buildinginsurance.web.dto.cityDto.CityResponseDTO;
+import ro.insurance.buildinginsurance.web.dto.city_dto.CityDTO;
+import ro.insurance.buildinginsurance.web.dto.city_dto.CityRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.city_dto.CityResponseDTO;
 import ro.insurance.buildinginsurance.domain.entity.City;
 import ro.insurance.buildinginsurance.domain.entity.County;
 

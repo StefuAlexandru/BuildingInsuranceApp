@@ -9,8 +9,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.*;
 
 import ro.insurance.buildinginsurance.application.service.impl.CountryService;
-import ro.insurance.buildinginsurance.web.dto.countryDto.CountryRequestDTO;
-import ro.insurance.buildinginsurance.web.dto.countryDto.CountryResponseDTO;
+import ro.insurance.buildinginsurance.web.dto.country_dto.CountryRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.country_dto.CountryResponseDTO;
 import ro.insurance.buildinginsurance.domain.entity.Country;
 import ro.insurance.buildinginsurance.domain.enums.ErrorCode;
 import ro.insurance.buildinginsurance.web.error.BusinessException;

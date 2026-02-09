@@ -1,8 +1,8 @@
 package ro.insurance.buildinginsurance.util;
 
-import ro.insurance.buildinginsurance.web.dto.countyDto.CountyDTO;
-import ro.insurance.buildinginsurance.web.dto.countyDto.CountyRequestDTO;
-import ro.insurance.buildinginsurance.web.dto.countyDto.CountyResponseDTO;
+import ro.insurance.buildinginsurance.web.dto.county_dto.CountyDTO;
+import ro.insurance.buildinginsurance.web.dto.county_dto.CountyRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.county_dto.CountyResponseDTO;
 import ro.insurance.buildinginsurance.domain.entity.County;
 
 import static ro.insurance.buildinginsurance.util.CountryTestDataFactory.aCountry;

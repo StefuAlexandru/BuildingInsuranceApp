@@ -1,7 +1,7 @@
 package ro.insurance.buildinginsurance.util;
 
 import ro.insurance.buildinginsurance.domain.entity.Broker;
-import ro.insurance.buildinginsurance.web.dto.brokerDto.BrokerRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.broker_dto.BrokerRequestDTO;
 
 import java.math.BigDecimal;
 

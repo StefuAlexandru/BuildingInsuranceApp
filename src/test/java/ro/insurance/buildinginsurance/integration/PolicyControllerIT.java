@@ -19,13 +19,13 @@ import ro.insurance.buildinginsurance.config.TestSecurityUsersConfig;
 import ro.insurance.buildinginsurance.domain.entity.*;
 import ro.insurance.buildinginsurance.domain.enums.PolicyStatus;
 import ro.insurance.buildinginsurance.infrastructure.persistance.repository.*;
-import ro.insurance.buildinginsurance.web.dto.brokerDto.BrokerRequestDTO;
-import ro.insurance.buildinginsurance.web.dto.buildingDto.BuildingRequestDTO;
-import ro.insurance.buildinginsurance.web.dto.cityDto.CityRequestDTO;
-import ro.insurance.buildinginsurance.web.dto.countryDto.CountryRequestDTO;
-import ro.insurance.buildinginsurance.web.dto.countyDto.CountyRequestDTO;
-import ro.insurance.buildinginsurance.web.dto.currencyDto.CurrencyRequestDTO;
-import ro.insurance.buildinginsurance.web.dto.policyDto.PolicyCreateRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.broker_dto.BrokerRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.building_dto.BuildingRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.city_dto.CityRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.country_dto.CountryRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.county_dto.CountyRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.currency_dto.CurrencyRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.policy_dto.PolicyCreateRequestDTO;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -120,7 +120,6 @@ class PolicyControllerIT {
         PolicyCreateRequestDTO createRequest = aPolicyCreateRequest(
                 clientId,
                 buildingId,
-                broker.getId(),
                 currency.getId(),
                 start,
                 end
@@ -227,7 +226,6 @@ class PolicyControllerIT {
         PolicyCreateRequestDTO createRequest = aPolicyCreateRequest(
                 999L, // Not in db
                 buildingId,
-                broker.getId(),
                 currency.getId(),
                 start,
                 end
@@ -265,7 +263,6 @@ class PolicyControllerIT {
         PolicyCreateRequestDTO createRequest = aPolicyCreateRequest(
                 clientId,
                 999L,
-                broker.getId(),
                 currency.getId(),
                 start,
                 end
@@ -301,7 +298,6 @@ class PolicyControllerIT {
         PolicyCreateRequestDTO request = aPolicyCreateRequest(
                 clientId,
                 buildingId,
-                broker.getId(),
                 currency.getId(),
                 start,
                 end
@@ -344,7 +340,6 @@ class PolicyControllerIT {
         PolicyCreateRequestDTO createRequest1 = aPolicyCreateRequest(
                 clientId,
                 buildingId,
-                brokerId,
                 currency.getId(),
                 start,
                 end
@@ -371,10 +366,9 @@ class PolicyControllerIT {
         PolicyCreateRequestDTO createRequest2 = aPolicyCreateRequest(
                 clientId,
                 buildingId,
-                brokerId,                 // same broker, now deactivated
                 currency.getId(),
-                LocalDate.of(2026, 2, 6),
-                LocalDate.of(2026, 3, 6)
+                start,
+                end
         );
 
         mockMvc.perform(post(BASE)

@@ -8,8 +8,8 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ro.insurance.buildinginsurance.web.dto.countyDto.CountyRequestDTO;
-import ro.insurance.buildinginsurance.web.dto.countyDto.CountyResponseDTO;
+import ro.insurance.buildinginsurance.web.dto.county_dto.CountyRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.county_dto.CountyResponseDTO;
 import ro.insurance.buildinginsurance.application.service.ICountyService;
 
 @RestController

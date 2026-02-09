@@ -2,7 +2,7 @@ package ro.insurance.buildinginsurance.application.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import ro.insurance.buildinginsurance.web.dto.clientDto.*;
+import ro.insurance.buildinginsurance.web.dto.client_dto.*;
 
 
 public interface IClientService {

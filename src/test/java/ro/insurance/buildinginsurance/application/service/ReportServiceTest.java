@@ -9,7 +9,7 @@ import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ro.insurance.buildinginsurance.application.service.impl.ReportService;
 import ro.insurance.buildinginsurance.domain.enums.ErrorCode;
-import ro.insurance.buildinginsurance.web.dto.reportDto.*;
+import ro.insurance.buildinginsurance.web.dto.report_dto.*;
 import ro.insurance.buildinginsurance.web.error.BusinessException;
 
 import java.math.BigDecimal;

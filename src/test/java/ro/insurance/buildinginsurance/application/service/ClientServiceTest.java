@@ -12,7 +12,7 @@ import ro.insurance.buildinginsurance.application.service.impl.ClientService;
 import ro.insurance.buildinginsurance.domain.entity.City;
 import ro.insurance.buildinginsurance.domain.entity.Client;
 import ro.insurance.buildinginsurance.domain.enums.ErrorCode;
-import ro.insurance.buildinginsurance.web.dto.clientDto.*;
+import ro.insurance.buildinginsurance.web.dto.client_dto.*;
 import ro.insurance.buildinginsurance.web.error.BusinessException;
 import ro.insurance.buildinginsurance.application.facade.ClientIdentityFacade;
 import ro.insurance.buildinginsurance.application.mapper.ClientMapper;

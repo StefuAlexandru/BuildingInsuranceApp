@@ -11,7 +11,7 @@ import ro.insurance.buildinginsurance.infrastructure.persistance.repository.City
 import ro.insurance.buildinginsurance.infrastructure.persistance.repository.CountryRepository;
 import ro.insurance.buildinginsurance.infrastructure.persistance.repository.CountyRepository;
 import ro.insurance.buildinginsurance.infrastructure.persistance.repository.RiskFactorConfigurationRepository;
-import ro.insurance.buildinginsurance.web.dto.riskFactorConfigurationDto.RiskFactorConfigurationRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.risk_factor_configuration_dto.RiskFactorConfigurationRequestDTO;
 import ro.insurance.buildinginsurance.web.error.BusinessException;
 
 import static org.junit.jupiter.api.Assertions.*;

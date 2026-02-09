@@ -2,11 +2,10 @@ package ro.insurance.buildinginsurance.application.mapper;
 
 import org.mapstruct.*;
 import ro.insurance.buildinginsurance.domain.entity.*;
-import ro.insurance.buildinginsurance.web.dto.policyCalculationDto.PolicyCalculationResponseDTO;
-import ro.insurance.buildinginsurance.web.dto.policyDto.*;
+import ro.insurance.buildinginsurance.web.dto.policy_calculation_dto.PolicyCalculationResponseDTO;
+import ro.insurance.buildinginsurance.web.dto.policy_dto.*;
 
 import java.math.BigDecimal;
-import java.time.OffsetDateTime;
 
 @Mapper(
         componentModel = "spring",

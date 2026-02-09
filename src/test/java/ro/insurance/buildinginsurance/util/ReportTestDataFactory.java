@@ -3,7 +3,7 @@ package ro.insurance.buildinginsurance.util;
 import ro.insurance.buildinginsurance.domain.enums.PeriodGranularity;
 import ro.insurance.buildinginsurance.domain.enums.PolicyStatus;
 import ro.insurance.buildinginsurance.domain.enums.GroupBy;
-import ro.insurance.buildinginsurance.web.dto.reportDto.ReportRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.report_dto.ReportRequestDTO;
 
 import java.time.LocalDate;
 import java.util.List;

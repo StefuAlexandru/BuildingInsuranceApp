@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import ro.insurance.buildinginsurance.web.dto.clientDto.*;
+import ro.insurance.buildinginsurance.web.dto.client_dto.*;
 import ro.insurance.buildinginsurance.application.service.IClientService;
 
 @RestController

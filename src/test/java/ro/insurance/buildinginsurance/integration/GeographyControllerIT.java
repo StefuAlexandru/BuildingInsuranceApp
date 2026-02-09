@@ -10,9 +10,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import ro.insurance.buildinginsurance.config.TestSecurityUsersConfig;
-import ro.insurance.buildinginsurance.web.dto.cityDto.CityRequestDTO;
-import ro.insurance.buildinginsurance.web.dto.countryDto.CountryRequestDTO;
-import ro.insurance.buildinginsurance.web.dto.countyDto.CountyRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.city_dto.CityRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.country_dto.CountryRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.county_dto.CountyRequestDTO;
 import ro.insurance.buildinginsurance.domain.entity.Country;
 import ro.insurance.buildinginsurance.domain.entity.County;
 import ro.insurance.buildinginsurance.application.mapper.CityMapper;
@@ -48,7 +48,7 @@ class GeographyControllerIT {
     @Autowired CountyMapper countyMapper;
     @Autowired CityMapper cityMapper;
 
-    private static final String USER = "broker@email.com";
+    private static final String USER = "admin";
     private static final String PASS = "pass";
 
     private void seedGeo() {

@@ -1,8 +1,8 @@
 package ro.insurance.buildinginsurance.util;
 
 import ro.insurance.buildinginsurance.domain.entity.Currency;
-import ro.insurance.buildinginsurance.web.dto.currencyDto.CurrencyRequestDTO;
-import ro.insurance.buildinginsurance.web.dto.currencyDto.CurrencyResponseDTO;
+import ro.insurance.buildinginsurance.web.dto.currency_dto.CurrencyRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.currency_dto.CurrencyResponseDTO;
 
 import java.math.BigDecimal;
 

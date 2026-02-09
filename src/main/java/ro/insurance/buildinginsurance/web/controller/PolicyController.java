@@ -1,6 +1,7 @@
 package ro.insurance.buildinginsurance.web.controller;
 
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -13,13 +14,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import ro.insurance.buildinginsurance.application.service.IPolicyService;
 import ro.insurance.buildinginsurance.domain.enums.PolicyStatus;
-import ro.insurance.buildinginsurance.web.dto.policyDto.*;
+import ro.insurance.buildinginsurance.web.dto.policy_dto.*;
 
 import java.time.LocalDate;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/brokers/policies")
+@SecurityRequirement(name = "basicAuth")
 public class PolicyController {
 
     private final IPolicyService policyService;
@@ -27,8 +29,8 @@ public class PolicyController {
     // ----------------------  POST  ----------------------
 
     @PostMapping
-    public ResponseEntity<PolicyResponseDTO> createPolicy(@Valid @RequestBody PolicyCreateRequestDTO request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(policyService.createDraftPolicy(request));
+    public ResponseEntity<PolicyResponseDTO> createPolicy(@Valid @RequestBody PolicyCreateRequestDTO request,Authentication authentication) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(policyService.createDraftPolicy(request,authentication.getName()));
     }
 
     @PostMapping("/{id}/activate")

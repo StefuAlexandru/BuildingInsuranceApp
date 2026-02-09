@@ -12,8 +12,8 @@ import ro.insurance.buildinginsurance.domain.entity.Currency;
 import ro.insurance.buildinginsurance.domain.enums.ErrorCode;
 import ro.insurance.buildinginsurance.infrastructure.persistance.repository.CurrencyRepository;
 import ro.insurance.buildinginsurance.infrastructure.persistance.repository.PolicyRepository;
-import ro.insurance.buildinginsurance.web.dto.currencyDto.CurrencyRequestDTO;
-import ro.insurance.buildinginsurance.web.dto.currencyDto.CurrencyResponseDTO;
+import ro.insurance.buildinginsurance.web.dto.currency_dto.CurrencyRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.currency_dto.CurrencyResponseDTO;
 import ro.insurance.buildinginsurance.web.error.BusinessException;
 
 import java.util.List;

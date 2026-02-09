@@ -11,8 +11,8 @@ import ro.insurance.buildinginsurance.application.service.IBrokerService;
 import ro.insurance.buildinginsurance.domain.entity.Broker;
 import ro.insurance.buildinginsurance.domain.enums.ErrorCode;
 import ro.insurance.buildinginsurance.infrastructure.persistance.repository.BrokerRepository;
-import ro.insurance.buildinginsurance.web.dto.brokerDto.BrokerRequestDTO;
-import ro.insurance.buildinginsurance.web.dto.brokerDto.BrokerResponseDTO;
+import ro.insurance.buildinginsurance.web.dto.broker_dto.BrokerRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.broker_dto.BrokerResponseDTO;
 import ro.insurance.buildinginsurance.web.error.BusinessException;
 
 @Service

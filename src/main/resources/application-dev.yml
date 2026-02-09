@@ -13,11 +13,14 @@ spring:
     locations: classpath:db/migration
     clean-disabled: true
 
+app:
   security:
-    user:
-      name: admin
-      password: admin
-      roles: ADMIN,BROKER
+    admin:
+      username: ${APP_ADMIN_USER}
+      password: ${APP_ADMIN_PASS}
+    broker:
+      username: ${APP_BROKER_USER}
+      password: ${APP_BROKER_PASS}
 
 logging:
   level:

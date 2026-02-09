@@ -17,12 +17,12 @@ import ro.insurance.buildinginsurance.application.mapper.CountryMapper;
 import ro.insurance.buildinginsurance.application.mapper.CountyMapper;
 import ro.insurance.buildinginsurance.domain.entity.*;
 import ro.insurance.buildinginsurance.infrastructure.persistance.repository.*;
-import ro.insurance.buildinginsurance.web.dto.buildingDto.BuildingRequestDTO;
-import ro.insurance.buildinginsurance.web.dto.buildingDto.BuildingUpdateRequestDTO;
-import ro.insurance.buildinginsurance.web.dto.cityDto.CityRequestDTO;
-import ro.insurance.buildinginsurance.web.dto.clientDto.ClientRequestDTO;
-import ro.insurance.buildinginsurance.web.dto.countryDto.CountryRequestDTO;
-import ro.insurance.buildinginsurance.web.dto.countyDto.CountyRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.building_dto.BuildingRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.building_dto.BuildingUpdateRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.city_dto.CityRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.client_dto.ClientRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.country_dto.CountryRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.county_dto.CountyRequestDTO;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;

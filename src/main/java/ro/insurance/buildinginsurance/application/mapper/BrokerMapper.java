@@ -6,8 +6,8 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import ro.insurance.buildinginsurance.domain.entity.Broker;
 import ro.insurance.buildinginsurance.util.StringNormalizer;
-import ro.insurance.buildinginsurance.web.dto.brokerDto.BrokerRequestDTO;
-import ro.insurance.buildinginsurance.web.dto.brokerDto.BrokerResponseDTO;
+import ro.insurance.buildinginsurance.web.dto.broker_dto.BrokerRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.broker_dto.BrokerResponseDTO;
 
 @Mapper(componentModel = "spring")
 public interface BrokerMapper {

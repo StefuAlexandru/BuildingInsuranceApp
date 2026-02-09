@@ -17,8 +17,8 @@ import ro.insurance.buildinginsurance.infrastructure.persistance.repository.Curr
 import ro.insurance.buildinginsurance.infrastructure.persistance.repository.FeeConfigurationRepository;
 import ro.insurance.buildinginsurance.infrastructure.persistance.repository.RiskFactorConfigurationRepository;
 import ro.insurance.buildinginsurance.util.CurrencyTestDataFactory;
-import ro.insurance.buildinginsurance.web.dto.policyCalculationDto.PolicyCalculationRequestDTO;
-import ro.insurance.buildinginsurance.web.dto.policyCalculationDto.PolicyCalculationResponseDTO;
+import ro.insurance.buildinginsurance.web.dto.policy_calculation_dto.PolicyCalculationRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.policy_calculation_dto.PolicyCalculationResponseDTO;
 import ro.insurance.buildinginsurance.web.error.BusinessException;
 
 import java.math.BigDecimal;

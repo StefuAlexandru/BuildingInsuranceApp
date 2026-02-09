@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ro.insurance.buildinginsurance.domain.entity.City;
 import ro.insurance.buildinginsurance.domain.entity.Client;
 import ro.insurance.buildinginsurance.domain.enums.ErrorCode;
-import ro.insurance.buildinginsurance.web.dto.clientDto.*;
+import ro.insurance.buildinginsurance.web.dto.client_dto.*;
 import ro.insurance.buildinginsurance.web.error.BusinessException;
 import ro.insurance.buildinginsurance.web.error.ErrorModel;
 import ro.insurance.buildinginsurance.application.facade.ClientIdentityFacade;
