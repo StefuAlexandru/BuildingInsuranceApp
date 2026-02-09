@@ -15,8 +15,8 @@ import ro.insurance.buildinginsurance.application.service.impl.RiskFactorConfigu
 import ro.insurance.buildinginsurance.domain.entity.RiskFactorConfiguration;
 import ro.insurance.buildinginsurance.domain.enums.ErrorCode;
 import ro.insurance.buildinginsurance.infrastructure.persistance.repository.RiskFactorConfigurationRepository;
-import ro.insurance.buildinginsurance.web.dto.riskFactorConfigurationDto.RiskFactorConfigurationRequestDTO;
-import ro.insurance.buildinginsurance.web.dto.riskFactorConfigurationDto.RiskFactorConfigurationResponseDTO;
+import ro.insurance.buildinginsurance.web.dto.risk_factor_configuration_dto.RiskFactorConfigurationRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.risk_factor_configuration_dto.RiskFactorConfigurationResponseDTO;
 import ro.insurance.buildinginsurance.web.error.BusinessException;
 
 import java.time.LocalDate;

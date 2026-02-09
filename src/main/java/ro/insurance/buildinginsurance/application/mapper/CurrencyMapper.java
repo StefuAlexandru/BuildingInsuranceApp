@@ -6,9 +6,9 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import ro.insurance.buildinginsurance.domain.entity.Currency;
-import ro.insurance.buildinginsurance.web.dto.currencyDto.CurrencyDTO;
-import ro.insurance.buildinginsurance.web.dto.currencyDto.CurrencyRequestDTO;
-import ro.insurance.buildinginsurance.web.dto.currencyDto.CurrencyResponseDTO;
+import ro.insurance.buildinginsurance.web.dto.currency_dto.CurrencyDTO;
+import ro.insurance.buildinginsurance.web.dto.currency_dto.CurrencyRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.currency_dto.CurrencyResponseDTO;
 
 import static ro.insurance.buildinginsurance.util.StringNormalizer.normalizeUpper;
 import static ro.insurance.buildinginsurance.util.StringNormalizer.trimToNull;

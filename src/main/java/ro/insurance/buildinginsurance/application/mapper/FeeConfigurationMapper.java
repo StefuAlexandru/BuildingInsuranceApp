@@ -6,8 +6,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import ro.insurance.buildinginsurance.domain.entity.FeeConfiguration;
-import ro.insurance.buildinginsurance.web.dto.feeConfigurationDto.FeeConfigurationRequestDTO;
-import ro.insurance.buildinginsurance.web.dto.feeConfigurationDto.FeeConfigurationResponseDTO;
+import ro.insurance.buildinginsurance.web.dto.fee_configuration_dto.FeeConfigurationRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.fee_configuration_dto.FeeConfigurationResponseDTO;
 
 import static ro.insurance.buildinginsurance.util.StringNormalizer.trimToNull;
 

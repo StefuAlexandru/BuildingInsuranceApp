@@ -11,8 +11,8 @@ import ro.insurance.buildinginsurance.application.service.IFeeConfigurationServi
 import ro.insurance.buildinginsurance.domain.entity.FeeConfiguration;
 import ro.insurance.buildinginsurance.domain.enums.ErrorCode;
 import ro.insurance.buildinginsurance.infrastructure.persistance.repository.FeeConfigurationRepository;
-import ro.insurance.buildinginsurance.web.dto.feeConfigurationDto.FeeConfigurationRequestDTO;
-import ro.insurance.buildinginsurance.web.dto.feeConfigurationDto.FeeConfigurationResponseDTO;
+import ro.insurance.buildinginsurance.web.dto.fee_configuration_dto.FeeConfigurationRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.fee_configuration_dto.FeeConfigurationResponseDTO;
 import ro.insurance.buildinginsurance.web.error.BusinessException;
 
 import java.time.LocalDate;

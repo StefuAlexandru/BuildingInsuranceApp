@@ -2,8 +2,8 @@ package ro.insurance.buildinginsurance.application.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import ro.insurance.buildinginsurance.web.dto.countryDto.CountryRequestDTO;
-import ro.insurance.buildinginsurance.web.dto.countryDto.CountryResponseDTO;
+import ro.insurance.buildinginsurance.web.dto.country_dto.CountryRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.country_dto.CountryResponseDTO;
 
 public interface ICountryService {
     CountryResponseDTO registerCountry(CountryRequestDTO countryRequestDTO);

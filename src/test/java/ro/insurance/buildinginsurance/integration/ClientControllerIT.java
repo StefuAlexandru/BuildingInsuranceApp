@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ro.insurance.buildinginsurance.config.TestSecurityUsersConfig;
 import ro.insurance.buildinginsurance.domain.entity.*;
 import ro.insurance.buildinginsurance.infrastructure.persistance.repository.*;
-import ro.insurance.buildinginsurance.web.dto.clientDto.ClientRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.client_dto.ClientRequestDTO;
 import ro.insurance.buildinginsurance.domain.enums.ClientType;
 import ro.insurance.buildinginsurance.application.mapper.CityMapper;
 import ro.insurance.buildinginsurance.application.mapper.ClientMapper;

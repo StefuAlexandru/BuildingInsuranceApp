@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import ro.insurance.buildinginsurance.domain.entity.RiskFactorConfiguration;
 import ro.insurance.buildinginsurance.domain.enums.BuildingType;
 import ro.insurance.buildinginsurance.domain.enums.RiskFactorLevel;
-import ro.insurance.buildinginsurance.web.dto.riskFactorConfigurationDto.RiskFactorConfigurationRequestDTO;
-import ro.insurance.buildinginsurance.web.dto.riskFactorConfigurationDto.RiskFactorConfigurationResponseDTO;
+import ro.insurance.buildinginsurance.web.dto.risk_factor_configuration_dto.RiskFactorConfigurationRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.risk_factor_configuration_dto.RiskFactorConfigurationResponseDTO;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

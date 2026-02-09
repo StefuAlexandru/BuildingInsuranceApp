@@ -12,8 +12,8 @@ import ro.insurance.buildinginsurance.domain.entity.*;
 import ro.insurance.buildinginsurance.domain.enums.ErrorCode;
 import ro.insurance.buildinginsurance.domain.enums.PolicyStatus;
 import ro.insurance.buildinginsurance.infrastructure.persistance.repository.*;
-import ro.insurance.buildinginsurance.web.dto.policyDto.PolicyCreateRequestDTO;
-import ro.insurance.buildinginsurance.web.dto.policyDto.PolicyPatchRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.policy_dto.PolicyCreateRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.policy_dto.PolicyPatchRequestDTO;
 import ro.insurance.buildinginsurance.web.error.BusinessException;
 
 import java.math.BigDecimal;
@@ -28,6 +28,7 @@ import static ro.insurance.buildinginsurance.util.BuildingTestDataFactory.aBuild
 import static ro.insurance.buildinginsurance.util.BrokerTestDataFactory.aBrokerWithId;
 import static ro.insurance.buildinginsurance.util.ClientTestDataFactory.aClientWithId;
 import static ro.insurance.buildinginsurance.util.CurrencyTestDataFactory.aCurrencyWithId;
+import static ro.insurance.buildinginsurance.util.ExceptionAssertions.assertHasError;
 import static ro.insurance.buildinginsurance.util.PolicyTestDataFactory.aDraftPolicyWithAllMandatoryFields;
 import static ro.insurance.buildinginsurance.util.PolicyTestDataFactory.aPolicyCreateRequest;
 
@@ -61,31 +62,25 @@ class PolicyFacadeTest {
         );
     }
 
-    private static void assertHasError(BusinessException ex, ErrorCode code) {
-        assertTrue(ex.getErrors().stream().anyMatch(e -> code.name().equals(e.getCode())));
-    }
-
     // ---------------- resolveCreateContext ----------------
 
     @Test
     void resolveCreateContext_happyPath_shouldLoadAll_validateOwnership_currency_dates_andReturnContext() {
         PolicyCreateRequestDTO request = aPolicyCreateRequest();
+        Long brokerId = 1L;
 
         Client client = aClientWithId(request.clientId());
         Building building = aBuildingWithId(request.buildingId());
-        Broker broker = aBrokerWithId(request.brokerId());
-        broker.setActive(true);
+        Broker broker = aBrokerWithId(brokerId);
 
         Currency currency = aCurrencyWithId(request.currencyId());
-        currency.setActive(true);
 
         when(clientRepository.findById(request.clientId())).thenReturn(Optional.of(client));
         when(buildingRepository.findById(request.buildingId())).thenReturn(Optional.of(building));
         when(buildingRepository.existsByIdAndClientId(request.buildingId(), request.clientId())).thenReturn(true);
-        when(brokerRepository.findById(request.brokerId())).thenReturn(Optional.of(broker));
         when(currencyRepository.findById(request.currencyId())).thenReturn(Optional.of(currency));
 
-        PolicyFacade.PolicyCreateContext ctx = policyFacade.resolveCreateContext(request);
+        PolicyFacade.PolicyCreateContext ctx = policyFacade.resolveCreateContext(request,broker);
 
         assertAll(
                 () -> assertSame(client, ctx.client()),
@@ -100,12 +95,13 @@ class PolicyFacadeTest {
     @Test
     void resolveCreateContext_whenBuildingNotOwned_shouldThrow() {
         PolicyCreateRequestDTO request = aPolicyCreateRequest();
+        Broker broker = aBrokerWithId(1L);
 
         when(clientRepository.findById(request.clientId())).thenReturn(Optional.of(aClientWithId(request.clientId())));
         when(buildingRepository.findById(request.buildingId())).thenReturn(Optional.of(aBuildingWithId(request.buildingId())));
         when(buildingRepository.existsByIdAndClientId(request.buildingId(), request.clientId())).thenReturn(false);
 
-        BusinessException ex = assertThrows(BusinessException.class, () -> policyFacade.resolveCreateContext(request));
+        BusinessException ex = assertThrows(BusinessException.class, () -> policyFacade.resolveCreateContext(request,broker));
         assertHasError(ex, ErrorCode.BUILDING_NOT_OWNED_BY_CLIENT);
 
         verify(brokerRepository, never()).findById(any());
@@ -115,11 +111,11 @@ class PolicyFacadeTest {
     @Test
     void resolveCreateContext_whenCurrencyInactive_shouldThrow() {
         PolicyCreateRequestDTO request = aPolicyCreateRequest();
+        Long brokerId = 1L;
 
         Client client = aClientWithId(request.clientId());
         Building building = aBuildingWithId(request.buildingId());
-        Broker broker = aBrokerWithId(request.brokerId());
-        broker.setActive(true);
+        Broker broker = aBrokerWithId(brokerId);
 
         Currency currency = aCurrencyWithId(request.currencyId());
         currency.setActive(false);
@@ -127,46 +123,46 @@ class PolicyFacadeTest {
         when(clientRepository.findById(request.clientId())).thenReturn(Optional.of(client));
         when(buildingRepository.findById(request.buildingId())).thenReturn(Optional.of(building));
         when(buildingRepository.existsByIdAndClientId(request.buildingId(), request.clientId())).thenReturn(true);
-        when(brokerRepository.findById(request.brokerId())).thenReturn(Optional.of(broker));
         when(currencyRepository.findById(request.currencyId())).thenReturn(Optional.of(currency));
 
-        BusinessException ex = assertThrows(BusinessException.class, () -> policyFacade.resolveCreateContext(request));
+        BusinessException ex = assertThrows(BusinessException.class, () -> policyFacade.resolveCreateContext(request,broker));
         assertHasError(ex, ErrorCode.CURRENCY_IS_NOT_ACTIVE);
     }
 
     @Test
     void resolveCreateContext_whenStartAfterEnd_shouldThrow() {
         PolicyCreateRequestDTO request = new PolicyCreateRequestDTO(
-                1L, 1L, 1L, 1L,
+                1L, 1L, 1L,
                 LocalDate.of(2026, 12, 31),
                 LocalDate.of(2026, 1, 1),
                 new BigDecimal("100.00")
         );
 
+        Long brokerId = 1L;
+
         Client client = aClientWithId(request.clientId());
         Building building = aBuildingWithId(request.buildingId());
-        Broker broker = aBrokerWithId(request.brokerId());
-        broker.setActive(true);
+        Broker broker = aBrokerWithId(brokerId);
 
         Currency currency = aCurrencyWithId(request.currencyId());
-        currency.setActive(true);
 
         when(clientRepository.findById(request.clientId())).thenReturn(Optional.of(client));
         when(buildingRepository.findById(request.buildingId())).thenReturn(Optional.of(building));
         when(buildingRepository.existsByIdAndClientId(request.buildingId(), request.clientId())).thenReturn(true);
-        when(brokerRepository.findById(request.brokerId())).thenReturn(Optional.of(broker));
         when(currencyRepository.findById(request.currencyId())).thenReturn(Optional.of(currency));
 
-        BusinessException ex = assertThrows(BusinessException.class, () -> policyFacade.resolveCreateContext(request));
+        BusinessException ex = assertThrows(BusinessException.class, () -> policyFacade.resolveCreateContext(request,broker));
         assertHasError(ex, ErrorCode.INVALID_DATES);
     }
 
     @Test
     void resolveCreateContext_whenClientNotFound_shouldThrow_andStop() {
         PolicyCreateRequestDTO request = aPolicyCreateRequest();
+        Broker broker = aBrokerWithId(1L);
+
         when(clientRepository.findById(request.clientId())).thenReturn(Optional.empty());
 
-        BusinessException ex = assertThrows(BusinessException.class, () -> policyFacade.resolveCreateContext(request));
+        BusinessException ex = assertThrows(BusinessException.class, () -> policyFacade.resolveCreateContext(request,broker));
         assertHasError(ex, ErrorCode.CLIENT_NOT_FOUND);
 
         verifyNoInteractions(buildingRepository, brokerRepository, currencyRepository);
@@ -175,11 +171,12 @@ class PolicyFacadeTest {
     @Test
     void resolveCreateContext_whenBuildingNotFound_shouldThrow_andStop() {
         PolicyCreateRequestDTO request = aPolicyCreateRequest();
+        Broker broker = aBrokerWithId(1L);
 
         when(clientRepository.findById(request.clientId())).thenReturn(Optional.of(aClientWithId(request.clientId())));
         when(buildingRepository.findById(request.buildingId())).thenReturn(Optional.empty());
 
-        BusinessException ex = assertThrows(BusinessException.class, () -> policyFacade.resolveCreateContext(request));
+        BusinessException ex = assertThrows(BusinessException.class, () -> policyFacade.resolveCreateContext(request,broker));
         assertHasError(ex, ErrorCode.BUILDING_NOT_FOUND);
 
         verify(buildingRepository, never()).existsByIdAndClientId(anyLong(), anyLong());
@@ -187,50 +184,33 @@ class PolicyFacadeTest {
     }
 
     @Test
-    void resolveCreateContext_whenBrokerNotFound_shouldThrow_andStop() {
-        PolicyCreateRequestDTO request = aPolicyCreateRequest();
-
-        when(clientRepository.findById(request.clientId())).thenReturn(Optional.of(aClientWithId(request.clientId())));
-        when(buildingRepository.findById(request.buildingId())).thenReturn(Optional.of(aBuildingWithId(request.buildingId())));
-        when(buildingRepository.existsByIdAndClientId(request.buildingId(), request.clientId())).thenReturn(true);
-        when(brokerRepository.findById(request.brokerId())).thenReturn(Optional.empty());
-
-        BusinessException ex = assertThrows(BusinessException.class, () -> policyFacade.resolveCreateContext(request));
-        assertHasError(ex, ErrorCode.BROKER_NOT_FOUND);
-
-        verifyNoInteractions(currencyRepository);
-    }
-
-    @Test
     void resolveCreateContext_whenCurrencyNotFound_shouldThrow() {
         PolicyCreateRequestDTO request = aPolicyCreateRequest();
 
-        Broker broker = aBrokerWithId(request.brokerId());
-        broker.setActive(true);
+        Long brokerId = 1L;
+        Broker broker = aBrokerWithId(brokerId);
 
         when(clientRepository.findById(request.clientId())).thenReturn(Optional.of(aClientWithId(request.clientId())));
         when(buildingRepository.findById(request.buildingId())).thenReturn(Optional.of(aBuildingWithId(request.buildingId())));
         when(buildingRepository.existsByIdAndClientId(request.buildingId(), request.clientId())).thenReturn(true);
-        when(brokerRepository.findById(request.brokerId())).thenReturn(Optional.of(broker));
         when(currencyRepository.findById(request.currencyId())).thenReturn(Optional.empty());
 
-        BusinessException ex = assertThrows(BusinessException.class, () -> policyFacade.resolveCreateContext(request));
+        BusinessException ex = assertThrows(BusinessException.class, () -> policyFacade.resolveCreateContext(request,broker));
         assertHasError(ex, ErrorCode.CURRENCY_NOT_FOUND);
     }
 
     @Test
     void resolveCreateContext_whenBrokerInactive_shouldThrow_andStopBeforeCurrencyLoad() {
         PolicyCreateRequestDTO request = aPolicyCreateRequest();
-
-        Broker broker = aBrokerWithId(request.brokerId());
+        Long brokerId = 1L;
+        Broker broker = aBrokerWithId(brokerId);
         broker.setActive(false);
 
         when(clientRepository.findById(request.clientId())).thenReturn(Optional.of(aClientWithId(request.clientId())));
         when(buildingRepository.findById(request.buildingId())).thenReturn(Optional.of(aBuildingWithId(request.buildingId())));
         when(buildingRepository.existsByIdAndClientId(request.buildingId(), request.clientId())).thenReturn(true);
-        when(brokerRepository.findById(request.brokerId())).thenReturn(Optional.of(broker));
 
-        BusinessException ex = assertThrows(BusinessException.class, () -> policyFacade.resolveCreateContext(request));
+        BusinessException ex = assertThrows(BusinessException.class, () -> policyFacade.resolveCreateContext(request,broker));
         assertHasError(ex, ErrorCode.BROKER_IS_NOT_ACTIVE);
 
         verify(currencyRepository, never()).findById(anyLong());
@@ -240,24 +220,22 @@ class PolicyFacadeTest {
     void resolveCreateContext_whenStartEqualsEnd_shouldNotThrow() {
         LocalDate date = LocalDate.of(2026, 2, 10);
         PolicyCreateRequestDTO request = new PolicyCreateRequestDTO(
-                1L, 1L, 1L, 1L,
+                1L, 1L, 1L,
                 date, date,
                 new BigDecimal("100.00")
         );
 
-        Broker broker = aBrokerWithId(request.brokerId());
-        broker.setActive(true);
+        Long brokerId = 1L;
 
+        Broker broker = aBrokerWithId(brokerId);
         Currency currency = aCurrencyWithId(request.currencyId());
-        currency.setActive(true);
 
         when(clientRepository.findById(request.clientId())).thenReturn(Optional.of(aClientWithId(request.clientId())));
         when(buildingRepository.findById(request.buildingId())).thenReturn(Optional.of(aBuildingWithId(request.buildingId())));
         when(buildingRepository.existsByIdAndClientId(request.buildingId(), request.clientId())).thenReturn(true);
-        when(brokerRepository.findById(request.brokerId())).thenReturn(Optional.of(broker));
         when(currencyRepository.findById(request.currencyId())).thenReturn(Optional.of(currency));
 
-        assertDoesNotThrow(() -> policyFacade.resolveCreateContext(request));
+        assertDoesNotThrow(() -> policyFacade.resolveCreateContext(request,broker));
     }
 
     // ---------------- validateActivateOrThrow ----------------

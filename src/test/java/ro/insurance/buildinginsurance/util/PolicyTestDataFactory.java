@@ -3,9 +3,9 @@ package ro.insurance.buildinginsurance.util;
 import ro.insurance.buildinginsurance.domain.entity.Currency;
 import ro.insurance.buildinginsurance.domain.entity.Policy;
 import ro.insurance.buildinginsurance.domain.enums.PolicyStatus;
-import ro.insurance.buildinginsurance.web.dto.policyCalculationDto.PolicyCalculationResponseDTO;
-import ro.insurance.buildinginsurance.web.dto.policyDto.PolicyCreateRequestDTO;
-import ro.insurance.buildinginsurance.web.dto.policyDto.PolicyResponseDTO;
+import ro.insurance.buildinginsurance.web.dto.policy_calculation_dto.PolicyCalculationResponseDTO;
+import ro.insurance.buildinginsurance.web.dto.policy_dto.PolicyCreateRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.policy_dto.PolicyResponseDTO;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -21,16 +21,16 @@ public class PolicyTestDataFactory {
     // -------------------  DTOS  -------------------
     public static PolicyCreateRequestDTO aPolicyCreateRequest() {
         return new PolicyCreateRequestDTO(
-                1L, 1L, 1L, 1L,
+                1L,  1L, 1L,
                 LocalDate.of(2026, 1, 30),
                 LocalDate.of(2026, 12, 31),
                 new BigDecimal("100.00")
         );
     }
 
-    public static PolicyCreateRequestDTO aPolicyCreateRequest(Long clientId, Long buildingId, Long brokerId, Long currencyId, LocalDate startDate, LocalDate endDate) {
+    public static PolicyCreateRequestDTO aPolicyCreateRequest(Long clientId, Long buildingId, Long currencyId, LocalDate startDate, LocalDate endDate) {
         return new PolicyCreateRequestDTO(
-                clientId, buildingId, brokerId, currencyId,
+                clientId, buildingId, currencyId,
                 startDate, endDate,
                 new BigDecimal("100.00")
         );

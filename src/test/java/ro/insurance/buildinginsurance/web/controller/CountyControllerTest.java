@@ -12,8 +12,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
-import ro.insurance.buildinginsurance.web.dto.countyDto.CountyRequestDTO;
-import ro.insurance.buildinginsurance.web.dto.countyDto.CountyResponseDTO;
+import ro.insurance.buildinginsurance.web.dto.county_dto.CountyRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.county_dto.CountyResponseDTO;
 import ro.insurance.buildinginsurance.web.error.CustomExceptionHandler;
 import ro.insurance.buildinginsurance.application.service.ICountyService;
 

@@ -3,7 +3,7 @@ package ro.insurance.buildinginsurance.application.facade;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ro.insurance.buildinginsurance.web.dto.clientDto.ClientIdentityPatchDTO;
+import ro.insurance.buildinginsurance.web.dto.client_dto.ClientIdentityPatchDTO;
 import ro.insurance.buildinginsurance.domain.entity.Client;
 import ro.insurance.buildinginsurance.domain.enums.ClientType;
 import ro.insurance.buildinginsurance.domain.enums.ErrorCode;

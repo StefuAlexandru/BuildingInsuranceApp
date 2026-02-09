@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ro.insurance.buildinginsurance.config.TestSecurityUsersConfig;
 import ro.insurance.buildinginsurance.domain.entity.Currency;
 import ro.insurance.buildinginsurance.infrastructure.persistance.repository.CurrencyRepository;
-import ro.insurance.buildinginsurance.web.dto.currencyDto.CurrencyRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.currency_dto.CurrencyRequestDTO;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;

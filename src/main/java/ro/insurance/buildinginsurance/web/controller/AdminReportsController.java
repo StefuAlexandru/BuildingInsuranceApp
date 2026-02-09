@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ro.insurance.buildinginsurance.application.service.IReportService;
-import ro.insurance.buildinginsurance.web.dto.reportDto.ReportRequestDTO;
-import ro.insurance.buildinginsurance.web.dto.reportDto.ReportResponseDTO;
+import ro.insurance.buildinginsurance.web.dto.report_dto.ReportRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.report_dto.ReportResponseDTO;
 
 @RestController
 @RequestMapping("/api/admin/reports")

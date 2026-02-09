@@ -8,8 +8,8 @@ import ro.insurance.buildinginsurance.domain.entity.*;
 import ro.insurance.buildinginsurance.domain.enums.ErrorCode;
 import ro.insurance.buildinginsurance.domain.enums.PolicyStatus;
 import ro.insurance.buildinginsurance.infrastructure.persistance.repository.*;
-import ro.insurance.buildinginsurance.web.dto.policyDto.PolicyCreateRequestDTO;
-import ro.insurance.buildinginsurance.web.dto.policyDto.PolicyPatchRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.policy_dto.PolicyCreateRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.policy_dto.PolicyPatchRequestDTO;
 import ro.insurance.buildinginsurance.web.error.BusinessException;
 
 import java.math.BigDecimal;
@@ -24,17 +24,15 @@ public class PolicyFacade {
 
     private final ClientRepository clientRepository;
     private final BuildingRepository buildingRepository;
-    private final BrokerRepository brokerRepository;
     private final CurrencyRepository currencyRepository;
     private final Clock clock;
 
 
-    public PolicyCreateContext resolveCreateContext(PolicyCreateRequestDTO request) {
+    public PolicyCreateContext resolveCreateContext(PolicyCreateRequestDTO request,Broker broker) {
         Client client = getClientOrThrow(request.clientId());
         Building building = getBuildingOrThrow(request.buildingId());
         validateBuildingOwnership(request.buildingId(), request.clientId());
-        Broker broker = getBrokerOrThrow(request.brokerId());
-        validateBrokerActive(broker, request.brokerId());
+        validateBrokerActive(broker);
         Currency currency = getCurrencyOrThrow(request.currencyId());
 
         validateCurrencyActive(currency, request.currencyId());
@@ -58,7 +56,7 @@ public class PolicyFacade {
             throw new BusinessException(ErrorCode.POLICY_INVALID_STATE);
         }
 
-        validateBrokerActive(policy.getBroker(), policy.getBroker().getId());
+        validateBrokerActive(policy.getBroker());
         validateCurrencyActive(policy.getCurrency(), policy.getCurrency().getId());
     }
 
@@ -114,9 +112,9 @@ public class PolicyFacade {
         }
     }
 
-    private void validateBrokerActive(Broker broker, Long brokerId) {
+    private void validateBrokerActive(Broker broker) {
         if (!broker.isActive()) {
-            log.warn("Broker with id {} is not active", brokerId);
+            log.warn("Broker with id {} is not active", broker.getId());
             throw new BusinessException(ErrorCode.BROKER_IS_NOT_ACTIVE);
         }
     }
@@ -142,14 +140,6 @@ public class PolicyFacade {
             log.warn("Building with id {} is not owned by client with id {}", buildingId, clientId);
             throw new BusinessException(ErrorCode.BUILDING_NOT_OWNED_BY_CLIENT);
         }
-    }
-
-    private Broker getBrokerOrThrow(Long brokerId) {
-        return brokerRepository.findById(brokerId)
-                .orElseThrow(() -> {
-                    log.warn("Broker with id {} does not exist for creating/modifying a draft policy", brokerId);
-                    return new BusinessException(ErrorCode.BROKER_NOT_FOUND);
-                });
     }
 
     private Currency getCurrencyOrThrow(Long currencyId) {

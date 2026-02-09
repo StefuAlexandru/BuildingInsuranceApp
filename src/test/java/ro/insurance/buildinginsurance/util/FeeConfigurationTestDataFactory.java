@@ -3,8 +3,8 @@ package ro.insurance.buildinginsurance.util;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ro.insurance.buildinginsurance.domain.entity.FeeConfiguration;
 import ro.insurance.buildinginsurance.domain.enums.FeeType;
-import ro.insurance.buildinginsurance.web.dto.feeConfigurationDto.FeeConfigurationRequestDTO;
-import ro.insurance.buildinginsurance.web.dto.feeConfigurationDto.FeeConfigurationResponseDTO;
+import ro.insurance.buildinginsurance.web.dto.fee_configuration_dto.FeeConfigurationRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.fee_configuration_dto.FeeConfigurationResponseDTO;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

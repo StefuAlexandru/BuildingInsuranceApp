@@ -10,10 +10,13 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
+  main:
+    allow-bean-definition-overriding: true
 
 logging:
   level:
     root: WARN
+    org.springframework.security: DEBUG
     ro.insurance.buildinginsurance: INFO
     org.springframework: WARN
     org.hibernate: WARN

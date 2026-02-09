@@ -9,8 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ro.insurance.buildinginsurance.application.service.ICurrencyService;
-import ro.insurance.buildinginsurance.web.dto.currencyDto.CurrencyRequestDTO;
-import ro.insurance.buildinginsurance.web.dto.currencyDto.CurrencyResponseDTO;
+import ro.insurance.buildinginsurance.web.dto.currency_dto.CurrencyRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.currency_dto.CurrencyResponseDTO;
 
 @RestController
 @RequiredArgsConstructor

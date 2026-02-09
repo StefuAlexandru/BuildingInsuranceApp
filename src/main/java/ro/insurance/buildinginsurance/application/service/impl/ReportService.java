@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ro.insurance.buildinginsurance.application.service.IReportService;
 import ro.insurance.buildinginsurance.domain.enums.ErrorCode;
 import ro.insurance.buildinginsurance.domain.enums.GroupBy;
-import ro.insurance.buildinginsurance.web.dto.reportDto.*;
+import ro.insurance.buildinginsurance.web.dto.report_dto.*;
 import ro.insurance.buildinginsurance.web.error.BusinessException;
 
 import java.math.BigDecimal;

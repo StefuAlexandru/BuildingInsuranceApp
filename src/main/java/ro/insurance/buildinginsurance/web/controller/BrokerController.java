@@ -9,8 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ro.insurance.buildinginsurance.application.service.IBrokerService;
-import ro.insurance.buildinginsurance.web.dto.brokerDto.BrokerRequestDTO;
-import ro.insurance.buildinginsurance.web.dto.brokerDto.BrokerResponseDTO;
+import ro.insurance.buildinginsurance.web.dto.broker_dto.BrokerRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.broker_dto.BrokerResponseDTO;
 
 @RestController
 @RequestMapping("/api/admin/brokers")

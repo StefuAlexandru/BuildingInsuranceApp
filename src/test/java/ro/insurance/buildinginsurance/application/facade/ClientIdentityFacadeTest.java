@@ -5,7 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ro.insurance.buildinginsurance.web.dto.clientDto.ClientIdentityPatchDTO;
+import ro.insurance.buildinginsurance.web.dto.client_dto.ClientIdentityPatchDTO;
 import ro.insurance.buildinginsurance.domain.entity.Client;
 import ro.insurance.buildinginsurance.domain.enums.ClientType;
 import ro.insurance.buildinginsurance.domain.enums.ErrorCode;

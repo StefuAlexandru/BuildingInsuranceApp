@@ -4,9 +4,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import ro.insurance.buildinginsurance.web.dto.countryDto.CountryDTO;
-import ro.insurance.buildinginsurance.web.dto.countryDto.CountryRequestDTO;
-import ro.insurance.buildinginsurance.web.dto.countryDto.CountryResponseDTO;
+import ro.insurance.buildinginsurance.web.dto.country_dto.CountryDTO;
+import ro.insurance.buildinginsurance.web.dto.country_dto.CountryRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.country_dto.CountryResponseDTO;
 import ro.insurance.buildinginsurance.domain.entity.Country;
 
 import static org.junit.jupiter.api.Assertions.*;

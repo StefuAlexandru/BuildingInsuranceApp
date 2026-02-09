@@ -4,9 +4,9 @@ import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import ro.insurance.buildinginsurance.web.dto.countyDto.CountyDTO;
-import ro.insurance.buildinginsurance.web.dto.countyDto.CountyRequestDTO;
-import ro.insurance.buildinginsurance.web.dto.countyDto.CountyResponseDTO;
+import ro.insurance.buildinginsurance.web.dto.county_dto.CountyDTO;
+import ro.insurance.buildinginsurance.web.dto.county_dto.CountyRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.county_dto.CountyResponseDTO;
 import ro.insurance.buildinginsurance.domain.entity.Country;
 import ro.insurance.buildinginsurance.domain.entity.County;
 

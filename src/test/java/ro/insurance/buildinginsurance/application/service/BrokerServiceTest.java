@@ -12,11 +12,10 @@ import org.springframework.data.domain.PageRequest;
 import ro.insurance.buildinginsurance.application.mapper.BrokerMapper;
 import ro.insurance.buildinginsurance.application.service.impl.BrokerService;
 import ro.insurance.buildinginsurance.domain.entity.Broker;
-import ro.insurance.buildinginsurance.domain.enums.ErrorCode;
 import ro.insurance.buildinginsurance.infrastructure.persistance.repository.BrokerRepository;
 import ro.insurance.buildinginsurance.util.BrokerTestDataFactory;
-import ro.insurance.buildinginsurance.web.dto.brokerDto.BrokerRequestDTO;
-import ro.insurance.buildinginsurance.web.dto.brokerDto.BrokerResponseDTO;
+import ro.insurance.buildinginsurance.web.dto.broker_dto.BrokerRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.broker_dto.BrokerResponseDTO;
 import ro.insurance.buildinginsurance.web.error.BusinessException;
 
 import java.util.List;
@@ -25,7 +24,6 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-import static ro.insurance.buildinginsurance.util.ExceptionAssertions.assertHasError;
 
 @ExtendWith(MockitoExtension.class)
 class BrokerServiceTest {

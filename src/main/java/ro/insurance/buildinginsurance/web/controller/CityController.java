@@ -8,8 +8,8 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ro.insurance.buildinginsurance.web.dto.cityDto.CityRequestDTO;
-import ro.insurance.buildinginsurance.web.dto.cityDto.CityResponseDTO;
+import ro.insurance.buildinginsurance.web.dto.city_dto.CityRequestDTO;
+import ro.insurance.buildinginsurance.web.dto.city_dto.CityResponseDTO;
 import ro.insurance.buildinginsurance.application.service.ICityService;
 
 @RestController
