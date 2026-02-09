@@ -1,6 +1,5 @@
 package ro.insurance.buildinginsurance.web.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,13 +16,12 @@ import ro.insurance.buildinginsurance.web.dto.country_dto.CountryResponseDTO;
 import ro.insurance.buildinginsurance.web.error.CustomExceptionHandler;
 import ro.insurance.buildinginsurance.application.service.ICountryService;
 
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static ro.insurance.buildinginsurance.util.CountryTestDataFactory.createCountryRequestBody;
 
 @ExtendWith(MockitoExtension.class)
 class CountryControllerTest {
@@ -38,8 +36,6 @@ class CountryControllerTest {
 
     private static final String BASE = "/api/geography/countries";
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(countryController)
@@ -47,12 +43,6 @@ class CountryControllerTest {
                 .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
                 .setValidator(new LocalValidatorFactoryBean())
                 .build();
-    }
-
-    private String createCountryRequestBody(String name) throws Exception {
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("name", name);
-        return objectMapper.writeValueAsString(body);
     }
 
     // ---------------------  CREATE  ---------------------

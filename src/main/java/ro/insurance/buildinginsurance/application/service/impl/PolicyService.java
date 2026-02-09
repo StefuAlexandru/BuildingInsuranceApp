@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ro.insurance.buildinginsurance.application.facade.PolicyFacade;
 import ro.insurance.buildinginsurance.application.mapper.PolicyMapper;
+import ro.insurance.buildinginsurance.application.security.CurrentBrokerProvider;
 import ro.insurance.buildinginsurance.application.service.IPolicyCalculationService;
 import ro.insurance.buildinginsurance.application.service.IPolicyService;
 import ro.insurance.buildinginsurance.domain.entity.Broker;
@@ -38,7 +39,7 @@ import static ro.insurance.buildinginsurance.infrastructure.persistance.spec.Pol
 public class PolicyService implements IPolicyService {
 
     private final PolicyRepository policyRepository;
-    private final BrokerRepository brokerRepository;
+    private final CurrentBrokerProvider currentBrokerProvider;
     private final PolicyMapper policyMapper;
     private final PolicyFacade policyFacade;
     private final IPolicyCalculationService policyCalculationService;
@@ -49,7 +50,7 @@ public class PolicyService implements IPolicyService {
 
     @Override
     public PolicyResponseDTO createDraftPolicy(PolicyCreateRequestDTO policyCreateRequestDTO,String brokerEmail) {
-        Broker broker = getCurrentBrokerOrThrow(brokerEmail);
+        Broker broker = currentBrokerProvider.getActiveOrThrow(brokerEmail);
         log.info("Create draft policy request: clientId={}, buildingId={}, brokerId={}, currencyId={}",
                 policyCreateRequestDTO.clientId(),
                 policyCreateRequestDTO.buildingId(),
@@ -85,7 +86,7 @@ public class PolicyService implements IPolicyService {
     @Override
     public PolicyResponseDTO activatePolicy(Long id, String brokerEmail) {
         log.info("Policy activate requested. policyId={}", id);
-        Long brokerId = getCurrentBrokerOrThrow(brokerEmail).getId();
+        Long brokerId = currentBrokerProvider.getActiveOrThrow(brokerEmail).getId();
 
         Policy policy = getPolicyForBrokerOrThrow(id,brokerId);
 
@@ -123,7 +124,7 @@ public class PolicyService implements IPolicyService {
     @Override
     public PolicyResponseDTO cancelPolicy(Long id, PolicyCancelRequestDTO request, String brokerEmail) {
         log.info("Policy cancel requested. policyId={} reason='{}'", id, request.cancellationReason());
-        Long brokerId = getCurrentBrokerOrThrow(brokerEmail).getId();
+        Long brokerId = currentBrokerProvider.getActiveOrThrow(brokerEmail).getId();
 
 
         Policy policy = getPolicyForBrokerOrThrow(id,brokerId);
@@ -173,7 +174,7 @@ public class PolicyService implements IPolicyService {
                 pageable.getPageSize(),
                 pageable.getSort()
         );
-        Long brokerId = getCurrentBrokerOrThrow(brokerEmail).getId();
+        Long brokerId = currentBrokerProvider.getActiveOrThrow(brokerEmail).getId();
 
         Specification<Policy> spec =
                 hasBrokerId(brokerId)
@@ -197,7 +198,7 @@ public class PolicyService implements IPolicyService {
     @Transactional(readOnly = true)
     public PolicyDetailsResponseDTO getPolicyDetails(Long id,String brokerEmail) {
         log.info("Policy details requested. policyId={}", id);
-        Long brokerId = getCurrentBrokerOrThrow(brokerEmail).getId();
+        Long brokerId = currentBrokerProvider.getActiveOrThrow(brokerEmail).getId();
         Policy policy = getPolicyDetailsForBrokerOrThrow(id,brokerId);
         return policyMapper.toDetailsResponse(policy);
     }
@@ -214,7 +215,7 @@ public class PolicyService implements IPolicyService {
                 policyPatchRequestDTO.endDate(),
                 policyPatchRequestDTO.basePremiumAmount()
         );
-        Long brokerId = getCurrentBrokerOrThrow(brokerEmail).getId();
+        Long brokerId = currentBrokerProvider.getActiveOrThrow(brokerEmail).getId();
 
         Policy policy = getPolicyForBrokerOrThrow(id,brokerId);
 
@@ -239,15 +240,6 @@ public class PolicyService implements IPolicyService {
     }
 
     // --------------------- HELPERS ---------------------
-
-    private Broker getCurrentBrokerOrThrow(String email) {
-        return brokerRepository.findByEmailIgnoreCase(email)
-                .orElseThrow(() -> {
-                    log.warn("Broker not found for email={}", email);
-                    return new BusinessException(ErrorCode.BROKER_NOT_FOUND);
-                });
-    }
-
 
     private Policy getPolicyForBrokerOrThrow(Long id,Long brokerId) {
         return policyRepository.findByIdAndBrokerId(id,brokerId)

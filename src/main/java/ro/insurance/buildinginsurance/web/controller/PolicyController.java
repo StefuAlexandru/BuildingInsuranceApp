@@ -1,7 +1,6 @@
 package ro.insurance.buildinginsurance.web.controller;
 
 
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,7 +20,6 @@ import java.time.LocalDate;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/brokers/policies")
-@SecurityRequirement(name = "basicAuth")
 public class PolicyController {
 
     private final IPolicyService policyService;
@@ -41,7 +39,7 @@ public class PolicyController {
     @PostMapping("/{id}/cancel")
     public ResponseEntity<PolicyResponseDTO> cancelPolicy(
             @PathVariable Long id,
-            @RequestBody(required = false) PolicyCancelRequestDTO request,
+            PolicyCancelRequestDTO request,
             Authentication authentication
     ) {
        return ResponseEntity.ok(policyService.cancelPolicy(id, request,authentication.getName()));

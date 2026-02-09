@@ -11,20 +11,21 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import ro.insurance.buildinginsurance.application.service.IBuildingService;
 import ro.insurance.buildinginsurance.web.dto.building_dto.*;
 import ro.insurance.buildinginsurance.web.error.CustomExceptionHandler;
-import ro.insurance.buildinginsurance.application.service.IBuildingService;
 
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static ro.insurance.buildinginsurance.util.BuildingTestDataFactory.*;
@@ -34,107 +35,67 @@ class BuildingControllerTest {
 
     private MockMvc mockMvc;
 
-    @Mock
-    private IBuildingService buildingService;
-
-    @InjectMocks
-    private BuildingController buildingController;
+    @Mock private IBuildingService buildingService;
+    @InjectMocks private BuildingController buildingController;
 
     private static final String BASE = "/api/brokers/buildings";
+    private static final String USER = "broker@email.com";
+    private static final String PASS = "pass";
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private static RequestPostProcessor principalEmail() {
+        return request -> {
+            request.setUserPrincipal(new UsernamePasswordAuthenticationToken(USER, PASS));
+            return request;
+        };
+    }
 
     @BeforeEach
     void setUp() {
+        LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
+        validator.afterPropertiesSet();
+
         mockMvc = MockMvcBuilders.standaloneSetup(buildingController)
                 .setControllerAdvice(new CustomExceptionHandler())
                 .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
-                .setValidator(new LocalValidatorFactoryBean())
+                .setValidator(validator)
                 .build();
     }
 
-    private String createBuildingRequestBody(Long clientId, Long cityId, String street, String number, Integer constructionYear, String buildingType, Integer floors, double surfaceArea, double insuredValue, Boolean floodZone, Boolean earthquakeZone) throws Exception {
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("clientId", clientId);
-        body.put("cityId", cityId);
-        body.put("street", street);
-        body.put("number", number);
-        body.put("constructionYear", constructionYear);
-        body.put("buildingType", buildingType);
-        body.put("floors", floors);
-        body.put("surfaceArea", surfaceArea);
-        body.put("insuredValue", insuredValue);
-        body.put("floodZone", floodZone);
-        body.put("earthquakeZone", earthquakeZone);
-        return objectMapper.writeValueAsString(body);
-    }
-
-    private String createBuildingUpdateRequestBody(Long cityId, String street, String number, Integer constructionYear, String buildingType, Integer floors, double surfaceArea, double insuredValue, Boolean floodZone, Boolean earthquakeZone) throws Exception {
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("cityId", cityId);
-        body.put("street", street);
-        body.put("number", number);
-        body.put("constructionYear", constructionYear);
-        body.put("buildingType", buildingType);
-        body.put("floors", floors);
-        body.put("surfaceArea", surfaceArea);
-        body.put("insuredValue", insuredValue);
-        body.put("floodZone", floodZone);
-        body.put("earthquakeZone", earthquakeZone);
-        return objectMapper.writeValueAsString(body);
-    }
-
-    private String createBuildingPatchBody(Long cityId, String street, String number, Integer constructionYear, String buildingType, Integer floors, Double surfaceArea, Double insuredValue, Boolean floodZone, Boolean earthquakeZone) throws Exception {
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("cityId", cityId);
-        body.put("street", street);
-        body.put("number", number);
-        body.put("constructionYear", constructionYear);
-        body.put("buildingType", buildingType);
-        body.put("floors", floors);
-        body.put("surfaceArea", surfaceArea);
-        body.put("insuredValue", insuredValue);
-        body.put("floodZone", floodZone);
-        body.put("earthquakeZone", earthquakeZone);
-        return objectMapper.writeValueAsString(body);
-    }
-
-    // ---------------------  CREATE  ---------------------
+    // --------------------- CREATE ---------------------
 
     @Test
     void createBuilding_shouldReturn201AndResponseBody() throws Exception {
-        // Arrange
-        BuildingRequestDTO buildingRequestDTO = aBuildingRequest();
-        BuildingResponseDTO buildingResponseDTO = aBuildingResponse();
+        BuildingRequestDTO req = aBuildingRequest();
+        BuildingResponseDTO res = aBuildingResponse();
 
         String body = createBuildingRequestBody(
-                buildingRequestDTO.clientId(), buildingRequestDTO.cityId(),
-                buildingRequestDTO.street(), buildingRequestDTO.number(),
-                buildingRequestDTO.constructionYear(), buildingRequestDTO.buildingType().name(),
-                buildingRequestDTO.floors(),
-                buildingRequestDTO.surfaceArea().doubleValue(),
-                buildingRequestDTO.insuredValue().doubleValue(),
-                buildingRequestDTO.floodZone(), buildingRequestDTO.earthquakeZone()
+                req.clientId(), req.cityId(),
+                req.street(), req.number(),
+                req.constructionYear(), req.buildingType().name(),
+                req.floors(),
+                req.surfaceArea().doubleValue(),
+                req.insuredValue().doubleValue(),
+                req.floodZone(), req.earthquakeZone()
         );
 
-        when(buildingService.registerNewBuilding(any(BuildingRequestDTO.class))).thenReturn(buildingResponseDTO);
+        when(buildingService.registerNewBuilding(any(BuildingRequestDTO.class), eq(USER))).thenReturn(res);
 
-        // Act + Assert
         mockMvc.perform(post(BASE)
+                        .with(principalEmail())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpectAll(
                         status().isCreated(),
-                        jsonPath("$.id").value(buildingResponseDTO.id().intValue()),
-                        jsonPath("$.street").value(buildingResponseDTO.street()),
-                        jsonPath("$.number").value(buildingResponseDTO.number()),
-                        jsonPath("$.constructionYear").value(buildingResponseDTO.constructionYear()),
-                        jsonPath("$.buildingType").value(buildingResponseDTO.buildingType().name()),
-                        jsonPath("$.city.id").value(buildingResponseDTO.city().id().intValue()),
-                        jsonPath("$.city.name").value(buildingResponseDTO.city().name())
+                        jsonPath("$.id").value(res.id().intValue()),
+                        jsonPath("$.street").value(res.street()),
+                        jsonPath("$.number").value(res.number()),
+                        jsonPath("$.constructionYear").value(res.constructionYear()),
+                        jsonPath("$.buildingType").value(res.buildingType().name()),
+                        jsonPath("$.city.id").value(res.city().id().intValue()),
+                        jsonPath("$.city.name").value(res.city().name())
                 );
 
-        verify(buildingService).registerNewBuilding(any(BuildingRequestDTO.class));
+        verify(buildingService).registerNewBuilding(any(BuildingRequestDTO.class), eq(USER));
         verifyNoMoreInteractions(buildingService);
     }
 
@@ -147,8 +108,8 @@ class BuildingControllerTest {
                 true, true
         );
 
-        // Act + Assert
         mockMvc.perform(post(BASE)
+                        .with(principalEmail())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isBadRequest());
@@ -156,79 +117,77 @@ class BuildingControllerTest {
         verifyNoInteractions(buildingService);
     }
 
-    // ---------------------  GET  ---------------------
+    // --------------------- GET ---------------------
 
     @Test
     void getBuildingById_shouldReturn200AndBody() throws Exception {
-        // Arrange
-        BuildingResponseDTO buildingResponseDTO = aBuildingResponse();
-        when(buildingService.getBuildingById(1L)).thenReturn(buildingResponseDTO);
+        BuildingResponseDTO res = aBuildingResponse();
+        when(buildingService.getBuildingById(1L, USER)).thenReturn(res);
 
-        // Act + Assert
-        mockMvc.perform(get(BASE + "/{buildingId}", 1L))
+        mockMvc.perform(get(BASE + "/{buildingId}", 1L)
+                        .with(principalEmail()))
                 .andExpectAll(
                         status().isOk(),
-                        jsonPath("$.id").value(buildingResponseDTO.id().intValue()),
-                        jsonPath("$.street").value(buildingResponseDTO.street()),
-                        jsonPath("$.buildingType").value(buildingResponseDTO.buildingType().name()),
-                        jsonPath("$.city.id").value(buildingResponseDTO.city().id().intValue())
+                        jsonPath("$.id").value(res.id().intValue()),
+                        jsonPath("$.street").value(res.street()),
+                        jsonPath("$.buildingType").value(res.buildingType().name()),
+                        jsonPath("$.city.id").value(res.city().id().intValue())
                 );
 
-        verify(buildingService).getBuildingById(1L);
+        verify(buildingService).getBuildingById(1L, USER);
         verifyNoMoreInteractions(buildingService);
     }
 
     @Test
     void getBuildingDetails_shouldReturn200AndBody() throws Exception {
-        // Arrange
-        Long buildingId = 1L;
-        BuildingDetailsResponseDTO buildingDetailsResponseDTO = aBuildingDetailsResponse();
-        when(buildingService.getBuildingDetailsById(buildingId)).thenReturn(buildingDetailsResponseDTO);
+        long buildingId = 1L;
+        BuildingDetailsResponseDTO res = aBuildingDetailsResponse();
 
-        // Act + Assert
-        mockMvc.perform(get(BASE + "/{buildingId}/details", buildingId))
+        when(buildingService.getBuildingDetailsById(buildingId, USER)).thenReturn(res);
+
+        mockMvc.perform(get(BASE + "/{buildingId}/details", buildingId)
+                        .with(principalEmail()))
                 .andExpectAll(
                         status().isOk(),
-                        jsonPath("$.id").value(buildingDetailsResponseDTO.id().intValue()),
-                        jsonPath("$.street").value(buildingDetailsResponseDTO.street()),
-                        jsonPath("$.constructionYear").value(buildingDetailsResponseDTO.constructionYear()),
-                        jsonPath("$.buildingType").value(buildingDetailsResponseDTO.buildingType().name()),
-                        jsonPath("$.floors").value(buildingDetailsResponseDTO.floors()),
-                        jsonPath("$.surfaceArea").value(buildingDetailsResponseDTO.surfaceArea().doubleValue()),
-                        jsonPath("$.insuredValue").value(buildingDetailsResponseDTO.insuredValue().doubleValue()),
-                        jsonPath("$.floodZone").value(buildingDetailsResponseDTO.floodZone()),
-                        jsonPath("$.earthquakeZone").value(buildingDetailsResponseDTO.earthquakeZone()),
-                        jsonPath("$.city.id").value(buildingDetailsResponseDTO.city().id().intValue())
+                        jsonPath("$.id").value(res.id().intValue()),
+                        jsonPath("$.street").value(res.street()),
+                        jsonPath("$.constructionYear").value(res.constructionYear()),
+                        jsonPath("$.buildingType").value(res.buildingType().name()),
+                        jsonPath("$.floors").value(res.floors()),
+                        jsonPath("$.surfaceArea").value(res.surfaceArea().doubleValue()),
+                        jsonPath("$.insuredValue").value(res.insuredValue().doubleValue()),
+                        jsonPath("$.floodZone").value(res.floodZone()),
+                        jsonPath("$.earthquakeZone").value(res.earthquakeZone()),
+                        jsonPath("$.city.id").value(res.city().id().intValue())
                 );
 
-        verify(buildingService).getBuildingDetailsById(buildingId);
+        verify(buildingService).getBuildingDetailsById(buildingId, USER);
         verifyNoMoreInteractions(buildingService);
     }
 
     @Test
     void getBuildingsByClientId_shouldReturn200_andDefaultPageable() throws Exception {
-        // Arrange
-        Long clientId = 1L;
-        BuildingResponseDTO buildingResponseDTO = aBuildingResponse();
+        long clientId = 1L;
+        BuildingResponseDTO dto = aBuildingResponse();
 
         Pageable expected = PageRequest.of(0, 5, Sort.by("id"));
-        Page<BuildingResponseDTO> page = new PageImpl<>(List.of(buildingResponseDTO), expected, 1);
+        Page<BuildingResponseDTO> page = new PageImpl<>(List.of(dto), expected, 1);
 
-        when(buildingService.getBuildingsByClientId(eq(clientId), any(Pageable.class))).thenReturn(page);
+        when(buildingService.getBuildingsByClientId(eq(clientId), any(Pageable.class), eq(USER))).thenReturn(page);
 
         ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
 
-        // Act + Assert
         mockMvc.perform(get(BASE)
-                        .param("clientId", clientId.toString()))
+                        .with(principalEmail())
+                        .param("clientId", String.valueOf(clientId)))
                 .andExpectAll(
                         status().isOk(),
-                        jsonPath("$.content[0].id").value(buildingResponseDTO.id().intValue()),
-                        jsonPath("$.content[0].street").value(buildingResponseDTO.street()),
+                        jsonPath("$.content[0].id").value(dto.id().intValue()),
+                        jsonPath("$.content[0].street").value(dto.street()),
                         jsonPath("$.totalElements").value(1)
                 );
 
-        verify(buildingService).getBuildingsByClientId(eq(clientId), pageableCaptor.capture());
+        verify(buildingService).getBuildingsByClientId(eq(clientId), pageableCaptor.capture(), eq(USER));
 
         Pageable used = pageableCaptor.getValue();
         assertAll(
@@ -242,74 +201,73 @@ class BuildingControllerTest {
 
     @Test
     void getBuildingsByClientId_shouldReturn200_whenCustomPageable() throws Exception {
-        // Arrange
-        Long clientId = 1L;
-        BuildingResponseDTO buildingResponseDTO = aBuildingResponse();
+        long clientId = 1L;
+        BuildingResponseDTO dto = aBuildingResponse();
+
         Pageable pageable = PageRequest.of(1, 5, Sort.by("id").descending());
-        Page<BuildingResponseDTO> page = new PageImpl<>(List.of(buildingResponseDTO), pageable, 6);
+        Page<BuildingResponseDTO> page = new PageImpl<>(List.of(dto), pageable, 6);
 
-        when(buildingService.getBuildingsByClientId(eq(clientId), any(Pageable.class))).thenReturn(page);
+        when(buildingService.getBuildingsByClientId(eq(clientId), any(Pageable.class), eq(USER))).thenReturn(page);
 
-        // Act + Assert
         mockMvc.perform(get(BASE)
-                        .param("clientId", clientId.toString())
+                        .with(principalEmail())
+                        .param("clientId", String.valueOf(clientId))
                         .param("page", "1")
                         .param("size", "5")
                         .param("sort", "id,desc"))
                 .andExpectAll(
                         status().isOk(),
-                        jsonPath("$.content[0].id").value(buildingResponseDTO.id().intValue()),
+                        jsonPath("$.content[0].id").value(dto.id().intValue()),
                         jsonPath("$.totalElements").value(6)
                 );
 
-        verify(buildingService).getBuildingsByClientId(eq(clientId), any(Pageable.class));
+        verify(buildingService).getBuildingsByClientId(eq(clientId), any(Pageable.class), eq(USER));
         verifyNoMoreInteractions(buildingService);
     }
 
-    // ---------------------  UPDATE  ---------------------
+    // --------------------- UPDATE ---------------------
 
     @Test
     void updateBuilding_shouldReturn200AndBody() throws Exception {
-        // Arrange
-        Long buildingId = 10L;
-        BuildingUpdateRequestDTO buildingUpdateRequestDTO = aBuildingUpdateRequest();
-        BuildingDetailsResponseDTO buildingResponseDTO = aBuildingDetailsResponse();
+        long buildingId = 10L;
+        BuildingUpdateRequestDTO req = aBuildingUpdateRequest();
+        BuildingDetailsResponseDTO res = aBuildingDetailsResponse();
 
         String body = createBuildingUpdateRequestBody(
-                buildingUpdateRequestDTO.cityId(),
-                buildingUpdateRequestDTO.street(), buildingUpdateRequestDTO.number(),
-                buildingUpdateRequestDTO.constructionYear(),
-                buildingUpdateRequestDTO.buildingType().name(),
-                buildingUpdateRequestDTO.floors(),
-                buildingUpdateRequestDTO.surfaceArea().doubleValue(),
-                buildingUpdateRequestDTO.insuredValue().doubleValue(),
-                buildingUpdateRequestDTO.floodZone(), buildingUpdateRequestDTO.earthquakeZone()
+                req.cityId(),
+                req.street(), req.number(),
+                req.constructionYear(),
+                req.buildingType().name(),
+                req.floors(),
+                req.surfaceArea().doubleValue(),
+                req.insuredValue().doubleValue(),
+                req.floodZone(), req.earthquakeZone()
         );
 
-        when(buildingService.updateBuilding(eq(buildingId), any(BuildingUpdateRequestDTO.class))).thenReturn(buildingResponseDTO);
+        when(buildingService.updateBuilding(eq(buildingId), any(BuildingUpdateRequestDTO.class), eq(USER))).thenReturn(res);
 
-        // Act + Assert
         mockMvc.perform(put(BASE + "/{buildingId}", buildingId)
+                        .with(principalEmail())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpectAll(
                         status().isOk(),
-                        jsonPath("$.id").value(buildingResponseDTO.id().intValue()),
-                        jsonPath("$.client.id").value(buildingResponseDTO.client().id().intValue()),
-                        jsonPath("$.city.id").value(buildingResponseDTO.city().id().intValue()),
-                        jsonPath("$.city.name").value(buildingResponseDTO.city().name()),
-                        jsonPath("$.number").value(buildingResponseDTO.number()),
-                        jsonPath("$.constructionYear").value(buildingResponseDTO.constructionYear()),
-                        jsonPath("$.floors").value(buildingResponseDTO.floors()),
-                        jsonPath("$.insuredValue").value(buildingResponseDTO.insuredValue()),
-                        jsonPath("$.surfaceArea").value(buildingResponseDTO.surfaceArea().doubleValue()),
-                        jsonPath("$.floodZone").value(buildingResponseDTO.floodZone()),
-                        jsonPath("$.earthquakeZone").value(buildingResponseDTO.earthquakeZone()),
-                        jsonPath("$.street").value(buildingResponseDTO.street()),
-                        jsonPath("$.buildingType").value(buildingResponseDTO.buildingType().name())
+                        jsonPath("$.id").value(res.id().intValue()),
+                        jsonPath("$.client.id").value(res.client().id().intValue()),
+                        jsonPath("$.city.id").value(res.city().id().intValue()),
+                        jsonPath("$.city.name").value(res.city().name()),
+                        jsonPath("$.number").value(res.number()),
+                        jsonPath("$.constructionYear").value(res.constructionYear()),
+                        jsonPath("$.floors").value(res.floors()),
+                        jsonPath("$.insuredValue").value(res.insuredValue().doubleValue()),
+                        jsonPath("$.surfaceArea").value(res.surfaceArea().doubleValue()),
+                        jsonPath("$.floodZone").value(res.floodZone()),
+                        jsonPath("$.earthquakeZone").value(res.earthquakeZone()),
+                        jsonPath("$.street").value(res.street()),
+                        jsonPath("$.buildingType").value(res.buildingType().name())
                 );
 
-        verify(buildingService).updateBuilding(eq(buildingId), any(BuildingUpdateRequestDTO.class));
+        verify(buildingService).updateBuilding(eq(buildingId), any(BuildingUpdateRequestDTO.class), eq(USER));
         verifyNoMoreInteractions(buildingService);
     }
 
@@ -320,8 +278,8 @@ class BuildingControllerTest {
                 1, 10.0, 100.0, true, true
         );
 
-        // Act + Assert
         mockMvc.perform(put(BASE + "/{buildingId}", 1L)
+                        .with(principalEmail())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isBadRequest());
@@ -329,48 +287,46 @@ class BuildingControllerTest {
         verifyNoInteractions(buildingService);
     }
 
-    // ---------------------  PATCH  ---------------------
+    // --------------------- PATCH ---------------------
 
     @Test
     void patchBuilding_shouldReturn200AndBody() throws Exception {
-        // Arrange
-        Long buildingId = 10L;
-        BuildingResponseDTO buildingResponseDTO = aBuildingResponse();
+        long buildingId = 10L;
+        BuildingResponseDTO res = aBuildingResponse();
 
         String body = createBuildingPatchBody(
                 null, "Patched Street", null, null, null, null,
                 null, null, null, null
         );
 
-        when(buildingService.patchBuilding(eq(buildingId), any(BuildingPatchDTO.class))).thenReturn(buildingResponseDTO);
+        when(buildingService.patchBuilding(eq(buildingId), any(BuildingPatchDTO.class), eq(USER))).thenReturn(res);
 
-        // Act + Assert
         mockMvc.perform(patch(BASE + "/{buildingId}", buildingId)
+                        .with(principalEmail())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpectAll(
                         status().isOk(),
-                        jsonPath("$.id").value(buildingResponseDTO.id().intValue()),
-                        jsonPath("$.street").value(buildingResponseDTO.street())
+                        jsonPath("$.id").value(res.id().intValue()),
+                        jsonPath("$.street").value(res.street())
                 );
 
-        verify(buildingService).patchBuilding(eq(buildingId), any(BuildingPatchDTO.class));
+        verify(buildingService).patchBuilding(eq(buildingId), any(BuildingPatchDTO.class), eq(USER));
         verifyNoMoreInteractions(buildingService);
     }
 
-    // ---------------------  DELETE  ---------------------
+    // --------------------- DELETE ---------------------
 
     @Test
     void deleteBuilding_shouldReturn204() throws Exception {
-        // Arrange
-        Long buildingId = 99L;
-        doNothing().when(buildingService).deleteBuilding(buildingId);
+        long buildingId = 99L;
+        doNothing().when(buildingService).deleteBuilding(buildingId, USER);
 
-        // Act + Assert
-        mockMvc.perform(delete(BASE + "/{buildingId}", buildingId))
+        mockMvc.perform(delete(BASE + "/{buildingId}", buildingId)
+                        .with(principalEmail()))
                 .andExpect(status().isNoContent());
 
-        verify(buildingService).deleteBuilding(buildingId);
+        verify(buildingService).deleteBuilding(buildingId, USER);
         verifyNoMoreInteractions(buildingService);
     }
 }

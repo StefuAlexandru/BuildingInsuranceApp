@@ -1,6 +1,5 @@
 package ro.insurance.buildinginsurance.web.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,9 +16,7 @@ import ro.insurance.buildinginsurance.web.dto.county_dto.CountyResponseDTO;
 import ro.insurance.buildinginsurance.web.error.CustomExceptionHandler;
 import ro.insurance.buildinginsurance.application.service.ICountyService;
 
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -40,8 +37,6 @@ class CountyControllerTest {
 
     private static final String BASE = "/api/geography/counties";
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(countyController)
@@ -49,13 +44,6 @@ class CountyControllerTest {
                 .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
                 .setValidator(new LocalValidatorFactoryBean())
                 .build();
-    }
-
-    private String createCountyRequestBody(String name, Long countryId) throws Exception {
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("name", name);
-        body.put("countryId", countryId);
-        return objectMapper.writeValueAsString(body);
     }
 
     // ---------------------  CREATE  ---------------------

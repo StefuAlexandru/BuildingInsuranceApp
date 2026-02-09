@@ -1,9 +1,13 @@
 package ro.insurance.buildinginsurance.util;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import ro.insurance.buildinginsurance.web.dto.county_dto.CountyDTO;
 import ro.insurance.buildinginsurance.web.dto.county_dto.CountyRequestDTO;
 import ro.insurance.buildinginsurance.web.dto.county_dto.CountyResponseDTO;
 import ro.insurance.buildinginsurance.domain.entity.County;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import static ro.insurance.buildinginsurance.util.CountryTestDataFactory.aCountry;
 import static ro.insurance.buildinginsurance.util.CountryTestDataFactory.aCountryDTO;
@@ -11,6 +15,17 @@ import static ro.insurance.buildinginsurance.util.CountryTestDataFactory.aCountr
 public class CountyTestDataFactory {
 
     private CountyTestDataFactory() {}
+
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+
+    // -------------------  BUILDERS  -------------------
+
+    public static String createCountyRequestBody(String name, Long countryId) throws Exception {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("name", name);
+        body.put("countryId", countryId);
+        return objectMapper.writeValueAsString(body);
+    }
 
     // -------------------  DTOS  -------------------
 
