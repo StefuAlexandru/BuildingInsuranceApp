@@ -30,8 +30,9 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/swagger-ui.html"
                         ).permitAll()
+                        .requestMatchers("/api/brokers/policies/**").hasRole(ROLE_BROKER)
+                        .requestMatchers("/api/brokers/**").hasAnyRole(ROLE_BROKER, ROLE_ADMIN)
                         .requestMatchers("/api/admin/**").hasRole(ROLE_ADMIN)
-                        .requestMatchers("/api/brokers/**").hasAnyRole(ROLE_BROKER)
                         .requestMatchers("/api/geography/**").hasRole(ROLE_ADMIN)
                         .anyRequest().authenticated()
                 )

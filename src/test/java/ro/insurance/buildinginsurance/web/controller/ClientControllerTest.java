@@ -15,6 +15,7 @@ import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import ro.insurance.buildinginsurance.web.controller.common.ClientController;
 import ro.insurance.buildinginsurance.web.dto.client_dto.ClientDetailsResponseDTO;
 import ro.insurance.buildinginsurance.web.dto.client_dto.ClientRequestDTO;
 import ro.insurance.buildinginsurance.web.dto.client_dto.ClientResponseDTO;

@@ -1,4 +1,4 @@
-package ro.insurance.buildinginsurance.web.controller;
+package ro.insurance.buildinginsurance.web.controller.admin;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

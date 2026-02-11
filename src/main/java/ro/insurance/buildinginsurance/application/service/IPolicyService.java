@@ -13,4 +13,8 @@ public interface IPolicyService {
     PolicyDetailsResponseDTO getPolicyDetails(Long id,String brokerEmail);
 
     PolicyResponseDTO patchDraftPolicy(Long id,PolicyPatchRequestDTO policyPatchRequestDTO,String brokerEmail);
+
+
+    Page<PolicyListItemDTO> listPoliciesForAdmin(PolicyListFilterDTO filter, Pageable pageable);
+    PolicyDetailsResponseDTO getPolicyDetailsForAdmin(Long id);
 }
