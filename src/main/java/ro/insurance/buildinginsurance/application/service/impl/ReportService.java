@@ -13,7 +13,6 @@ import ro.insurance.buildinginsurance.web.dto.report_dto.*;
 import ro.insurance.buildinginsurance.web.error.BusinessException;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.*;
 
 @Service
@@ -25,36 +24,31 @@ public class ReportService implements IReportService {
     private final EntityManager entityManager;
 
     private static final String COUNTRY_NAME = "cn.name";
-    private static final String COUNTY_NAME = "co.name";
-    private static final String CITY_NAME = "c.name";
-    private static final String BROKER_NAME = "br.name";
-    private static final String START_DATE = "p.startDate";
-    private static final String YEAR_START_DATE = "year(" + START_DATE + ")";
-    private static final String MONTH_START_DATE = "month(" + START_DATE + ")";
+    private static final String COUNTY_NAME  = "co.name";
+    private static final String CITY_NAME    = "c.name";
+    private static final String CURRENCY_CODE = "cur.code";
+    private static final String BROKER_NAME  = "br.name";
+    private static final String START_DATE   = "p.startDate";
+
+    private record QueryParts(String jpql) {}
 
     @Override
-    public ReportResponseDTO getPoliciesReport(ReportRequestDTO request) {
+    public List<ReportRowDTO> getPoliciesReport(GroupBy groupBy,ReportRequestDTO request) {
         validateRequest(request);
 
-        QueryParts queryParts = buildQuery(request);
+        QueryParts queryParts = buildQuery(groupBy,request);
 
         TypedQuery<Object[]> query = entityManager.createQuery(queryParts.jpql, Object[].class)
                 .setParameter("from", request.from())
-                .setParameter("to", request.to());
+                .setParameter("to", request.to())
+                .setParameter("currencyId", request.currencyId());
 
         if (request.status() != null) query.setParameter("status", request.status());
-        if (request.currencyId() != null) query.setParameter("currencyId", request.currencyId());
-        if (request.brokerId() != null) query.setParameter("brokerId", request.brokerId());
+        if (request.buildingType() != null) query.setParameter("buildingType", request.buildingType());
 
-        List<Object[]> rows = query.getResultList();
-
-        List<ReportRowDTO> mapped = rows.stream()
-                .map(r -> mapRow(r, request))
-                .toList();
-
-        ReportTotalsDTO totals = totals(mapped);
-
-        return new ReportResponseDTO(mapped, totals);
+       return query.getResultList().stream()
+               .map(this::mapRow)
+               .toList();
     }
 
     // ------------------- VALIDATION -------------------
@@ -66,10 +60,7 @@ public class ReportService implements IReportService {
     }
 
     // ------------------- QUERY BUILDING -------------------
-
-    private record QueryParts(String jpql) {}
-
-    private QueryParts buildQuery(ReportRequestDTO request) {
+    private QueryParts buildQuery(GroupBy groupBy,ReportRequestDTO request) {
         String from = """
                 from Policy p
                   join p.building b
@@ -81,140 +72,103 @@ public class ReportService implements IReportService {
                 """;
 
         List<String> select = new ArrayList<>();
-        List<String> groupBy = new ArrayList<>();
-        List<String> orderBy = new ArrayList<>();
+        List<String> group  = new ArrayList<>();
+        List<String> order  = new ArrayList<>();
+
 
         // GroupBy columns
-        for (GroupBy g : request.groupBy()) {
-            switch (g) {
-                case COUNTRY -> {
-                    select.add("cast(cn.id as string)");
-                    select.add(COUNTRY_NAME);
-                    groupBy.add("cn.id");
-                    groupBy.add(COUNTRY_NAME);
-                    orderBy.add(COUNTRY_NAME);
-                }
-                case COUNTY -> {
-                    select.add("cast(co.id as string)");
-                    select.add(COUNTY_NAME);
-                    groupBy.add("co.id");
-                    groupBy.add(COUNTY_NAME);
-                    orderBy.add(COUNTY_NAME);
-                }
-                case CITY -> {
-                    select.add("cast(c.id as string)");
-                    select.add(CITY_NAME);
-                    groupBy.add("c.id");
-                    groupBy.add(CITY_NAME);
-                    orderBy.add(CITY_NAME);
-                }
-                case BROKER -> {
-                    select.add("cast(br.id as string)");
-                    select.add(BROKER_NAME);
-                    groupBy.add("br.id");
-                    groupBy.add(BROKER_NAME);
-                    orderBy.add(BROKER_NAME);
-                }
+        switch (groupBy) {
+            case COUNTRY -> {
+                select.add("cast(cn.id as string)");
+                select.add(COUNTRY_NAME);
+
+                group.add("cn.id");
+                group.add(COUNTRY_NAME);
+
+                order.add(COUNTRY_NAME);
             }
+            case COUNTY -> {
+                select.add("cast(co.id as string)");
+                select.add(COUNTY_NAME);
+
+                group.add("co.id");
+                group.add(COUNTY_NAME);
+
+                order.add(COUNTY_NAME);
+            }
+            case CITY -> {
+                select.add("cast(c.id as string)");
+                select.add(CITY_NAME);
+
+                group.add("c.id");
+                group.add(CITY_NAME);
+
+                order.add(CITY_NAME);
+            }
+            case BROKER -> {
+                select.add("cast(br.id as string)");
+                select.add(BROKER_NAME);
+
+                group.add("br.id");
+                group.add(BROKER_NAME);
+
+                order.add(BROKER_NAME);
+            }
+            default -> throw new BusinessException(ErrorCode.REPORT_INVALID_REQUEST);
         }
 
-        // Period columns
-        switch (request.granularity()) {
-            case NONE -> {
-                // nothing
-            }
-            case DAY -> {
-                select.add(START_DATE);
-                groupBy.add(START_DATE);
-                orderBy.add(START_DATE);
-            }
-            case MONTH -> {
-                select.add(YEAR_START_DATE);
-                select.add(MONTH_START_DATE);
-                groupBy.add(YEAR_START_DATE);
-                groupBy.add(MONTH_START_DATE);
-                orderBy.add(YEAR_START_DATE);
-                orderBy.add(MONTH_START_DATE);
-            }
-        }
+        // Currency is always part of grouping
+        select.add("cur.id");
+        select.add(CURRENCY_CODE);
+        group.add("cur.id");
+        group.add(CURRENCY_CODE);
+        order.add(CURRENCY_CODE);
 
         // Aggregates
         select.add("count(p.id)");
+        select.add("coalesce(sum(p.finalPremiumAmount), 0)");
         select.add("coalesce(sum(p.finalPremiumAmount * cur.exchangeRateToBase), 0)");
-        // This has to be patched because
-        // If I have one building with 3 active policies then the total insured value will be triple
-        // If I change it with sum(distinct b.insuredValue) then for two buildings with the same
-        // insured value the sum will wrong
-        // I have to send the building id also
-        select.add("coalesce(sum(b.insuredValue), 0)");
 
         List<String> where = new ArrayList<>();
         where.add(START_DATE + " >= :from");
         where.add(START_DATE + " <= :to");
+        where.add("p.currency.id = :currencyId");
 
         if (request.status() != null) where.add("p.status = :status");
-        if (request.currencyId() != null) where.add("p.currency.id = :currencyId");
-        if (request.brokerId() != null) where.add("br.id = :brokerId");
+        if (request.buildingType() != null) where.add("b.buildingType = :buildingType");
 
         String jpql = "select " + String.join(", ", select) + "\n"
                 + from + "\n"
                 + "where " + String.join(" and ", where) + "\n"
-                + "group by " + String.join(", ", groupBy) + "\n"
-                + "order by " + String.join(", ", orderBy);
+                + "group by " + String.join(", ", group) + "\n"
+                + "order by " + String.join(", ", order);
 
         return new QueryParts(jpql);
     }
 
     // ------------------- MAPPING -------------------
 
-    private ReportRowDTO mapRow(Object[] object, ReportRequestDTO request) {
+    private ReportRowDTO mapRow(Object[] row) {
         int idx = 0;
 
-        int groupCount = request.groupBy().size();
+        String groupKey = Objects.toString(row[idx++], "");
+        String groupName = Objects.toString(row[idx++], "");
 
-        List<String> keys = new ArrayList<>(groupCount);
-        List<String> names = new ArrayList<>(groupCount);
+        Long currencyId = ((Number) row[idx++]).longValue();
+        String currencyCode = Objects.toString(row[idx++], "");
 
-        for (int i = 0; i < groupCount; i++) {
-            keys.add(Objects.toString(object[idx++], ""));
-            names.add(Objects.toString(object[idx++], ""));
-        }
-
-        LocalDate periodStart = null;
-        switch (request.granularity()) {
-            case NONE -> { /* null */ }
-            case DAY -> periodStart = (LocalDate) object[idx++];
-            case MONTH -> {
-                Integer year = (Integer) object[idx++];
-                Integer month = (Integer) object[idx++];
-                periodStart = LocalDate.of(year, month, 1);
-            }
-        }
-
-        long policyCount = ((Number) object[idx++]).longValue();
-        BigDecimal totalPremium = (BigDecimal) object[idx++];
-        BigDecimal totalInsuredValue = (BigDecimal) object[idx];
+        long policyCount = ((Number) row[idx++]).longValue();
+        BigDecimal totalFinalPremium = (BigDecimal) row[idx++];
+        BigDecimal totalFinalPremiumInBase = (BigDecimal) row[idx];
 
         return new ReportRowDTO(
-                String.join("|", keys),
-                String.join(" / ", names),
-                periodStart,
+                groupKey,
+                groupName,
+                currencyId,
+                currencyCode,
                 policyCount,
-                totalPremium,
-                totalInsuredValue
+                totalFinalPremium,
+                totalFinalPremiumInBase
         );
-    }
-
-    private ReportTotalsDTO totals(List<ReportRowDTO> rows) {
-        long count = rows.stream().mapToLong(ReportRowDTO::policyCount).sum();
-        BigDecimal premium = rows.stream()
-                .map(ReportRowDTO::totalPremium)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        BigDecimal insured = rows.stream()
-                .map(ReportRowDTO::totalInsuredValue)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        return new ReportTotalsDTO(count, premium, insured);
     }
 }
