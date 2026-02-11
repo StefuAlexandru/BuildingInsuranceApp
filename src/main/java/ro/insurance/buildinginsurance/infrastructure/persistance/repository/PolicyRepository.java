@@ -43,4 +43,11 @@ public interface PolicyRepository extends JpaRepository<Policy,Long>, JpaSpecifi
           AND p.broker_id = :brokerId
         """, nativeQuery = true)
     Optional<Policy> findByIdAndBrokerId(@Param("id") Long id, @Param("brokerId") Long brokerId);
+
+    @EntityGraph(attributePaths = {
+            "client","building","building.city","building.city.county",
+            "building.city.county.country","currency"
+    })
+    Optional<Policy> findDetailsById(Long id);
+
 }

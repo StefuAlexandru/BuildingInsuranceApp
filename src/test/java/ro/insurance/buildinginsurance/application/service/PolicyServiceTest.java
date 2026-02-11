@@ -395,6 +395,75 @@ class PolicyServiceTest {
         verifyNoInteractions(policyMapper);
     }
 
+    @Test
+    void listPoliciesForAdmin_shouldCallRepositoryWithSpec_andMapResults() {
+        PolicyListFilterDTO filter = new PolicyListFilterDTO(
+                1L,
+                2L,
+                PolicyStatus.ACTIVE,
+                LocalDate.of(2026, 1, 1),
+                LocalDate.of(2026, 12, 31)
+        );
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        Policy p1 = aDraftPolicyWithAllMandatoryFields(1L);
+        Policy p2 = aDraftPolicyWithAllMandatoryFields(2L);
+
+        Page<Policy> repoPage = new PageImpl<>(List.of(p1, p2), pageable, 2);
+
+        when(policyRepository.findAll(ArgumentMatchers.<Specification<Policy>>any(), eq(pageable)))
+                .thenReturn(repoPage);
+
+        PolicyListItemDTO dto1 = mock(PolicyListItemDTO.class);
+        PolicyListItemDTO dto2 = mock(PolicyListItemDTO.class);
+
+        when(policyMapper.toListItem(p1)).thenReturn(dto1);
+        when(policyMapper.toListItem(p2)).thenReturn(dto2);
+
+        Page<PolicyListItemDTO> result =
+                policyService.listPoliciesForAdmin(filter, pageable);
+
+        verify(policyRepository).findAll(specCaptor.capture(), eq(pageable));
+        assertNotNull(specCaptor.getValue());
+
+        assertEquals(2, result.getContent().size());
+        assertSame(dto1, result.getContent().get(0));
+        assertSame(dto2, result.getContent().get(1));
+    }
+
+    @Test
+    void getPolicyDetailsForAdmin_shouldLoadPolicy_andReturnMappedResponse() {
+        long policyId = 10L;
+
+        Policy policy = aDraftPolicyWithAllMandatoryFields(policyId);
+        PolicyDetailsResponseDTO expected = mock(PolicyDetailsResponseDTO.class);
+
+        when(policyRepository.findDetailsById(policyId)).thenReturn(Optional.of(policy));
+        when(policyMapper.toDetailsResponse(policy)).thenReturn(expected);
+
+        PolicyDetailsResponseDTO response = policyService.getPolicyDetailsForAdmin(policyId);
+
+        assertSame(expected, response);
+
+        verify(policyRepository).findDetailsById(policyId);
+        verify(policyMapper).toDetailsResponse(policy);
+    }
+
+    @Test
+    void getPolicyDetailsForAdmin_whenNotFound_shouldThrowPolicyNotFound() {
+        long policyId = 404L;
+
+        when(policyRepository.findDetailsById(policyId)).thenReturn(Optional.empty());
+
+        BusinessException ex = assertThrows(BusinessException.class, () -> policyService.getPolicyDetailsForAdmin(policyId));
+
+        assertHasError(ex, ErrorCode.POLICY_NOT_FOUND);
+
+        verify(policyRepository).findDetailsById(policyId);
+        verifyNoInteractions(policyMapper);
+    }
+
     // --------------------- PATCH DRAFT ---------------------
 
     @Test

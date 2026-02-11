@@ -203,6 +203,40 @@ public class PolicyService implements IPolicyService {
         return policyMapper.toDetailsResponse(policy);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Page<PolicyListItemDTO> listPoliciesForAdmin(PolicyListFilterDTO filter, Pageable pageable) {
+        log.info("Admin policies list requested. clientId={} brokerId={} status={} startDate={} endDate={} page={} pageSize={} sort={}",
+                filter.clientId(),
+                filter.brokerId(),
+                filter.status(),
+                filter.startDate(),
+                filter.endDate(),
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                pageable.getSort()
+        );
+
+        Specification<Policy> spec =
+                hasBrokerId(filter.brokerId())
+                        .and(hasClientId(filter.clientId()))
+                        .and(hasStatus(filter.status()))
+                        .and(startDateFrom(filter.startDate()))
+                        .and(endDateTo(filter.endDate()));
+
+        Page<Policy> page = policyRepository.findAll(spec, pageable);
+        return page.map(policyMapper::toListItem);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PolicyDetailsResponseDTO getPolicyDetailsForAdmin(Long id) {
+        log.info("Admin policy details requested. policyId={}", id);
+        Policy policy = getPolicyDetailsOrThrow(id);
+        return policyMapper.toDetailsResponse(policy);
+    }
+
+
     // --------------------- PATCH ---------------------
 
     @Override
@@ -240,6 +274,15 @@ public class PolicyService implements IPolicyService {
     }
 
     // --------------------- HELPERS ---------------------
+
+    private Policy getPolicyDetailsOrThrow(Long id) {
+        return policyRepository.findDetailsById(id)
+                .orElseThrow(() -> {
+                    log.warn("Policy with id {} not found (admin details)", id);
+                    return new BusinessException(ErrorCode.POLICY_NOT_FOUND);
+                });
+    }
+
 
     private Policy getPolicyForBrokerOrThrow(Long id,Long brokerId) {
         return policyRepository.findByIdAndBrokerId(id,brokerId)

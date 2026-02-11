@@ -1,4 +1,4 @@
-package ro.insurance.buildinginsurance.web.controller;
+package ro.insurance.buildinginsurance.web.controller.admin.geography;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
