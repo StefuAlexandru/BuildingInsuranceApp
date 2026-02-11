@@ -39,7 +39,7 @@ public class PolicyController {
     @PostMapping("/{id}/cancel")
     public ResponseEntity<PolicyResponseDTO> cancelPolicy(
             @PathVariable Long id,
-            PolicyCancelRequestDTO request,
+            @Valid @RequestBody PolicyCancelRequestDTO request,
             Authentication authentication
     ) {
        return ResponseEntity.ok(policyService.cancelPolicy(id, request,authentication.getName()));

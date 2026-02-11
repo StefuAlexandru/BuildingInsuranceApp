@@ -2,6 +2,8 @@ package ro.insurance.buildinginsurance.web.error;
 
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import ro.insurance.buildinginsurance.domain.enums.*;
 import tools.jackson.databind.exc.InvalidFormatException;
 import org.springframework.http.HttpStatus;
@@ -25,9 +27,7 @@ public class CustomExceptionHandler {
             BuildingType.class, "InvalidBuildingType",
             ClientType.class, "InvalidClientType",
             FeeType.class, "InvalidFeeType",
-            RiskFactorLevel.class, "InvalidRiskFactorLevel",
-            GroupBy.class,"InvalidGroupBy",
-            PeriodGranularity.class,"InvalidPeriodGranularity"
+            RiskFactorLevel.class, "InvalidRiskFactorLevel"
     );
 
     @ExceptionHandler(BusinessException.class)
@@ -82,5 +82,17 @@ public class CustomExceptionHandler {
         log.error("Unexpected exception", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(List.of(new ErrorModel("INTERNAL_ERROR", "Something went wrong")));
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<List<ErrorModel>> handleMissingRequestParam(MissingServletRequestParameterException ex) {
+        String msg = "Missing required query param: " + ex.getParameterName();
+        return ResponseEntity.badRequest().body(List.of(new ErrorModel("MissingRequestParam", msg)));
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<List<ErrorModel>> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        String msg = "Invalid value for '" + ex.getName() + "'";
+        return ResponseEntity.badRequest().body(List.of(new ErrorModel("InvalidRequestParam", msg)));
     }
 }
