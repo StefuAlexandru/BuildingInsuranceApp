@@ -13,6 +13,10 @@ spring:
     locations: classpath:db/migration
     clean-disabled: true
 
+  task:
+    scheduling:
+      enabled: true
+
 app:
   security:
     admin:

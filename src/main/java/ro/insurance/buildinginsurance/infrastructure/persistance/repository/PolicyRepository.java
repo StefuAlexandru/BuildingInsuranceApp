@@ -4,13 +4,12 @@ import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.repository.EntityGraph;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import ro.insurance.buildinginsurance.domain.entity.Policy;
+import ro.insurance.buildinginsurance.domain.enums.PolicyStatus;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 public interface PolicyRepository extends JpaRepository<Policy,Long>, JpaSpecificationExecutor<Policy> {
@@ -50,4 +49,12 @@ public interface PolicyRepository extends JpaRepository<Policy,Long>, JpaSpecifi
     })
     Optional<Policy> findDetailsById(Long id);
 
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+        update Policy p
+           set p.status = :expired
+         where p.status = :active
+           and p.endDate < :today
+    """)
+    int expireActivePolicies(@Param("today") LocalDate today, @Param("active") PolicyStatus active, @Param("expired") PolicyStatus expired);
 }
