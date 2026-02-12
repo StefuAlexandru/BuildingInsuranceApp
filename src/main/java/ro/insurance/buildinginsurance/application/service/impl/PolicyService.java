@@ -176,13 +176,15 @@ public class PolicyService implements IPolicyService {
         );
         Long brokerId = currentBrokerProvider.getActiveOrThrow(brokerEmail).getId();
 
-        Specification<Policy> spec =
-                hasBrokerId(brokerId)
-                        .and(hasClientId(filter.clientId()))
-                        .and(hasStatus(filter.status()))
-                        .and(startDateFrom(filter.startDate()))
-                        .and(endDateTo(filter.endDate()));
+        PolicySearchFilterDTO searchFilterDTO = new PolicySearchFilterDTO(
+                filter.clientId(),
+                brokerId,
+                filter.status(),
+                filter.startDate(),
+                filter.endDate()
+        );
 
+        Specification<Policy> spec = byFilter(searchFilterDTO);
         Page<Policy> page = policyRepository.findAll(spec, pageable);
 
         log.info("Policies list returned. totalItems={} totalPages={} returnedItems={}",
@@ -217,12 +219,15 @@ public class PolicyService implements IPolicyService {
                 pageable.getSort()
         );
 
-        Specification<Policy> spec =
-                hasBrokerId(filter.brokerId())
-                        .and(hasClientId(filter.clientId()))
-                        .and(hasStatus(filter.status()))
-                        .and(startDateFrom(filter.startDate()))
-                        .and(endDateTo(filter.endDate()));
+        PolicySearchFilterDTO searchFilterDTO = new PolicySearchFilterDTO(
+                filter.clientId(),
+                null,
+                filter.status(),
+                filter.startDate(),
+                filter.endDate()
+        );
+
+        Specification<Policy> spec = byFilter(searchFilterDTO);
 
         Page<Policy> page = policyRepository.findAll(spec, pageable);
         return page.map(policyMapper::toListItem);
