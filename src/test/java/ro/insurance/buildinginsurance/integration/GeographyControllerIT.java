@@ -3,13 +3,9 @@ package ro.insurance.buildinginsurance.integration;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.http.HttpHeaders;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
-import ro.insurance.buildinginsurance.config.TestSecurityUsersConfig;
+import ro.insurance.buildinginsurance.integration.support.AbstractIntegrationTest;
 import ro.insurance.buildinginsurance.web.dto.city_dto.CityRequestDTO;
 import ro.insurance.buildinginsurance.web.dto.country_dto.CountryRequestDTO;
 import ro.insurance.buildinginsurance.web.dto.county_dto.CountyRequestDTO;
@@ -23,20 +19,14 @@ import ro.insurance.buildinginsurance.infrastructure.persistance.repository.Coun
 import ro.insurance.buildinginsurance.infrastructure.persistance.repository.CountyRepository;
 
 
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static ro.insurance.buildinginsurance.util.CityTestDataFactory.aCityRequest;
-import static ro.insurance.buildinginsurance.util.CountryTestDataFactory.aCountryRequest;
-import static ro.insurance.buildinginsurance.util.CountyTestDataFactory.aCountyRequest;
+import static ro.insurance.buildinginsurance.util.data_factory.CityTestDataFactory.aCityRequest;
+import static ro.insurance.buildinginsurance.util.data_factory.CountryTestDataFactory.aCountryRequest;
+import static ro.insurance.buildinginsurance.util.data_factory.CountyTestDataFactory.aCountyRequest;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
-@Import(TestSecurityUsersConfig.class)
-@Transactional
-class GeographyControllerIT {
+class GeographyControllerIT extends AbstractIntegrationTest {
 
     @Autowired MockMvc mockMvc;
 
@@ -47,9 +37,6 @@ class GeographyControllerIT {
     @Autowired CountryMapper countryMapper;
     @Autowired CountyMapper countyMapper;
     @Autowired CityMapper cityMapper;
-
-    private static final String USER = "admin";
-    private static final String PASS = "pass";
 
     private void seedGeo() {
         CountryRequestDTO countryRequestDTO = aCountryRequest();
@@ -71,7 +58,7 @@ class GeographyControllerIT {
         seedGeo();
 
         mockMvc.perform(get(uri)
-                        .with(httpBasic(USER,PASS))
+                        .header(HttpHeaders.AUTHORIZATION,adminToken())
                         .queryParam("page", "0")
                         .queryParam("size", "5"))
                 .andExpectAll(

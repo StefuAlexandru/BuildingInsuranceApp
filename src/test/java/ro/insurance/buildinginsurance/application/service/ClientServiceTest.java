@@ -24,9 +24,9 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static ro.insurance.buildinginsurance.util.CityTestDataFactory.aCity;
-import static ro.insurance.buildinginsurance.util.CityTestDataFactory.aCityWithId;
-import static ro.insurance.buildinginsurance.util.ClientTestDataFactory.*;
+import static ro.insurance.buildinginsurance.util.data_factory.CityTestDataFactory.aCity;
+import static ro.insurance.buildinginsurance.util.data_factory.CityTestDataFactory.aCityWithId;
+import static ro.insurance.buildinginsurance.util.data_factory.ClientTestDataFactory.*;
 import static ro.insurance.buildinginsurance.util.ExceptionAssertions.assertHasError;
 
 

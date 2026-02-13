@@ -3,20 +3,16 @@ package ro.insurance.buildinginsurance.integration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
-import ro.insurance.buildinginsurance.config.TestSecurityUsersConfig;
 import ro.insurance.buildinginsurance.application.mapper.CityMapper;
 import ro.insurance.buildinginsurance.application.mapper.ClientMapper;
 import ro.insurance.buildinginsurance.application.mapper.CountryMapper;
 import ro.insurance.buildinginsurance.application.mapper.CountyMapper;
 import ro.insurance.buildinginsurance.domain.entity.*;
 import ro.insurance.buildinginsurance.infrastructure.persistance.repository.*;
+import ro.insurance.buildinginsurance.integration.support.AbstractIntegrationTest;
 import ro.insurance.buildinginsurance.web.dto.building_dto.BuildingRequestDTO;
 import ro.insurance.buildinginsurance.web.dto.building_dto.BuildingUpdateRequestDTO;
 import ro.insurance.buildinginsurance.web.dto.city_dto.CityRequestDTO;
@@ -26,22 +22,16 @@ import ro.insurance.buildinginsurance.web.dto.county_dto.CountyRequestDTO;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import static ro.insurance.buildinginsurance.util.BuildingTestDataFactory.*;
-import static ro.insurance.buildinginsurance.util.CityTestDataFactory.*;
-import static ro.insurance.buildinginsurance.util.ClientTestDataFactory.*;
-import static ro.insurance.buildinginsurance.util.CountryTestDataFactory.*;
-import static ro.insurance.buildinginsurance.util.CountyTestDataFactory.*;
+import static ro.insurance.buildinginsurance.util.data_factory.BuildingTestDataFactory.*;
+import static ro.insurance.buildinginsurance.util.data_factory.CityTestDataFactory.*;
+import static ro.insurance.buildinginsurance.util.data_factory.ClientTestDataFactory.*;
+import static ro.insurance.buildinginsurance.util.data_factory.CountryTestDataFactory.*;
+import static ro.insurance.buildinginsurance.util.data_factory.CountyTestDataFactory.*;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
-@Import(TestSecurityUsersConfig.class)
-@Transactional
-class BuildingControllerIT {
+class BuildingControllerIT extends AbstractIntegrationTest {
 
     @Autowired MockMvc mockMvc;
 
@@ -67,8 +57,6 @@ class BuildingControllerIT {
 
     ObjectMapper objectMapper = new ObjectMapper();
 
-    private static final String USER = "broker@email.com";
-    private static final String PASS = "pass";
     private static final String BASE = "/api/brokers/buildings";
 
     // ----------------------  HELPERS  ----------------------
@@ -107,7 +95,7 @@ class BuildingControllerIT {
         );
 
         var result = mockMvc.perform(post(BASE)
-                        .with(httpBasic(USER, PASS))
+                        .header(HttpHeaders.AUTHORIZATION, adminToken())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isCreated())
@@ -138,7 +126,7 @@ class BuildingControllerIT {
         Long buildingId = createBuilding(seed.client.getId(), seed.city.getId());
 
         mockMvc.perform(get(BASE + "/{id}", buildingId)
-                        .with(httpBasic(USER, PASS)))
+                        .header(HttpHeaders.AUTHORIZATION, adminToken()))
                 .andExpectAll(
                         status().isOk(),
                         jsonPath("$.id").value(buildingId.intValue()),
@@ -153,7 +141,7 @@ class BuildingControllerIT {
         Long buildingId = createBuilding(seed.client.getId(), seed.city.getId());
 
         mockMvc.perform(get(BASE)
-                        .with(httpBasic(USER, PASS))
+                        .header(HttpHeaders.AUTHORIZATION, adminToken())
                         .queryParam("clientId", String.valueOf(seed.client.getId()))
                         .queryParam("page", "0")
                         .queryParam("size", "5"))
@@ -188,7 +176,7 @@ class BuildingControllerIT {
         );
 
         mockMvc.perform(put(BASE + "/{id}", buildingId)
-                        .with(httpBasic(USER, PASS))
+                        .header(HttpHeaders.AUTHORIZATION, adminToken())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(upd)))
                 .andExpectAll(
@@ -209,11 +197,11 @@ class BuildingControllerIT {
         Long buildingId = createBuilding(seed.client().getId(), seed.city().getId());
 
         mockMvc.perform(delete(BASE + "/{id}", buildingId)
-                        .with(httpBasic(USER,PASS)))
+                        .header(HttpHeaders.AUTHORIZATION, adminToken()))
                 .andExpect(status().isNoContent());
 
         mockMvc.perform(get(BASE + "/{id}", buildingId)
-                        .with(httpBasic(USER,PASS)))
+                        .header(HttpHeaders.AUTHORIZATION, adminToken()))
                 .andExpect(status().isNotFound());
     }
 

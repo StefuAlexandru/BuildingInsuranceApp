@@ -24,8 +24,8 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static ro.insurance.buildinginsurance.util.CountyTestDataFactory.*;
-import static ro.insurance.buildinginsurance.util.CountryTestDataFactory.*;
+import static ro.insurance.buildinginsurance.util.data_factory.CountyTestDataFactory.*;
+import static ro.insurance.buildinginsurance.util.data_factory.CountryTestDataFactory.*;
 import static ro.insurance.buildinginsurance.util.ExceptionAssertions.assertHasError;
 
 @ExtendWith(MockitoExtension.class)

@@ -20,4 +20,13 @@ public interface BrokerRepository extends JpaRepository<Broker, Long> {
     @Query(value = "SELECT * FROM brokers b WHERE LOWER(b.email)=LOWER(:email) LIMIT 1", nativeQuery = true)
     Optional<Broker> findByEmailIgnoreCase(@Param("email") String email);
 
+    @Query(value = """
+            SELECT EXISTS(
+                SELECT 1
+                    FROM brokers
+                    WHERE LOWER(email) = LOWER(:email)
+            )
+            """,nativeQuery = true)
+    boolean existsByEmailIgnoreCase(@Param("email") String email);
+
 }

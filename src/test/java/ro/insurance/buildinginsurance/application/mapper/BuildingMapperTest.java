@@ -14,10 +14,10 @@ import ro.insurance.buildinginsurance.domain.entity.Client;
 import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static ro.insurance.buildinginsurance.util.BuildingTestDataFactory.*;
-import static ro.insurance.buildinginsurance.util.CityTestDataFactory.aCity;
-import static ro.insurance.buildinginsurance.util.CityTestDataFactory.aCityWithId;
-import static ro.insurance.buildinginsurance.util.ClientTestDataFactory.aClient;
+import static ro.insurance.buildinginsurance.util.data_factory.BuildingTestDataFactory.*;
+import static ro.insurance.buildinginsurance.util.data_factory.CityTestDataFactory.aCity;
+import static ro.insurance.buildinginsurance.util.data_factory.CityTestDataFactory.aCityWithId;
+import static ro.insurance.buildinginsurance.util.data_factory.ClientTestDataFactory.aClient;
 
 @SpringBootTest
 @ActiveProfiles("test")

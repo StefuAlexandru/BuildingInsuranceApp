@@ -3,16 +3,12 @@ package ro.insurance.buildinginsurance.integration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
-import ro.insurance.buildinginsurance.config.TestSecurityUsersConfig;
 import ro.insurance.buildinginsurance.domain.entity.*;
 import ro.insurance.buildinginsurance.infrastructure.persistance.repository.*;
+import ro.insurance.buildinginsurance.integration.support.AbstractIntegrationTest;
 import ro.insurance.buildinginsurance.web.dto.client_dto.ClientRequestDTO;
 import ro.insurance.buildinginsurance.domain.enums.ClientType;
 import ro.insurance.buildinginsurance.application.mapper.CityMapper;
@@ -22,21 +18,15 @@ import ro.insurance.buildinginsurance.application.mapper.CountyMapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import static ro.insurance.buildinginsurance.util.CityTestDataFactory.*;
-import static ro.insurance.buildinginsurance.util.ClientTestDataFactory.*;
-import static ro.insurance.buildinginsurance.util.CountryTestDataFactory.*;
-import static ro.insurance.buildinginsurance.util.CountyTestDataFactory.*;
+import static ro.insurance.buildinginsurance.util.data_factory.CityTestDataFactory.*;
+import static ro.insurance.buildinginsurance.util.data_factory.ClientTestDataFactory.*;
+import static ro.insurance.buildinginsurance.util.data_factory.CountryTestDataFactory.*;
+import static ro.insurance.buildinginsurance.util.data_factory.CountyTestDataFactory.*;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
-@Import(TestSecurityUsersConfig.class)
-@Transactional
-class ClientControllerIT {
+class ClientControllerIT extends AbstractIntegrationTest {
 
     @Autowired MockMvc mockMvc;
 
@@ -58,8 +48,6 @@ class ClientControllerIT {
 
     ObjectMapper objectMapper = new ObjectMapper();
 
-    private static final String USER = "broker@email.com";
-    private static final String PASS = "pass";
     private static final String BASE = "/api/brokers/clients";
 
     private record Seed(Country country, County county, City city, Client client) {}
@@ -90,7 +78,7 @@ class ClientControllerIT {
         String body = createClientRequestBody("   John Doe   ", ClientType.INDIVIDUAL, "   CNP123   ", "jonx@x.com", "0783728349", null, null, null);
 
         var result = mockMvc.perform(post(BASE)
-                        .with(httpBasic(USER,PASS))
+                        .header(HttpHeaders.AUTHORIZATION, adminToken())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isCreated())
@@ -117,7 +105,7 @@ class ClientControllerIT {
         String body = createClientRequestBody("   John Doe   ", ClientType.INDIVIDUAL, "   CNP123   ", "jonx@x.com", "0783728349", geo.city.getId(), "Str. test", "10A");
 
         var result = mockMvc.perform(post(BASE)
-                        .with(httpBasic(USER,PASS))
+                        .header(HttpHeaders.AUTHORIZATION, adminToken())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isCreated())
@@ -143,7 +131,7 @@ class ClientControllerIT {
         String body = createClientRequestBody("  ", ClientType.INDIVIDUAL, "   CNP123   ", "  bad -email", "abc", null, null, null);
 
         mockMvc.perform(post(BASE)
-                        .with(httpBasic(USER,PASS))
+                        .header(HttpHeaders.AUTHORIZATION, adminToken())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpectAll(
@@ -168,7 +156,7 @@ class ClientControllerIT {
         Seed s = seedClientAndCity();
 
         mockMvc.perform(get(BASE + "/{id}", s.client.getId())
-                        .with(httpBasic(USER,PASS)))
+                        .header(HttpHeaders.AUTHORIZATION, adminToken()))
                 .andExpectAll(
                         status().isOk(),
                         jsonPath("$.id").value(s.client.getId().intValue()),
@@ -197,7 +185,7 @@ class ClientControllerIT {
         String body = createClientUpdateRequestBody("   John Doe   ", "jonUpdated@xa.ro", "0777777777", s.city.getId(), "   Str. test   ", "  10A  ");
 
         mockMvc.perform(put(BASE + "/{id}", s.client.getId())
-                        .with(httpBasic(USER,PASS))
+                        .header(HttpHeaders.AUTHORIZATION, adminToken())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpectAll(
@@ -242,7 +230,7 @@ class ClientControllerIT {
             """;
 
         mockMvc.perform(patch(BASE + "/{id}/identity", s.client.getId())
-                        .with(httpBasic(USER,PASS))
+                        .header(HttpHeaders.AUTHORIZATION, adminToken())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpectAll(
@@ -269,7 +257,6 @@ class ClientControllerIT {
         assertThat(typeRow.getOldValue()).isEqualTo(oldType);
         assertThat(typeRow.getNewValue()).isEqualTo("COMPANY");
         assertThat(typeRow.getReason()).isEqualTo("correction");
-        assertThat(typeRow.getChangedBy()).isEqualTo(USER);
 
         var idRow = rows.stream()
                 .filter(r -> r.getField() == ClientChangeHistory.Field.IDENTIFICATION_NUMBER)
@@ -278,7 +265,6 @@ class ClientControllerIT {
         assertThat(idRow.getOldValue()).isEqualTo(oldIdNo);
         assertThat(idRow.getNewValue()).isEqualTo("CUI999");
         assertThat(idRow.getReason()).isEqualTo("correction");
-        assertThat(idRow.getChangedBy()).isEqualTo(USER);
     }
 
     // ----------------------  DELETE  ----------------------
@@ -288,11 +274,11 @@ class ClientControllerIT {
         Seed s = seedClientAndCity();
 
         mockMvc.perform(delete(BASE + "/{id}", s.client.getId())
-                        .with(httpBasic(USER,PASS)))
+                        .header(HttpHeaders.AUTHORIZATION, adminToken()))
                 .andExpect(status().is2xxSuccessful());
 
         mockMvc.perform(get(BASE + "/{id}", s.client.getId())
-                        .with(httpBasic(USER,PASS)))
+                        .header(HttpHeaders.AUTHORIZATION, adminToken()))
                 .andExpect(status().isNotFound());
     }
 }

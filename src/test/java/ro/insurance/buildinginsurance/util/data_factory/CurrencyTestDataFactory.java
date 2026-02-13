@@ -1,4 +1,4 @@
-package ro.insurance.buildinginsurance.util;
+package ro.insurance.buildinginsurance.util.data_factory;
 
 import ro.insurance.buildinginsurance.domain.entity.Currency;
 import ro.insurance.buildinginsurance.web.dto.currency_dto.CurrencyRequestDTO;

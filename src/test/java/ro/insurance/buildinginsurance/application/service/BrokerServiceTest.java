@@ -13,7 +13,7 @@ import ro.insurance.buildinginsurance.application.mapper.BrokerMapper;
 import ro.insurance.buildinginsurance.application.service.impl.BrokerService;
 import ro.insurance.buildinginsurance.domain.entity.Broker;
 import ro.insurance.buildinginsurance.infrastructure.persistance.repository.BrokerRepository;
-import ro.insurance.buildinginsurance.util.BrokerTestDataFactory;
+import ro.insurance.buildinginsurance.util.data_factory.BrokerTestDataFactory;
 import ro.insurance.buildinginsurance.web.dto.broker_dto.BrokerRequestDTO;
 import ro.insurance.buildinginsurance.web.dto.broker_dto.BrokerResponseDTO;
 import ro.insurance.buildinginsurance.web.error.BusinessException;

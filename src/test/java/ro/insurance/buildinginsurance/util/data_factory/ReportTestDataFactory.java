@@ -1,7 +1,5 @@
-package ro.insurance.buildinginsurance.util;
+package ro.insurance.buildinginsurance.util.data_factory;
 
-import ro.insurance.buildinginsurance.domain.enums.PolicyStatus;
-import ro.insurance.buildinginsurance.domain.enums.BuildingType;
 import ro.insurance.buildinginsurance.web.dto.report_dto.ReportRequestDTO;
 
 import java.time.LocalDate;

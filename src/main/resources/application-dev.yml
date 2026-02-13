@@ -23,8 +23,12 @@ app:
       username: ${APP_ADMIN_USER}
       password: ${APP_ADMIN_PASS}
     broker:
-      username: ${APP_BROKER_USER}
       password: ${APP_BROKER_PASS}
+
+    jwt:
+        secret: ${APP_JWT_SECRET}
+        accessMinutes: 10
+        refreshDays: 14
 
 logging:
   level:

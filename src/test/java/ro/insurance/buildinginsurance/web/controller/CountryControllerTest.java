@@ -22,7 +22,7 @@ import java.util.List;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static ro.insurance.buildinginsurance.util.CountryTestDataFactory.createCountryRequestBody;
+import static ro.insurance.buildinginsurance.util.data_factory.CountryTestDataFactory.createCountryRequestBody;
 
 @ExtendWith(MockitoExtension.class)
 class CountryControllerTest {

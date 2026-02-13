@@ -1,4 +1,4 @@
-package ro.insurance.buildinginsurance.util;
+package ro.insurance.buildinginsurance.util.data_factory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ro.insurance.buildinginsurance.domain.entity.Country;

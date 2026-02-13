@@ -21,7 +21,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static ro.insurance.buildinginsurance.util.CurrencyTestDataFactory.*;
+import static ro.insurance.buildinginsurance.util.data_factory.CurrencyTestDataFactory.*;
 import static ro.insurance.buildinginsurance.util.ExceptionAssertions.assertHasError;
 
 @ExtendWith(MockitoExtension.class)

@@ -16,7 +16,7 @@ import ro.insurance.buildinginsurance.domain.enums.RiskFactorLevel;
 import ro.insurance.buildinginsurance.infrastructure.persistance.repository.CurrencyRepository;
 import ro.insurance.buildinginsurance.infrastructure.persistance.repository.FeeConfigurationRepository;
 import ro.insurance.buildinginsurance.infrastructure.persistance.repository.RiskFactorConfigurationRepository;
-import ro.insurance.buildinginsurance.util.CurrencyTestDataFactory;
+import ro.insurance.buildinginsurance.util.data_factory.CurrencyTestDataFactory;
 import ro.insurance.buildinginsurance.web.dto.policy_calculation_dto.PolicyCalculationRequestDTO;
 import ro.insurance.buildinginsurance.web.dto.policy_calculation_dto.PolicyCalculationResponseDTO;
 import ro.insurance.buildinginsurance.web.error.BusinessException;
@@ -28,11 +28,11 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static ro.insurance.buildinginsurance.util.CurrencyTestDataFactory.aCurrencyWithId;
+import static ro.insurance.buildinginsurance.util.data_factory.CurrencyTestDataFactory.aCurrencyWithId;
 import static ro.insurance.buildinginsurance.util.ExceptionAssertions.assertHasError;
-import static ro.insurance.buildinginsurance.util.FeeConfigurationTestDataFactory.aFee;
-import static ro.insurance.buildinginsurance.util.PolicyCalculationTestDataFactory.*;
-import static ro.insurance.buildinginsurance.util.RiskFactorConfigurationTestDataFactory.aRisk;
+import static ro.insurance.buildinginsurance.util.data_factory.FeeConfigurationTestDataFactory.aFee;
+import static ro.insurance.buildinginsurance.util.data_factory.PolicyCalculationTestDataFactory.*;
+import static ro.insurance.buildinginsurance.util.data_factory.RiskFactorConfigurationTestDataFactory.aRisk;
 
 @ExtendWith(MockitoExtension.class)
 class PolicyCalculationServiceTest {

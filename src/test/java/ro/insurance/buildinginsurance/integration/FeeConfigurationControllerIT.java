@@ -4,43 +4,29 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
-import ro.insurance.buildinginsurance.config.TestSecurityUsersConfig;
 import ro.insurance.buildinginsurance.domain.entity.FeeConfiguration;
 import ro.insurance.buildinginsurance.domain.enums.FeeType;
 import ro.insurance.buildinginsurance.infrastructure.persistance.repository.FeeConfigurationRepository;
+import ro.insurance.buildinginsurance.integration.support.AbstractIntegrationTest;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static ro.insurance.buildinginsurance.util.FeeConfigurationTestDataFactory.createFeeRequestBody;
+import static ro.insurance.buildinginsurance.util.data_factory.FeeConfigurationTestDataFactory.createFeeRequestBody;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
-@Import(TestSecurityUsersConfig.class)
-@Transactional
-class FeeConfigurationControllerIT {
+class FeeConfigurationControllerIT extends AbstractIntegrationTest {
 
-    @Autowired
-    MockMvc mockMvc;
-    @Autowired
-    FeeConfigurationRepository feeConfigurationRepository;
+    @Autowired MockMvc mockMvc;
+    @Autowired FeeConfigurationRepository feeConfigurationRepository;
 
-    private static final String USER = "admin";
-    private static final String PASS = "pass";
     private static final String BASE = "/api/admin/fees";
 
     ObjectMapper objectMapper = new ObjectMapper();
@@ -59,7 +45,7 @@ class FeeConfigurationControllerIT {
 
 
         var createResult = mockMvc.perform(post(BASE)
-                        .with(httpBasic(USER,PASS))
+                        .header(HttpHeaders.AUTHORIZATION,adminToken())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isCreated())
@@ -85,7 +71,7 @@ class FeeConfigurationControllerIT {
 
 
         mockMvc.perform(put(BASE + "/{id}", id)
-                        .with(httpBasic(USER,PASS))
+                        .header(HttpHeaders.AUTHORIZATION,adminToken())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(updateBody))
                 .andExpect(status().isOk())
