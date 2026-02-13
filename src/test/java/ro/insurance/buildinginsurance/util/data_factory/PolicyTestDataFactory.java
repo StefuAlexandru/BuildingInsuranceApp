@@ -1,4 +1,4 @@
-package ro.insurance.buildinginsurance.util;
+package ro.insurance.buildinginsurance.util.data_factory;
 
 import ro.insurance.buildinginsurance.domain.entity.Currency;
 import ro.insurance.buildinginsurance.domain.entity.Policy;
@@ -11,10 +11,10 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
-import static ro.insurance.buildinginsurance.util.BrokerTestDataFactory.aBrokerWithId;
-import static ro.insurance.buildinginsurance.util.BuildingTestDataFactory.aBuildingWithId;
-import static ro.insurance.buildinginsurance.util.ClientTestDataFactory.aClientWithId;
-import static ro.insurance.buildinginsurance.util.CurrencyTestDataFactory.aCurrencyWithId;
+import static ro.insurance.buildinginsurance.util.data_factory.BrokerTestDataFactory.aBrokerWithId;
+import static ro.insurance.buildinginsurance.util.data_factory.BuildingTestDataFactory.aBuildingWithId;
+import static ro.insurance.buildinginsurance.util.data_factory.ClientTestDataFactory.aClientWithId;
+import static ro.insurance.buildinginsurance.util.data_factory.CurrencyTestDataFactory.aCurrencyWithId;
 
 public class PolicyTestDataFactory {
 

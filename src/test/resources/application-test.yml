@@ -13,6 +13,18 @@ spring:
   main:
     allow-bean-definition-overriding: true
 
+app:
+  security:
+    jwt:
+      secret: test-secret-please-change-1234567890-abcdefghijklmnopqrstuvwxyz-ABCDEFGHIJKLMNOPQRSTUVWXYZ
+      accessMinutes: 10
+      refreshDays: 14
+    admin:
+      username: admin@email.com
+      password: admin
+    broker:
+      password: broker
+
 logging:
   level:
     root: WARN

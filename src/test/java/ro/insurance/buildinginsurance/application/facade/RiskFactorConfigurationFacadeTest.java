@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static ro.insurance.buildinginsurance.util.ExceptionAssertions.assertHasError;
-import static ro.insurance.buildinginsurance.util.RiskFactorConfigurationTestDataFactory.*;
+import static ro.insurance.buildinginsurance.util.data_factory.RiskFactorConfigurationTestDataFactory.*;
 
 @ExtendWith(MockitoExtension.class)
 class RiskFactorConfigurationFacadeTest {

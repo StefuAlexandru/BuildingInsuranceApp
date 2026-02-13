@@ -8,7 +8,7 @@ import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import ro.insurance.buildinginsurance.application.facade.PolicyFacade;
 import ro.insurance.buildinginsurance.application.mapper.PolicyMapper;
-import ro.insurance.buildinginsurance.application.security.CurrentBrokerProvider;
+import ro.insurance.buildinginsurance.application.facade.CurrentBrokerProvider;
 import ro.insurance.buildinginsurance.application.service.impl.PolicyService;
 import ro.insurance.buildinginsurance.domain.entity.*;
 import ro.insurance.buildinginsurance.domain.enums.ErrorCode;
@@ -29,12 +29,12 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-import static ro.insurance.buildinginsurance.util.BrokerTestDataFactory.aBrokerWithId;
-import static ro.insurance.buildinginsurance.util.BuildingTestDataFactory.aBuildingWithId;
-import static ro.insurance.buildinginsurance.util.ClientTestDataFactory.aClientWithId;
-import static ro.insurance.buildinginsurance.util.CurrencyTestDataFactory.aCurrencyWithId;
+import static ro.insurance.buildinginsurance.util.data_factory.BrokerTestDataFactory.aBrokerWithId;
+import static ro.insurance.buildinginsurance.util.data_factory.BuildingTestDataFactory.aBuildingWithId;
+import static ro.insurance.buildinginsurance.util.data_factory.ClientTestDataFactory.aClientWithId;
+import static ro.insurance.buildinginsurance.util.data_factory.CurrencyTestDataFactory.aCurrencyWithId;
 import static ro.insurance.buildinginsurance.util.ExceptionAssertions.assertHasError;
-import static ro.insurance.buildinginsurance.util.PolicyTestDataFactory.*;
+import static ro.insurance.buildinginsurance.util.data_factory.PolicyTestDataFactory.*;
 
 @ExtendWith(MockitoExtension.class)
 class PolicyServiceTest {

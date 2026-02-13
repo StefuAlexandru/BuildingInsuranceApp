@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ro.insurance.buildinginsurance.application.facade.PolicyFacade;
 import ro.insurance.buildinginsurance.application.mapper.PolicyMapper;
-import ro.insurance.buildinginsurance.application.security.CurrentBrokerProvider;
+import ro.insurance.buildinginsurance.application.facade.CurrentBrokerProvider;
 import ro.insurance.buildinginsurance.application.service.IPolicyCalculationService;
 import ro.insurance.buildinginsurance.application.service.IPolicyService;
 import ro.insurance.buildinginsurance.domain.entity.Broker;

@@ -21,7 +21,6 @@ public class PolicyExpirationService implements IPolicyExpirationService {
     private final Clock clock;
 
     @Override
-    @Transactional
     public int expirePolicies() {
         LocalDate today = LocalDate.now(clock);
         int updated = policyRepository.expireActivePolicies(today, PolicyStatus.ACTIVE,PolicyStatus.EXPIRED);

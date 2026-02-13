@@ -1,4 +1,4 @@
-package ro.insurance.buildinginsurance.util;
+package ro.insurance.buildinginsurance.util.data_factory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ro.insurance.buildinginsurance.web.dto.building_dto.BuildingDTO;
@@ -11,9 +11,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static ro.insurance.buildinginsurance.util.BuildingTestDataFactory.aBuildingDTO;
-import static ro.insurance.buildinginsurance.util.CityTestDataFactory.aCity;
-import static ro.insurance.buildinginsurance.util.CityTestDataFactory.aCityDTO;
+import static ro.insurance.buildinginsurance.util.data_factory.BuildingTestDataFactory.aBuildingDTO;
+import static ro.insurance.buildinginsurance.util.data_factory.CityTestDataFactory.aCity;
+import static ro.insurance.buildinginsurance.util.data_factory.CityTestDataFactory.aCityDTO;
 
 public class ClientTestDataFactory {
     private ClientTestDataFactory() {}

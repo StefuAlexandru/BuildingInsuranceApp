@@ -10,7 +10,7 @@ import ro.insurance.buildinginsurance.web.dto.country_dto.CountryResponseDTO;
 import ro.insurance.buildinginsurance.domain.entity.Country;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static ro.insurance.buildinginsurance.util.CountryTestDataFactory.*;
+import static ro.insurance.buildinginsurance.util.data_factory.CountryTestDataFactory.*;
 
 @SpringBootTest
 @ActiveProfiles("test")

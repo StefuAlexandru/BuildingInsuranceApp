@@ -11,8 +11,8 @@ import ro.insurance.buildinginsurance.domain.entity.County;
 import ro.insurance.buildinginsurance.domain.entity.Country;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static ro.insurance.buildinginsurance.util.CountyTestDataFactory.*;
-import static ro.insurance.buildinginsurance.util.CountryTestDataFactory.*;
+import static ro.insurance.buildinginsurance.util.data_factory.CountyTestDataFactory.*;
+import static ro.insurance.buildinginsurance.util.data_factory.CountryTestDataFactory.*;
 
 @SpringBootTest
 @ActiveProfiles("test")

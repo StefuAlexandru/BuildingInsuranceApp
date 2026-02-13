@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static ro.insurance.buildinginsurance.util.ExceptionAssertions.assertHasError;
-import static ro.insurance.buildinginsurance.util.ReportTestDataFactory.*;
+import static ro.insurance.buildinginsurance.util.data_factory.ReportTestDataFactory.*;
 
 @ExtendWith(MockitoExtension.class)
 class ReportServiceTest {

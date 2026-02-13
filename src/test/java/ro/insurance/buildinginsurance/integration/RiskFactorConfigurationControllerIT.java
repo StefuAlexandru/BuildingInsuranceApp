@@ -4,14 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
-import ro.insurance.buildinginsurance.config.TestSecurityUsersConfig;
 import ro.insurance.buildinginsurance.domain.entity.City;
 import ro.insurance.buildinginsurance.domain.entity.Country;
 import ro.insurance.buildinginsurance.domain.entity.County;
@@ -21,26 +16,21 @@ import ro.insurance.buildinginsurance.infrastructure.persistance.repository.City
 import ro.insurance.buildinginsurance.infrastructure.persistance.repository.CountryRepository;
 import ro.insurance.buildinginsurance.infrastructure.persistance.repository.CountyRepository;
 import ro.insurance.buildinginsurance.infrastructure.persistance.repository.RiskFactorConfigurationRepository;
+import ro.insurance.buildinginsurance.integration.support.AbstractIntegrationTest;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static ro.insurance.buildinginsurance.util.CityTestDataFactory.aCityWithoutId;
-import static ro.insurance.buildinginsurance.util.CountryTestDataFactory.*;
-import static ro.insurance.buildinginsurance.util.CountyTestDataFactory.aCountyWithoutId;
-import static ro.insurance.buildinginsurance.util.RiskFactorConfigurationTestDataFactory.createRiskFactorRequestBody;
+import static ro.insurance.buildinginsurance.util.data_factory.CityTestDataFactory.aCityWithoutId;
+import static ro.insurance.buildinginsurance.util.data_factory.CountryTestDataFactory.*;
+import static ro.insurance.buildinginsurance.util.data_factory.CountyTestDataFactory.aCountyWithoutId;
+import static ro.insurance.buildinginsurance.util.data_factory.RiskFactorConfigurationTestDataFactory.createRiskFactorRequestBody;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
-@Import(TestSecurityUsersConfig.class)
-@Transactional
-class RiskFactorConfigurationControllerIT {
+class RiskFactorConfigurationControllerIT extends AbstractIntegrationTest {
 
     @Autowired MockMvc mockMvc;
 
@@ -49,8 +39,6 @@ class RiskFactorConfigurationControllerIT {
     @Autowired CountyRepository countyRepository;
     @Autowired CountryRepository countryRepository;
 
-    private static final String USER = "admin";
-    private static final String PASS = "pass";
     private static final String BASE = "/api/admin/risk-factors";
 
     ObjectMapper objectMapper = new ObjectMapper();
@@ -83,7 +71,7 @@ class RiskFactorConfigurationControllerIT {
         );
 
         var createResult = mockMvc.perform(post(BASE)
-                        .with(httpBasic(USER,PASS))
+                        .header(HttpHeaders.AUTHORIZATION,adminToken())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isCreated())
@@ -122,7 +110,7 @@ class RiskFactorConfigurationControllerIT {
         );
 
         mockMvc.perform(put(BASE + "/{id}", id)
-                        .with(httpBasic(USER,PASS))
+                        .header(HttpHeaders.AUTHORIZATION,adminToken())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(updateBody))
                 .andExpect(status().isOk())

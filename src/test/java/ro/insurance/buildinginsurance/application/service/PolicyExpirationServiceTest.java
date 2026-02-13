@@ -2,6 +2,7 @@ package ro.insurance.buildinginsurance.application.service;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ro.insurance.buildinginsurance.application.service.impl.PolicyExpirationService;
@@ -20,21 +21,24 @@ import static ro.insurance.buildinginsurance.domain.enums.PolicyStatus.EXPIRED;
 @ExtendWith(MockitoExtension.class)
 class PolicyExpirationServiceTest {
 
-    @Mock
-    private PolicyRepository policyRepository;
+    @Mock PolicyRepository policyRepository;
 
     @Test
-    void expirePolicies_shouldUseClockToday_andReturnUpdatedCount() {
-        Clock fixedClock = Clock.fixed(Instant.parse("2026-02-12T10:00:00Z"), ZoneOffset.UTC);
-        PolicyExpirationService policyExpirationService = new PolicyExpirationService(policyRepository, fixedClock);
+    void expirePolicies_shouldUseClockDate_andReturnUpdatedCount() {
+        Clock clock = Clock.fixed(Instant.parse("2026-02-04T10:00:00Z"), ZoneOffset.UTC);
+        PolicyExpirationService svc = new PolicyExpirationService(policyRepository, clock);
 
-        when(policyRepository.expireActivePolicies(LocalDate.of(2026, 2, 12), ACTIVE, EXPIRED)).thenReturn(7);
+        when(policyRepository.expireActivePolicies(any(), eq(ACTIVE), eq(EXPIRED))).thenReturn(7);
 
-        int updated = policyExpirationService.expirePolicies();
+        int updated = svc.expirePolicies();
 
         assertEquals(7, updated);
 
-        verify(policyRepository).expireActivePolicies(LocalDate.of(2026, 2, 12), ACTIVE, EXPIRED);
+        ArgumentCaptor<LocalDate> dateCaptor = ArgumentCaptor.forClass(LocalDate.class);
+        verify(policyRepository).expireActivePolicies(dateCaptor.capture(), eq(ACTIVE), eq(EXPIRED));
+        assertEquals(LocalDate.of(2026, 2, 4), dateCaptor.getValue());
+
         verifyNoMoreInteractions(policyRepository);
     }
 }
+

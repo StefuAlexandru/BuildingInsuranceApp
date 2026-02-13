@@ -24,13 +24,13 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static ro.insurance.buildinginsurance.util.BuildingTestDataFactory.aBuildingWithId;
-import static ro.insurance.buildinginsurance.util.BrokerTestDataFactory.aBrokerWithId;
-import static ro.insurance.buildinginsurance.util.ClientTestDataFactory.aClientWithId;
-import static ro.insurance.buildinginsurance.util.CurrencyTestDataFactory.aCurrencyWithId;
+import static ro.insurance.buildinginsurance.util.data_factory.BuildingTestDataFactory.aBuildingWithId;
+import static ro.insurance.buildinginsurance.util.data_factory.BrokerTestDataFactory.aBrokerWithId;
+import static ro.insurance.buildinginsurance.util.data_factory.ClientTestDataFactory.aClientWithId;
+import static ro.insurance.buildinginsurance.util.data_factory.CurrencyTestDataFactory.aCurrencyWithId;
 import static ro.insurance.buildinginsurance.util.ExceptionAssertions.assertHasError;
-import static ro.insurance.buildinginsurance.util.PolicyTestDataFactory.aDraftPolicyWithAllMandatoryFields;
-import static ro.insurance.buildinginsurance.util.PolicyTestDataFactory.aPolicyCreateRequest;
+import static ro.insurance.buildinginsurance.util.data_factory.PolicyTestDataFactory.aDraftPolicyWithAllMandatoryFields;
+import static ro.insurance.buildinginsurance.util.data_factory.PolicyTestDataFactory.aPolicyCreateRequest;
 
 @ExtendWith(MockitoExtension.class)
 class PolicyFacadeTest {

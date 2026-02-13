@@ -56,7 +56,12 @@ public enum ErrorCode {
     INVALID_FINAL_PREMIUM(HttpStatus.BAD_REQUEST, "Final premium invalid"),
     BROKER_IS_NOT_ACTIVE(HttpStatus.BAD_REQUEST, "Broker is not active"),
     BASE_PREMIUM_REQUIRED_WHEN_CHANGING_CURRENCY(HttpStatus.BAD_REQUEST, "Base premium required when changing currency"),
+
+
+    INVALID_CREDENTIALS(HttpStatus.BAD_REQUEST, "Invalid credentials"),
+    INVALID_REFRESH_TOKEN(HttpStatus.BAD_REQUEST, "Invalid refresh token")
     ;
+
 
 
     private final HttpStatus status;

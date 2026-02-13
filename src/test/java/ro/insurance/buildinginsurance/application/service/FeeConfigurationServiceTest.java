@@ -22,7 +22,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static ro.insurance.buildinginsurance.util.ExceptionAssertions.assertHasError;
-import static ro.insurance.buildinginsurance.util.FeeConfigurationTestDataFactory.*;
+import static ro.insurance.buildinginsurance.util.data_factory.FeeConfigurationTestDataFactory.*;
 
 @ExtendWith(MockitoExtension.class)
 class FeeConfigurationServiceTest {

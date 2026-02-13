@@ -31,7 +31,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static ro.insurance.buildinginsurance.util.ClientTestDataFactory.*;
+import static ro.insurance.buildinginsurance.util.data_factory.ClientTestDataFactory.*;
 
 @ExtendWith(MockitoExtension.class)
 class ClientControllerTest {

@@ -1,4 +1,4 @@
-package ro.insurance.buildinginsurance.util;
+package ro.insurance.buildinginsurance.util.data_factory;
 
 import ro.insurance.buildinginsurance.domain.entity.Broker;
 import ro.insurance.buildinginsurance.web.dto.broker_dto.BrokerRequestDTO;

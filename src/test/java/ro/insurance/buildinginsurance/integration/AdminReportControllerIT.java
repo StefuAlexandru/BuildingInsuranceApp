@@ -7,14 +7,11 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
 import ro.insurance.buildinginsurance.config.FixedClockConfig;
-import ro.insurance.buildinginsurance.config.TestSecurityUsersConfig;
 import ro.insurance.buildinginsurance.application.mapper.CityMapper;
 import ro.insurance.buildinginsurance.application.mapper.CountryMapper;
 import ro.insurance.buildinginsurance.application.mapper.CountyMapper;
@@ -23,6 +20,7 @@ import ro.insurance.buildinginsurance.domain.entity.*;
 import ro.insurance.buildinginsurance.domain.enums.BuildingType;
 import ro.insurance.buildinginsurance.domain.enums.PolicyStatus;
 import ro.insurance.buildinginsurance.infrastructure.persistance.repository.*;
+import ro.insurance.buildinginsurance.integration.support.AbstractIntegrationTest;
 import ro.insurance.buildinginsurance.web.dto.broker_dto.BrokerRequestDTO;
 import ro.insurance.buildinginsurance.web.dto.building_dto.BuildingRequestDTO;
 import ro.insurance.buildinginsurance.web.dto.report_dto.ReportRowDTO;
@@ -35,24 +33,19 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static ro.insurance.buildinginsurance.util.BrokerTestDataFactory.aBrokerRequest;
-import static ro.insurance.buildinginsurance.util.CityTestDataFactory.aCityRequest;
-import static ro.insurance.buildinginsurance.util.ClientTestDataFactory.aClientRequestWithAddress;
-import static ro.insurance.buildinginsurance.util.CountryTestDataFactory.aCountryRequest;
-import static ro.insurance.buildinginsurance.util.CountyTestDataFactory.aCountyRequest;
-import static ro.insurance.buildinginsurance.util.CurrencyTestDataFactory.aCurrencyRequest;
-import static ro.insurance.buildinginsurance.util.BuildingTestDataFactory.aBuildingRequest;
+import static ro.insurance.buildinginsurance.util.data_factory.BrokerTestDataFactory.aBrokerRequest;
+import static ro.insurance.buildinginsurance.util.data_factory.CityTestDataFactory.aCityRequest;
+import static ro.insurance.buildinginsurance.util.data_factory.ClientTestDataFactory.aClientRequestWithAddress;
+import static ro.insurance.buildinginsurance.util.data_factory.CountryTestDataFactory.aCountryRequest;
+import static ro.insurance.buildinginsurance.util.data_factory.CountyTestDataFactory.aCountyRequest;
+import static ro.insurance.buildinginsurance.util.data_factory.CurrencyTestDataFactory.aCurrencyRequest;
+import static ro.insurance.buildinginsurance.util.data_factory.BuildingTestDataFactory.aBuildingRequest;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
-@Import({TestSecurityUsersConfig.class, FixedClockConfig.class})
-@Transactional
-class AdminReportControllerIT {
+@Import(FixedClockConfig.class)
+class AdminReportControllerIT extends AbstractIntegrationTest {
 
     @Autowired MockMvc mockMvc;
 
@@ -73,10 +66,6 @@ class AdminReportControllerIT {
     private final ObjectMapper objectMapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-
-    private static final String ADMIN = "admin";
-    private static final String USER  = "broker@email.com";
-    private static final String PASS  = "pass";
 
     private static final String BASE = "/api/admin/reports";
 
@@ -115,7 +104,7 @@ class AdminReportControllerIT {
     @Test
     void policiesByCountry_shouldAggregateCorrectly() throws Exception {
         var mvc = mockMvc.perform(get(BASE + "/policies-by-country")
-                        .with(httpBasic(ADMIN, PASS))
+                        .header(HttpHeaders.AUTHORIZATION, adminToken())
                         .param("from", FROM.toString())
                         .param("to", TO.toString())
                         .param("currency", seed.eur().getId().toString()))
@@ -142,7 +131,7 @@ class AdminReportControllerIT {
     @Test
     void policiesByCounty_shouldReturnTwoRows_withCorrectSums() throws Exception {
         var mvc = mockMvc.perform(get(BASE + "/policies-by-county")
-                        .with(httpBasic(ADMIN, PASS))
+                        .header(HttpHeaders.AUTHORIZATION, adminToken())
                         .param("from", FROM.toString())
                         .param("to", TO.toString())
                         .param("currency", seed.eur().getId().toString()))
@@ -175,7 +164,7 @@ class AdminReportControllerIT {
     @Test
     void policiesByCity_withBuildingTypeFilter_shouldRestrictToResidential() throws Exception {
         var mvc = mockMvc.perform(get(BASE + "/policies-by-city")
-                        .with(httpBasic(ADMIN, PASS))
+                        .header(HttpHeaders.AUTHORIZATION, adminToken())
                         .param("from", FROM.toString())
                         .param("to", TO.toString())
                         .param("currency", seed.eur().getId().toString())
@@ -197,7 +186,7 @@ class AdminReportControllerIT {
     @Test
     void policiesByBroker_withStatusFilter_shouldReturnOnlyCancelled() throws Exception {
         var mvc = mockMvc.perform(get(BASE + "/policies-by-broker")
-                        .with(httpBasic(ADMIN, PASS))
+                        .header(HttpHeaders.AUTHORIZATION, adminToken())
                         .param("from", FROM.toString())
                         .param("to", TO.toString())
                         .param("currency", seed.eur().getId().toString())
@@ -219,7 +208,7 @@ class AdminReportControllerIT {
     @Test
     void reports_missingCurrency_shouldReturn400() throws Exception {
         mockMvc.perform(get(BASE + "/policies-by-city")
-                        .with(httpBasic(ADMIN, PASS))
+                        .header(HttpHeaders.AUTHORIZATION, adminToken())
                         .param("from", FROM.toString())
                         .param("to", TO.toString()))
                 .andExpect(status().isBadRequest());
@@ -228,7 +217,7 @@ class AdminReportControllerIT {
     @Test
     void reports_whenFromAfterTo_shouldReturn400_andContainErrorCode() throws Exception {
         var res = mockMvc.perform(get(BASE + "/policies-by-city")
-                        .with(httpBasic(ADMIN, PASS))
+                        .header(HttpHeaders.AUTHORIZATION, adminToken())
                         .param("from", LocalDate.of(2026, 3, 1).toString())
                         .param("to", LocalDate.of(2026, 2, 1).toString())
                         .param("currency", seed.eur().getId().toString()))
@@ -289,8 +278,8 @@ class AdminReportControllerIT {
         payload.put("email", email);
 
         var res = mockMvc.perform(post("/api/admin/brokers")
-                        .with(httpBasic(ADMIN, PASS))
-                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                        .header(HttpHeaders.AUTHORIZATION, adminToken())
+                        .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(payload)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").exists())
@@ -304,8 +293,8 @@ class AdminReportControllerIT {
         var clientReq = aClientRequestWithAddress(geo.city1().getId(), "Str. Test", "10A");
 
         var res = mockMvc.perform(post("/api/brokers/clients")
-                        .with(httpBasic(USER, PASS))
-                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                        .header(HttpHeaders.AUTHORIZATION, adminToken())
+                        .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(clientReq)))
                 .andExpectAll(status().isCreated(), jsonPath("$.id").exists())
                 .andReturn();
@@ -322,8 +311,8 @@ class AdminReportControllerIT {
         );
 
         var res = mockMvc.perform(post("/api/brokers/buildings")
-                        .with(httpBasic(USER, PASS))
-                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                        .header(HttpHeaders.AUTHORIZATION, adminToken())
+                        .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(buildingRequestDTO)))
                 .andExpectAll(status().isCreated(), jsonPath("$.id").exists())
                 .andReturn();

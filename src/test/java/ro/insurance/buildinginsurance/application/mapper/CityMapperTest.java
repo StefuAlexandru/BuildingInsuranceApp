@@ -11,9 +11,9 @@ import ro.insurance.buildinginsurance.domain.entity.City;
 import ro.insurance.buildinginsurance.domain.entity.County;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static ro.insurance.buildinginsurance.util.CityTestDataFactory.aCityRequest;
-import static ro.insurance.buildinginsurance.util.CityTestDataFactory.aCityWithId;
-import static ro.insurance.buildinginsurance.util.CountyTestDataFactory.aCounty;
+import static ro.insurance.buildinginsurance.util.data_factory.CityTestDataFactory.aCityRequest;
+import static ro.insurance.buildinginsurance.util.data_factory.CityTestDataFactory.aCityWithId;
+import static ro.insurance.buildinginsurance.util.data_factory.CountyTestDataFactory.aCounty;
 
 @SpringBootTest
 @ActiveProfiles("test")
