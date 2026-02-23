@@ -58,10 +58,16 @@ Many endpoints are protected and require authentication.
 
 - Broker endpoints: `/api/brokers/**` → roles `BROKER` or `ADMIN`
 - Admin endpoints: `/api/admin/**` → role `ADMIN`
-- Geography endpoints: `/api/geography/**` → authenticated
+- Geography endpoints: `/api/geography/**` → `ADMIN`
 
-The project currently uses **HTTP Basic** authentication (see `SecurityConfig`).
+The project uses **JWT-based** authentication 
 
+- An authentication endpoint issues a JWT token after successful login.
+- All protected endpoints require the header:Authorization: Bearer <token>
+- Role-based access control is enforced at endpoint level.
+- Supported roles:
+    - **BROKER**
+    - **ADMIN**
 ---
 
 ## API documentation

@@ -27,7 +27,7 @@ app:
 
     jwt:
         secret: ${APP_JWT_SECRET}
-        accessMinutes: 10
+        accessMinutes: 1000
         refreshDays: 14
 
 logging:

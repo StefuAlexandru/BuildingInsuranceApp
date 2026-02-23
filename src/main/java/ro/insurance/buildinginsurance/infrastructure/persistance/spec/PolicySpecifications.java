@@ -39,10 +39,6 @@ public final class PolicySpecifications {
 //                endDate == null ? criteriaBuilder.conjunction() : criteriaBuilder.lessThanOrEqualTo(root.get("endDate"), endDate);
 //    }
 
-    static <T> void addIfNotNull(List<Predicate> predicateList, T value, Function<T,Predicate> predicateFunction) {
-        if(value != null) {predicateList.add(predicateFunction.apply(value));}
-    }
-
     public static Specification<Policy> byFilter(PolicySearchFilterDTO policyFilter){
         return (root,query,criteriaBuilder) -> {
             List<Predicate> predicateList = new ArrayList<>();
@@ -55,5 +51,9 @@ public final class PolicySpecifications {
 
             return criteriaBuilder.and(predicateList.toArray(new Predicate[0]));
         };
+    }
+
+    private static <T> void addIfNotNull(List<Predicate> predicateList, T value, Function<T,Predicate> predicateFunction) {
+        if(value != null) {predicateList.add(predicateFunction.apply(value));}
     }
 }

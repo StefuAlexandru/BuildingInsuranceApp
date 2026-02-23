@@ -52,6 +52,8 @@ public class AuthService {
                 .revoked(false)
                 .build());
 
+        log.info("Login successful for email: {}, roles: {}", email, roles);
+
         return new AuthResponseDTO(access, refresh);
     }
 
@@ -101,6 +103,7 @@ public class AuthService {
             rt.setRevoked(true);
             refreshTokenRepository.save(rt);
         });
+        log.info("Logout successful for refresh token: {}", req.refreshToken());
     }
 
     private List<String> resolveRolesAndValidate(String email, String password) {
