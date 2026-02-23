@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -55,13 +56,18 @@ public class PolicyController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int pageSize,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir,
             Authentication authentication
     ) {
-        Pageable pageable = PageRequest.of(Math.max(page - 1, 0), pageSize);
+        var sort = "desc".equalsIgnoreCase(sortDir)
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(Math.max(page - 1, 0), pageSize, sort);
 
         PolicyListFilterDTO filter = new PolicyListFilterDTO(clientId, null, status, startDate, endDate);
-
-        return ResponseEntity.ok(policyService.listPolicies(filter, pageable,authentication.getName()));
+        return ResponseEntity.ok(policyService.listPolicies(filter, pageable, authentication.getName()));
     }
 
     @GetMapping("/{id}")
